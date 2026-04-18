@@ -20,13 +20,6 @@ async function authFetch(path: string, init?: RequestInit) {
 }
 
 export const api = {
-  auth: {
-    signup: (email: string, password: string) =>
-      authFetch('/auth/signup', { method: 'POST', body: JSON.stringify({ email, password }) }),
-    login: (email: string, password: string) =>
-      authFetch('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
-    logout: () => authFetch('/auth/logout', { method: 'POST' }),
-  },
   children: {
     list: () => authFetch('/children'),
     create: (body: { name: string; birth_date: string; gender: string }) =>

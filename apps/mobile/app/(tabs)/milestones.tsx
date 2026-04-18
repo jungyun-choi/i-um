@@ -4,11 +4,11 @@ import { api } from '../../src/lib/api';
 import { useChildStore } from '../../src/stores/childStore';
 import { MilestoneCard } from '../../src/components/MilestoneCard';
 
-const EXPECTED_MILESTONES = ['baekil', 'dol', 'idol', 'first_word', 'first_step'];
+const EXPECTED_MILESTONES = ['baekil', 'dol', '2nd_year', 'first_word', 'first_step'];
 
 function getExpectedDate(birthDate: string, type: string): string | undefined {
   const birth = new Date(birthDate);
-  const daysMap: Record<string, number> = { baekil: 100, dol: 365, idol: 730 };
+  const daysMap: Record<string, number> = { baekil: 100, dol: 365, '2nd_year': 730 };
   if (daysMap[type]) {
     const d = new Date(birth.getTime() + daysMap[type] * 86400000);
     return d.toISOString().split('T')[0];

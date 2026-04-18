@@ -48,3 +48,13 @@
   - apps/mobile/app.json
   - apps/mobile/assets/adaptive-icon.png
   - apps/mobile/assets/favicon.png
+
+## [2026-04-19] commit | feat: Phase 1 모바일 앱 화면 구현 완료
+
+- 커밋: `5f0571d` by jy.choi
+- 변경 파일 수: 28
+  - apps/mobile/.env.example
+  - apps/mobile/App.tsx
+  - apps/mobile/app.json
+  - apps/mobile/app/(auth)/_layout.tsx
+  - apps/mobile/app/(auth)/login.tsx

@@ -5,7 +5,7 @@ import { getDday } from '../lib/utils/age';
 const MILESTONE_META: Record<string, { emoji: string; label: string }> = {
   baekil: { emoji: '🎂', label: '백일' },
   dol: { emoji: '🎉', label: '돌' },
-  idol: { emoji: '🎈', label: '두돌' },
+  '2nd_year': { emoji: '🎈', label: '두돌' },
   first_word: { emoji: '💬', label: '첫말' },
   first_step: { emoji: '👣', label: '첫걸음' },
 };

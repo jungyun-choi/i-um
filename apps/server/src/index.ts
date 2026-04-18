@@ -1,7 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import authRoutes from './routes/auth';
 import childrenRoutes from './routes/children';
 import photosRoutes from './routes/photos';
 import diaryRoutes from './routes/diary';
@@ -12,7 +11,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/auth', authRoutes);
 app.use('/children', childrenRoutes);
 app.use('/photos', photosRoutes);
 app.use('/diary', diaryRoutes);
