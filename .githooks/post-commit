@@ -1,0 +1,33 @@
+#!/bin/bash
+# 커밋 후 wiki/log.md에 자동 기록
+
+WIKI_LOG="wiki/log.md"
+DATE=$(date +%Y-%m-%d)
+COMMIT_MSG=$(git log -1 --pretty=%s)
+COMMIT_HASH=$(git log -1 --pretty=%h)
+AUTHOR=$(git log -1 --pretty=%an)
+
+# wiki 파일 자체의 커밋은 기록 제외 (무한 루프 방지)
+CHANGED=$(git diff-tree --no-commit-id -r --name-only HEAD)
+if echo "$CHANGED" | grep -q "^wiki/"; then
+  NON_WIKI=$(echo "$CHANGED" | grep -v "^wiki/")
+  if [ -z "$NON_WIKI" ]; then
+    exit 0
+  fi
+fi
+
+# 변경된 파일 목록 (최대 5개)
+FILES=$(git diff-tree --no-commit-id -r --name-only HEAD | grep -v "^wiki/" | head -5 | sed 's/^/  - /' | tr '\n' '\n')
+FILE_COUNT=$(git diff-tree --no-commit-id -r --name-only HEAD | grep -v "^wiki/" | wc -l | tr -d ' ')
+
+# log.md에 추가
+cat >> "$WIKI_LOG" << EOF
+
+## [$DATE] commit | $COMMIT_MSG
+
+- 커밋: \`$COMMIT_HASH\` by $AUTHOR
+- 변경 파일 수: $FILE_COUNT
+$FILES
+EOF
+
+echo "📝 wiki/log.md updated"
