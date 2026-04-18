@@ -5,6 +5,13 @@
 
 ---
 
+## [2026-04-19] ingest | 시장조사 완료 — 육아 기록 앱 경쟁사 10개 분석
+
+- 조사 앱: FamilyAlbum, Tinybeans, Google Photos, Apple Photos, Glow Baby, 쑥쑥찰칵, 베이비타임, 베이비빌리, 23snaps, Lifecake(종료)
+- 핵심 발견: AI 텍스트 서사 생성 앱 현재 시장에 없음 → 이음의 핵심 차별점
+- 생성 페이지: entities/ 6개, topics/ 2개, analysis/ 1개
+- 관련 페이지: [[wiki/analysis/competitor-comparison.md]], [[wiki/topics/ium-differentiation.md]], [[wiki/topics/market-landscape.md]]
+
 ## [2026-04-18] setup | LLM Wiki 초기 셋업 완료
 
 - CLAUDE.md 스키마 작성
