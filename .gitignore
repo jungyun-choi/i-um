@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# bkit
+.bkit/
+
+# IDE
+.vscode/
+.idea/
+
+# Node
+node_modules/
