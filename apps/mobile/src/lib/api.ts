@@ -1,0 +1,67 @@
+import { supabase } from './supabase';
+
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL!;
+
+async function authFetch(path: string, init?: RequestInit) {
+  const { data: { session } } = await supabase.auth.getSession();
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session?.access_token ?? ''}`,
+      ...init?.headers,
+    },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }));
+    throw new Error(err.error ?? 'Request failed');
+  }
+  return res.json();
+}
+
+export const api = {
+  auth: {
+    signup: (email: string, password: string) =>
+      authFetch('/auth/signup', { method: 'POST', body: JSON.stringify({ email, password }) }),
+    login: (email: string, password: string) =>
+      authFetch('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+    logout: () => authFetch('/auth/logout', { method: 'POST' }),
+  },
+  children: {
+    list: () => authFetch('/children'),
+    create: (body: { name: string; birth_date: string; gender: string }) =>
+      authFetch('/children', { method: 'POST', body: JSON.stringify(body) }),
+    update: (id: string, body: Partial<{ name: string; birth_date: string; gender: string; avatar_url: string }>) =>
+      authFetch(`/children/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  },
+  photos: {
+    getUploadUrl: (body: { child_id: string; filename: string; taken_at?: string; gps_lat?: number; gps_lng?: number }) =>
+      authFetch('/photos/upload-url', { method: 'POST', body: JSON.stringify(body) }),
+    process: (id: string) =>
+      authFetch(`/photos/${id}/process`, { method: 'POST' }),
+    getDiary: (id: string) => authFetch(`/photos/${id}/diary`),
+  },
+  diary: {
+    get: (id: string) => authFetch(`/diary/${id}`),
+    update: (id: string, content: string) =>
+      authFetch(`/diary/${id}`, { method: 'PATCH', body: JSON.stringify({ content }) }),
+    timeline: (childId: string, cursor?: string, limit = 20) => {
+      const params = new URLSearchParams({ limit: String(limit) });
+      if (cursor) params.set('cursor', cursor);
+      return authFetch(`/diary/timeline/${childId}?${params}`);
+    },
+  },
+  milestones: {
+    list: (childId: string) => authFetch(`/milestones/${childId}`),
+  },
+};
+
+export async function uploadToS3(uploadUrl: string, fileUri: string) {
+  const response = await fetch(fileUri);
+  const blob = await response.blob();
+  await fetch(uploadUrl, {
+    method: 'PUT',
+    body: blob,
+    headers: { 'Content-Type': 'image/jpeg' },
+  });
+}

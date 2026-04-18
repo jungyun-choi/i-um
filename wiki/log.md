@@ -26,3 +26,25 @@
 - 변경 파일 수: 2
   - .githooks/post-commit
   - CLAUDE.md
+
+## [2026-04-19] commit | feat: 이음-MVP PDCA Plan 문서 작성
+
+- 커밋: `283f0c8` by jy.choi
+- 변경 파일 수: 1
+  - "docs/01-plan/features/\354\235\264\354\235\214-MVP.plan.md"
+
+## [2026-04-19] commit | feat: 이음-MVP PDCA Design 문서 작성
+
+- 커밋: `f44a8d6` by jy.choi
+- 변경 파일 수: 1
+  - "docs/02-design/features/\354\235\264\354\235\214-MVP.design.md"
+
+## [2026-04-19] commit | feat: Phase 1 서버 구현 완료
+
+- 커밋: `41bd3dd` by jy.choi
+- 변경 파일 수: 28
+  - apps/mobile/.gitignore
+  - apps/mobile/App.tsx
+  - apps/mobile/app.json
+  - apps/mobile/assets/adaptive-icon.png
+  - apps/mobile/assets/favicon.png
