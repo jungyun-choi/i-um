@@ -1,0 +1,12 @@
+{
+  "name": "i-um",
+  "private": true,
+  "workspaces": [
+    "apps/server",
+    "apps/mobile"
+  ],
+  "scripts": {
+    "server": "yarn workspace @i-um/server dev",
+    "mobile": "yarn workspace @i-um/mobile start"
+  }
+}
