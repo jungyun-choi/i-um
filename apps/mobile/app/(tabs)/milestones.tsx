@@ -3,18 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../../src/lib/api';
 import { useChildStore } from '../../src/stores/childStore';
 import { MilestoneCard } from '../../src/components/MilestoneCard';
+import { getExpectedDate, MILESTONE_META } from '../../src/lib/utils/milestone';
 
-const EXPECTED_MILESTONES = ['baekil', 'dol', '2nd_year', 'first_word', 'first_step'];
-
-function getExpectedDate(birthDate: string, type: string): string | undefined {
-  const birth = new Date(birthDate);
-  const daysMap: Record<string, number> = { baekil: 100, dol: 365, '2nd_year': 730 };
-  if (daysMap[type]) {
-    const d = new Date(birth.getTime() + daysMap[type] * 86400000);
-    return d.toISOString().split('T')[0];
-  }
-  return undefined;
-}
+const EXPECTED_MILESTONES = Object.keys(MILESTONE_META);
 
 export default function MilestonesScreen() {
   const activeChild = useChildStore((s) => s.activeChild);

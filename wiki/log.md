@@ -58,3 +58,13 @@
   - apps/mobile/app.json
   - apps/mobile/app/(auth)/_layout.tsx
   - apps/mobile/app/(auth)/login.tsx
+
+## [2026-04-19] commit | fix: Gap analysis 발견 버그 수정 + 의존성 정리
+
+- 커밋: `b933f7e` by jy.choi
+- 변경 파일 수: 8
+  - apps/mobile/app/(tabs)/milestones.tsx
+  - apps/mobile/src/components/MilestoneCard.tsx
+  - apps/mobile/src/lib/api.ts
+  - apps/server/package.json
+  - apps/server/src/index.ts

@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, FlatList,
-  SafeAreaView, Image, Alert, ActivityIndicator,
+  View, Text, StyleSheet, TouchableOpacity, ScrollView,
+  SafeAreaView, Alert, ActivityIndicator,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { api, uploadToS3 } from '../src/lib/api';
 import { useChildStore } from '../src/stores/childStore';
 import { useQueryClient } from '@tanstack/react-query';
+import { PhotoGrid } from '../src/components/PhotoGrid';
 
 interface SelectedPhoto {
   uri: string;
@@ -88,15 +89,12 @@ export default function UploadScreen() {
         </View>
       ) : (
         <>
-          <FlatList
-            data={photos}
-            keyExtractor={(_, i) => String(i)}
-            numColumns={3}
-            contentContainerStyle={styles.grid}
-            renderItem={({ item }) => (
-              <Image source={{ uri: item.uri }} style={styles.thumb} />
-            )}
-          />
+          <ScrollView>
+            <PhotoGrid
+              photos={photos}
+              onRemove={(i) => setPhotos((prev) => prev.filter((_, idx) => idx !== i))}
+            />
+          </ScrollView>
           <View style={styles.footer}>
             <TouchableOpacity style={styles.addMoreBtn} onPress={pickPhotos}>
               <Text style={styles.addMoreText}>+ 더 추가</Text>
@@ -135,8 +133,6 @@ const styles = StyleSheet.create({
     paddingVertical: 14, paddingHorizontal: 28,
   },
   pickBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  grid: { padding: 2 },
-  thumb: { width: '33.33%', aspectRatio: 1, padding: 2, borderRadius: 4 },
   footer: { padding: 16, gap: 12 },
   addMoreBtn: {
     backgroundColor: '#F5F2EC', borderRadius: 12,

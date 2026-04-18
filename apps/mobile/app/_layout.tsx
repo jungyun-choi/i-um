@@ -49,6 +49,7 @@ export default function RootLayout() {
         <Stack.Screen name="upload" options={{ presentation: 'modal' }} />
         <Stack.Screen name="diary/[id]" />
         <Stack.Screen name="child/new" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="child/[id]/edit" options={{ presentation: 'modal' }} />
       </Stack>
     </QueryClientProvider>
   );

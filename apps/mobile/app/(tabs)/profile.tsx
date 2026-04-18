@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { supabase } from '../../src/lib/supabase';
 import { useChildStore } from '../../src/stores/childStore';
 import { getAgeText } from '../../src/lib/utils/age';
+import { ChildAvatar } from '../../src/components/ChildAvatar';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -23,17 +24,19 @@ export default function ProfileScreen() {
       <Text style={styles.title}>프로필</Text>
 
       {activeChild ? (
-        <View style={styles.childCard}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{activeChild.name[0]}</Text>
-          </View>
+        <TouchableOpacity
+          style={styles.childCard}
+          onPress={() => router.push(`/child/${activeChild.id}/edit`)}
+        >
+          <ChildAvatar name={activeChild.name} avatarUrl={activeChild.avatar_url} size={56} />
           <View style={styles.childInfo}>
             <Text style={styles.childName}>{activeChild.name}</Text>
             <Text style={styles.childAge}>
               {getAgeText(activeChild.birth_date)} · {activeChild.birth_date}
             </Text>
           </View>
-        </View>
+          <Text style={styles.editHint}>편집 ›</Text>
+        </TouchableOpacity>
       ) : (
         <TouchableOpacity style={styles.addChildBtn} onPress={() => router.push('/child/new')}>
           <Text style={styles.addChildBtnText}>+ 아이 프로필 추가</Text>
@@ -58,14 +61,10 @@ const styles = StyleSheet.create({
     shadowColor: '#000', shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.06, shadowRadius: 6, elevation: 2,
   },
-  avatar: {
-    width: 56, height: 56, borderRadius: 28, backgroundColor: '#FFE0D9',
-    alignItems: 'center', justifyContent: 'center', marginRight: 14,
-  },
-  avatarText: { fontSize: 24, color: '#E8735A', fontWeight: '600' },
-  childInfo: { flex: 1 },
+  childInfo: { flex: 1, marginLeft: 14 },
   childName: { fontSize: 18, fontWeight: '600', color: '#1A1A1A' },
   childAge: { fontSize: 14, color: '#888', marginTop: 2 },
+  editHint: { fontSize: 14, color: '#AAA' },
   addChildBtn: {
     margin: 16, backgroundColor: '#FFF0ED', borderRadius: 14,
     padding: 16, alignItems: 'center',

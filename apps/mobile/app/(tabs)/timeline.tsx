@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  SafeAreaView, ActivityIndicator, RefreshControl,
+  SafeAreaView, ActivityIndicator, RefreshControl, Modal, Pressable,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTimeline } from '../../src/hooks/useTimeline';
@@ -12,6 +13,7 @@ export default function TimelineScreen() {
   const activeChild = useChildStore((s) => s.activeChild);
   const children = useChildStore((s) => s.children);
   const setActiveChild = useChildStore((s) => s.setActiveChild);
+  const [showPicker, setShowPicker] = useState(false);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } =
     useTimeline(activeChild?.id);
@@ -34,11 +36,13 @@ export default function TimelineScreen() {
       <View style={styles.header}>
         <Text style={styles.appName}>이음</Text>
         <View style={styles.headerRight}>
-          {children.length > 1 && (
-            <TouchableOpacity onPress={() => {}}>
+          {children.length > 1 ? (
+            <TouchableOpacity onPress={() => setShowPicker(true)}>
               <Text style={styles.childName}>{activeChild?.name} ▼</Text>
             </TouchableOpacity>
-          )}
+          ) : activeChild ? (
+            <Text style={styles.childName}>{activeChild.name}</Text>
+          ) : null}
           {activeChild && (
             <TouchableOpacity
               style={styles.uploadBtn}
@@ -74,6 +78,26 @@ export default function TimelineScreen() {
           }
         />
       )}
+
+      <Modal visible={showPicker} transparent animationType="fade">
+        <Pressable style={styles.overlay} onPress={() => setShowPicker(false)}>
+          <View style={styles.picker}>
+            <Text style={styles.pickerTitle}>아이 선택</Text>
+            {children.map((child) => (
+              <TouchableOpacity
+                key={child.id}
+                style={[styles.pickerItem, activeChild?.id === child.id && styles.pickerItemActive]}
+                onPress={() => { setActiveChild(child); setShowPicker(false); }}
+              >
+                <Text style={[styles.pickerItemText, activeChild?.id === child.id && styles.pickerItemTextActive]}>
+                  {child.name}
+                </Text>
+                {activeChild?.id === child.id && <Text style={styles.check}>✓</Text>}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -103,4 +127,21 @@ const styles = StyleSheet.create({
     paddingVertical: 14, paddingHorizontal: 28, alignItems: 'center',
   },
   addBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  overlay: {
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end',
+  },
+  picker: {
+    backgroundColor: '#FFFDF8', borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    padding: 20, paddingBottom: 40,
+  },
+  pickerTitle: { fontSize: 15, fontWeight: '600', color: '#888', marginBottom: 12, textAlign: 'center' },
+  pickerItem: {
+    flexDirection: 'row', alignItems: 'center', paddingVertical: 16,
+    borderBottomWidth: 1, borderBottomColor: '#F0EDE6',
+  },
+  pickerItemActive: {},
+  pickerItemText: { fontSize: 17, color: '#333', flex: 1 },
+  pickerItemTextActive: { color: '#E8735A', fontWeight: '600' },
+  check: { fontSize: 18, color: '#E8735A' },
 });
