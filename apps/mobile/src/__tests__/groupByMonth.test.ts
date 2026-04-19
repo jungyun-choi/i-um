@@ -3,7 +3,7 @@ import { groupEntriesByMonth, formatMonthLabel } from '../utils/groupByMonth';
 const makeEntry = (id: string, takenAt: string | null, createdAt: string) => ({
   id,
   created_at: createdAt,
-  photos: takenAt ? { taken_at: takenAt, s3_key: '', location_name: null } : null,
+  photos: takenAt ? { id: id, taken_at: takenAt, s3_key: '', location_name: null } : null,
   content: '',
   status: 'done' as const,
   milestone: null,

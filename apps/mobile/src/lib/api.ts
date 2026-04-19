@@ -40,6 +40,7 @@ export const api = {
       authFetch(`/diary/${id}`, { method: 'PATCH', body: JSON.stringify({ content }) }),
     delete: (id: string) =>
       authFetch(`/diary/${id}`, { method: 'DELETE' }),
+    stats: (childId: string) => authFetch(`/diary/stats/${childId}`),
     timeline: (childId: string, cursor?: string, limit = 20) => {
       const params = new URLSearchParams({ limit: String(limit) });
       if (cursor) params.set('cursor', cursor);
