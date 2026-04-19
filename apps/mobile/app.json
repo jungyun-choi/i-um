@@ -29,6 +29,12 @@
       "favicon": "./assets/favicon.png"
     },
     "scheme": "ium",
+    "privacy": "unlisted",
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    },
     "experiments": {
       "typedRoutes": true
     },
