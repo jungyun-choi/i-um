@@ -2,7 +2,7 @@
 title: 이음(i-um) 프로젝트 개요
 type: overview
 created: 2026-04-18
-updated: 2026-04-20
+updated: 2026-04-20 (Sprint #30~33)
 sources: []
 tags: [overview, 육아, AI, 제로에포트]
 ---
@@ -72,7 +72,11 @@ LLM (감성 일기 생성)
 - [x] **보안 강화** — 전체 엔드포인트 소유권 검증, rate limiting, input validation
 - [x] **UX 폴리시** — premium text diary card, 이메일 validation, char limit warning
 - [x] **개인정보처리방침** 화면
-- [x] 서버 Jest 테스트 22개 통과
+- [x] 서버 Jest 테스트 25개 통과
+- [x] **마일스톤 스케줄러 v2** — 3개 → 10개 알림 커버리지, UTC 날짜 파싱 버그 수정
+- [x] **KST 날짜 버그 3건** — todayString, AchievedCard, formatRecordPeriod UTC 오차 제거
+- [x] **Hermes Fabric 호환성** — condition && style 크래시 패턴 7건 수정
+- [x] **베타 Paywall UX** — 무료 한도 30개, 베타 친화 메시지
 
 ### 사용자가 직접 해야 할 작업 🔧
 - [ ] `npx eas login` → `npx eas project:init` → `app.json`의 `projectId` 자동 설정

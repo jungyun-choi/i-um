@@ -1,7 +1,7 @@
 # 이음 Wiki — Index
 
 > 이 파일은 wiki의 모든 페이지 카탈로그입니다. LLM이 자동으로 유지합니다.
-> 마지막 업데이트: 2026-04-19
+> 마지막 업데이트: 2026-04-20
 
 ---
 
@@ -50,6 +50,9 @@
 | [feat-milestone-manual-record.md](topics/feat-milestone-manual-record.md) | first_word / first_step 수동 기록 기능 |
 | [feat-text-diary.md](topics/feat-text-diary.md) | 텍스트 일기 작성 + 확장형 FAB + draft 자동저장 |
 | [feat-notification-settings.md](topics/feat-notification-settings.md) | 알림 설정 화면 — 준비 중 → 실제 기능 |
+| [feat-milestone-scheduler-v2.md](topics/feat-milestone-scheduler-v2.md) | 마일스톤 스케줄러 v2 — 10개 알림, UTC 버그, 타입 키 동기화 |
+| [feat-kst-date-bugfix.md](topics/feat-kst-date-bugfix.md) | KST 날짜 파싱 버그 3건 수정 — UTC 오차 제거 원칙 정리 |
+| [feat-hermes-style-fix.md](topics/feat-hermes-style-fix.md) | Hermes Fabric condition && style 크래시 패턴 7건 수정 |
 
 ---
 
@@ -59,14 +62,16 @@
 |--------|------|------|
 | [competitor-comparison.md](analysis/competitor-comparison.md) | 비교 분석 | 2026-04-19 |
 | [decision-2026-04-19-tech-setup.md](analysis/decision-2026-04-19-tech-setup.md) | 기술 결정 4건 | 2026-04-19 |
-| [decision-2026-04-19-production-roadmap.md](analysis/decision-2026-04-19-production-roadmap.md) | 프로덕션 로드맵 — 아이디어 회의 결과 | 2026-04-19 |
+| [decision-2026-04-19-production-roadmap.md](analysis/decision-2026-04-19-production-roadmap.md) | 프로덕션 로드맵 — 아이디어 회의 결과 |
+| [decision-2026-04-20-beta-paywall.md](analysis/decision-2026-04-20-beta-paywall.md) | 베타 Paywall 전략 — 무료 한도 30개, UX 메시지 개선 | 2026-04-19 |
 
 ---
 
 ## 통계
 
 - 총 소스: 0 (웹 리서치)
-- 총 wiki 페이지: 15
+- 총 wiki 페이지: 20
 - 마지막 ingest: 2026-04-19 (시장조사)
-- 마지막 decision: 2026-04-19 (프로덕션 로드맵)
+- 마지막 decision: 2026-04-20 (베타 Paywall 전략)
+- 마지막 feat: 2026-04-20 (Sprint #30~33)
 - 마지막 lint: —

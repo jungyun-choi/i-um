@@ -5,6 +5,48 @@
 
 ---
 
+## [2026-04-20] fix | Sprint #33 — Hermes Fabric condition && style 크래시 패턴 수정
+
+- 대상 파일: `timeline.tsx` 2건, `upload.tsx` 5건 (총 7건)
+- `condition && styles.X` → `condition ? styles.X : null` 전환
+- Expo SDK 54 New Architecture(Hermes + Fabric) 환경 크래시 예방
+- 테스트: `npx tsc --noEmit` 통과, Jest 25/25 통과
+- 브랜치: `feat/sprint-33-hermes-style-fix` → main 머지
+- 관련 문서: [[wiki/topics/feat-hermes-style-fix.md]]
+
+---
+
+## [2026-04-20] fix | Sprint #32 — KST UTC 날짜 파싱 버그 3건 수정
+
+- `milestones.tsx` `todayString()`: `toISOString()` → 로컬 날짜 (KST 오전 9시 이전 하루 오차 제거)
+- `milestones.tsx` `AchievedCard`: `milestone.date` 원시 문자열 → `formatMilestoneDate()` 한국어 형식
+- `profile.tsx` `formatRecordPeriod()`: `new Date(firstDate)` → 로컬 파싱 (`split('-')`)
+- 테스트: `npx tsc --noEmit` 통과, Jest 25/25 통과
+- 브랜치: `feat/sprint-32-ux-bugs` → main 머지
+- 관련 문서: [[wiki/topics/feat-kst-date-bugfix.md]]
+
+---
+
+## [2026-04-20] feat | Sprint #31 — 마일스톤 스케줄러 v2 + PayWall 베타 UX
+
+- `milestoneScheduler.ts` 전면 재작성: 3개 → 10개 마일스톤 커버리지 (week_1~year_3)
+- 스케줄러 UTC 날짜 파싱 버그 수정: `new Date(birth_date)` → 로컬 파싱
+- 구버전 타입 키(`baekil`, `2nd_year`) → 신버전 키(`day_100`, `year_2`) 동기화
+- 월간 무료 한도 10 → 30 (베타 전략 결정)
+- `PaywallModal.tsx`: 베타 친화 메시지 + 산호색 닫기 버튼
+- 관련 문서: [[wiki/topics/feat-milestone-scheduler-v2.md]], [[wiki/analysis/decision-2026-04-20-beta-paywall.md]]
+
+---
+
+## [2026-04-20] fix | Sprint #30 — 마일스톤 탭 버그 + 테스트 경계값 수정
+
+- `milestones.tsx` line 249: `EXPECTED_MILESTONES` (삭제된 상수) → `ORDERED_MILESTONE_TYPES` 교체
+- `milestoneUtils.test.ts`: `week_1` ±1 범위 경계값 테스트 수정
+  - "생후 8일 null" → 8일은 ±1 범위 내 (6~8일 모두 유효) → "생후 9일 null"로 수정
+- 테스트: Jest 25/25 통과
+
+---
+
 ## [2026-04-20] feat | 스프린트 — 텍스트 일기 + 알림 설정 + app.json 브랜딩
 
 - `feat/text-diary-ui`: write.tsx 텍스트 일기 작성 화면 + AsyncStorage draft 자동저장
@@ -733,3 +775,94 @@
   - apps/mobile/package.json
   - apps/mobile/src/components/OfflineBanner.tsx
   - package-lock.json
+
+## [2026-04-20] commit | feat: Sprint #22 — 멀티 업로드 결과 모달 + 가족 초대 UX 개선
+
+- 커밋: `e965f07` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/app/(tabs)/profile.tsx
+  - apps/mobile/app/upload.tsx
+
+## [2026-04-20] commit | feat: Sprint #23 — React 안티패턴 수정 + 7일 활동 스트립
+
+- 커밋: `19446e2` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/app/(tabs)/timeline.tsx
+  - apps/mobile/app/diary/[id].tsx
+
+## [2026-04-20] commit | fix: diaryWorker — takenAt null 크래시 방지
+
+- 커밋: `6805434` by jy.choi
+- 변경 파일 수: 1
+  - apps/server/src/workers/diaryWorker.ts
+
+## [2026-04-20] commit | feat: Sprint #25 — RecordModal DateTimePicker 교체
+
+- 커밋: `a78802a` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/(tabs)/milestones.tsx
+
+## [2026-04-20] commit | feat: sprint-26 — push deep link, write date picker, dead code cleanup
+
+- 커밋: `29f1bf4` by jy.choi
+- 변경 파일 수: 4
+  - apps/mobile/app.json
+  - apps/mobile/app/write.tsx
+  - apps/mobile/src/components/MilestoneCard.tsx
+  - apps/mobile/src/hooks/usePushNotification.ts
+
+## [2026-04-20] commit | fix: sprint-27 — age UTC bug, birth date display, notification timing
+
+- 커밋: `7f5ce63` by jy.choi
+- 변경 파일 수: 5
+  - apps/mobile/app/(tabs)/profile.tsx
+  - apps/mobile/app/upload.tsx
+  - apps/mobile/src/__tests__/age.test.ts
+  - apps/mobile/src/hooks/usePushNotification.ts
+  - apps/mobile/src/lib/utils/age.ts
+
+## [2026-04-20] commit | fix: sprint-28 — upload nav bug + child age context
+
+- 커밋: `412bae2` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/upload.tsx
+
+## [2026-04-20] commit | feat: sprint-29 — milestone expansion + Korean display labels
+
+- 커밋: `ec2f169` by jy.choi
+- 변경 파일 수: 7
+  - apps/mobile/app/diary/[id].tsx
+  - apps/mobile/app/upload.tsx
+  - apps/mobile/src/components/DiaryCard.tsx
+  - apps/mobile/src/lib/utils/milestone.ts
+  - apps/server/src/__tests__/milestoneUtils.test.ts
+
+## [2026-04-20] commit | feat(sprint-30): fix milestone screen ORDERED_MILESTONE_TYPES + test boundary fix
+
+- 커밋: `43fc622` by jy.choi
+- 변경 파일 수: 3
+  - apps/mobile/app/(tabs)/milestones.tsx
+  - apps/mobile/src/lib/utils/milestone.ts
+  - apps/server/src/__tests__/milestoneUtils.test.ts
+
+## [2026-04-20] commit | feat(sprint-31): expand milestone scheduler + beta paywall UX
+
+- 커밋: `a2c3edd` by jy.choi
+- 변경 파일 수: 3
+  - apps/mobile/src/components/PaywallModal.tsx
+  - apps/server/src/routes/photos.ts
+  - apps/server/src/workers/milestoneScheduler.ts
+
+## [2026-04-20] commit | fix: KST UTC 날짜 파싱 버그 3건 수정
+
+- 커밋: `ba6fda7` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/app/(tabs)/milestones.tsx
+  - apps/mobile/app/(tabs)/profile.tsx
+
+## [2026-04-20] commit | fix: Hermes Fabric condition && style 크래시 패턴 수정
+
+- 커밋: `41fcf51` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/app/(tabs)/timeline.tsx
+  - apps/mobile/app/upload.tsx
