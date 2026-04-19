@@ -183,3 +183,23 @@
 - 커밋: `3ac50be` by jy.choi
 - 변경 파일 수: 1
   - apps/mobile/app/(tabs)/timeline.tsx
+
+## [2026-04-19] commit | feat: 일기 생성 실패 시 재시도 UX 추가
+
+- 커밋: `77524ff` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/diary/[id].tsx
+
+## [2026-04-19] commit | feat: DiaryCard 폴리시 + "1년 전 오늘" 메모리 카드
+
+- 커밋: `263483c` by jy.choi
+- 변경 파일 수: 3
+  - apps/mobile/app/(tabs)/timeline.tsx
+  - apps/mobile/src/components/DiaryCard.tsx
+  - apps/mobile/src/components/MemoryCard.tsx
+
+## [2026-04-19] commit | feat: Welcome 화면 개선 — 핵심 가치 3가지 + CTA 강화
+
+- 커밋: `625d5bf` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/(auth)/welcome.tsx
