@@ -32,6 +32,7 @@ export function DiaryCard({ entry, allIds }: Props) {
   const dateStr = `${month}월 ${day}일 ${weekday}요일`;
 
   const isPending = entry.status === 'generating' || entry.status === 'pending';
+  const isFailed = entry.status === 'failed';
   const isTextOnly = !photo?.s3_key;
 
   if (isTextOnly) {
@@ -45,6 +46,8 @@ export function DiaryCard({ entry, allIds }: Props) {
           <Text style={styles.quoteGlyph}>"</Text>
           {isPending ? (
             <Text style={styles.generating}>AI가 일기를 쓰고 있어요...</Text>
+          ) : isFailed ? (
+            <Text style={styles.failedText}>일기 생성에 실패했어요. 탭해서 다시 시도해보세요.</Text>
           ) : entry.content ? (
             <Text style={styles.textCardContent} numberOfLines={4}>{entry.content}</Text>
           ) : null}
@@ -91,6 +94,8 @@ export function DiaryCard({ entry, allIds }: Props) {
 
         {isPending ? (
           <Text style={styles.generating}>AI가 일기를 쓰고 있어요...</Text>
+        ) : isFailed ? (
+          <Text style={styles.failedHint}>일기 생성 실패 — 탭해서 재시도</Text>
         ) : entry.content ? (
           <Text style={styles.content} numberOfLines={2}>{entry.content}</Text>
         ) : null}
@@ -119,6 +124,7 @@ const styles = StyleSheet.create({
   location: { fontSize: 12, color: '#BBB', marginBottom: 8 },
   content: { fontSize: 15, color: '#444', lineHeight: 23, letterSpacing: 0.1 },
   generating: { fontSize: 14, color: '#C5C0B8', fontStyle: 'italic' },
+  failedHint: { fontSize: 13, color: '#E8735A', fontStyle: 'italic', opacity: 0.8 },
 
   // Text-only diary card — journal entry style
   textCard: {
@@ -164,6 +170,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   textCardDate: { fontSize: 12, fontWeight: '600', color: 'rgba(255,255,255,0.45)', letterSpacing: 0.3 },
+  failedText: { fontSize: 14, color: '#E8735A', fontStyle: 'italic', opacity: 0.85, marginBottom: 16 },
 
   // Shared
   milestoneBadge: {
