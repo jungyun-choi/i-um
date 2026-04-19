@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
   KeyboardAvoidingView, Platform, ScrollView, Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
@@ -41,6 +42,24 @@ export default function WriteScreen() {
   const [content, setContent] = useState('');
   const [saving, setSaving] = useState(false);
 
+  const DRAFT_KEY = `diary_draft_${activeChild?.id ?? 'unknown'}`;
+
+  // Load draft on mount
+  useEffect(() => {
+    AsyncStorage.getItem(DRAFT_KEY).then((saved) => {
+      if (saved) setContent(saved);
+    });
+  }, [DRAFT_KEY]);
+
+  // Autosave draft on content change
+  useEffect(() => {
+    if (!content) {
+      AsyncStorage.removeItem(DRAFT_KEY);
+    } else {
+      AsyncStorage.setItem(DRAFT_KEY, content);
+    }
+  }, [content, DRAFT_KEY]);
+
   const today = todayKST();
   const isToday =
     date.getUTCFullYear() === today.getUTCFullYear() &&
@@ -60,6 +79,7 @@ export default function WriteScreen() {
         content: trimmed,
         date: dateStr,
       });
+      await AsyncStorage.removeItem(DRAFT_KEY);
       queryClient.invalidateQueries({ queryKey: ['timeline', activeChild.id] });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       showToast('일기를 저장했어요', 'success');
@@ -147,7 +167,7 @@ export default function WriteScreen() {
               style={styles.input}
               value={content}
               onChangeText={setContent}
-              placeholder={'오늘 어떤 일이 있었나요?\n\n아이의 표정, 말, 행동...\n기억하고 싶은 순간을 자유롭게 적어보세요'}
+              placeholder="오늘 기억하고 싶은 순간을 적어보세요..."
               placeholderTextColor="#C8C4BC"
               multiline
               textAlignVertical="top"

@@ -357,7 +357,7 @@ export default function TimelineScreen() {
             >
               <Text style={styles.fabSubIcon}>✏️</Text>
             </TouchableOpacity>
-            <Text style={styles.fabSubLabel}>글로 쓰기</Text>
+            <Text style={styles.fabSubLabel}>직접 쓰기</Text>
           </Animated.View>
           {/* 서브 버튼: 사진 일기 */}
           <Animated.View style={[
