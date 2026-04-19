@@ -52,6 +52,12 @@ export const api = {
     create: (body: { child_id: string; type: string; date: string }) =>
       authFetch('/milestones', { method: 'POST', body: JSON.stringify(body) }),
   },
+  invites: {
+    create: (childId: string) =>
+      authFetch('/invites', { method: 'POST', body: JSON.stringify({ child_id: childId }) }),
+    join: (code: string) =>
+      authFetch(`/invites/${code}/join`, { method: 'POST' }),
+  },
   monthlyLetters: {
     latest: (childId: string) => authFetch(`/monthly-letters/latest/${childId}`),
     list: (childId: string) => authFetch(`/monthly-letters/${childId}`),

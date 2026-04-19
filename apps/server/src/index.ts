@@ -7,6 +7,7 @@ import diaryRoutes from './routes/diary';
 import milestonesRoutes from './routes/milestones';
 import usersRoutes from './routes/users';
 import monthlyLettersRoutes from './routes/monthlyLetters';
+import invitesRoutes from './routes/invites';
 import { startMilestoneScheduler } from './workers/milestoneScheduler';
 import { startMonthlyLetterScheduler } from './workers/monthlyLetterScheduler';
 
@@ -21,6 +22,7 @@ app.use('/diary', diaryRoutes);
 app.use('/milestones', milestonesRoutes);
 app.use('/users', usersRoutes);
 app.use('/monthly-letters', monthlyLettersRoutes);
+app.use('/invites', invitesRoutes);
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
