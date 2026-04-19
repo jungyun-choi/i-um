@@ -48,6 +48,7 @@ function DiaryPage({
     queryKey: ['diary', diaryId],
     queryFn: () => api.diary.get(diaryId),
     enabled: !!diaryId,
+    staleTime: 1000 * 60 * 5,
   });
 
   const { diary: polledDiary } = useDiaryGeneration(
@@ -139,8 +140,20 @@ function DiaryPage({
     ? `${S3_BASE}/${current.photos.s3_key}`
     : undefined;
 
-  if (isLoading || !current) {
-    return <View style={{ width: SCREEN_W }}><DiaryGenerating /></View>;
+  if (isLoading) {
+    return (
+      <View style={{ width: SCREEN_W, flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#E8735A" />
+      </View>
+    );
+  }
+  if (!current) {
+    return (
+      <View style={{ width: SCREEN_W, flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
+        <Text style={{ fontSize: 32 }}>😔</Text>
+        <Text style={{ fontSize: 15, color: '#888' }}>일기를 불러올 수 없어요</Text>
+      </View>
+    );
   }
   if (current.status === 'generating' || current.status === 'pending' || retrying) {
     return <View style={{ width: SCREEN_W }}><DiaryGenerating photoUri={photoPreviewUri} /></View>;
@@ -270,6 +283,10 @@ export default function DiaryDetailScreen() {
         scrollEnabled={!isEditing}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={{ itemVisiblePercentThreshold: 60 }}
+        initialNumToRender={1}
+        maxToRenderPerBatch={1}
+        windowSize={3}
+        removeClippedSubviews
         keyExtractor={(item) => item}
         renderItem={({ item: diaryId, index }) => (
           <DiaryPage
