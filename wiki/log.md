@@ -68,3 +68,31 @@
   - apps/mobile/src/lib/api.ts
   - apps/server/package.json
   - apps/server/src/index.ts
+
+## [2026-04-19] commit | feat: Gap analysis iterate — 87% → 95%+ 달성
+
+- 커밋: `3856391` by jy.choi
+- 변경 파일 수: 10
+  - apps/mobile/app/(tabs)/milestones.tsx
+  - apps/mobile/app/(tabs)/profile.tsx
+  - apps/mobile/app/(tabs)/timeline.tsx
+  - apps/mobile/app/_layout.tsx
+  - apps/mobile/app/child/[id]/edit.tsx
+
+## [2026-04-19] commit | docs: 이음-MVP PDCA 완료 보고서 작성
+
+- 커밋: `27d0b7b` by jy.choi
+- 변경 파일 수: 1
+  - "docs/04-report/\354\235\264\354\235\214-MVP.report.md"
+
+## [2026-04-19] commit | fix: add app/index.tsx for Expo Router root route
+
+- 커밋: `ce6413e` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/index.tsx
+
+## [2026-04-19] commit | fix: metro config for monorepo React dedup + root index route
+
+- 커밋: `1de329e` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/metro.config.js

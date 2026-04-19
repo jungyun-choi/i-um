@@ -5,8 +5,17 @@
     "apps/server",
     "apps/mobile"
   ],
+  "overrides": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native-screens": "4.24.0"
+  },
   "scripts": {
     "server": "yarn workspace @i-um/server dev",
     "mobile": "yarn workspace @i-um/mobile start"
+  },
+  "dependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
   }
 }
