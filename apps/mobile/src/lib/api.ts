@@ -49,6 +49,8 @@ export const api = {
   },
   milestones: {
     list: (childId: string) => authFetch(`/milestones/${childId}`),
+    create: (body: { child_id: string; type: string; date: string }) =>
+      authFetch('/milestones', { method: 'POST', body: JSON.stringify(body) }),
   },
   users: {
     savePushToken: (token: string) =>
