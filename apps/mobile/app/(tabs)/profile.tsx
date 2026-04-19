@@ -237,7 +237,7 @@ export default function ProfileScreen() {
                 <View style={styles.statDivider} />
                 <StatBox value={stats.milestone_count} label="발자국" />
                 <View style={styles.statDivider} />
-                <StatBox value={formatRecordPeriod(stats.first_entry_date)} label="기록 중" />
+                <StatBox value={formatRecordPeriod(stats.first_entry_date ? stats.first_entry_date.split('T')[0] : null)} label="기록 중" />
               </View>
             )}
           </>

@@ -908,3 +908,11 @@
   - .claude/scheduled_tasks.lock
   - apps/mobile/app/diary/[id].tsx
   - apps/server/src/routes/diary.ts
+
+## [2026-04-20] commit | feat: 첫말 → 첫 대화, 발자국 미기록 안내문 순화
+
+- 커밋: `0044fce` by jy.choi
+- 변경 파일 수: 3
+  - apps/mobile/app/(auth)/welcome.tsx
+  - apps/mobile/app/(tabs)/milestones.tsx
+  - apps/mobile/src/lib/utils/milestone.ts
