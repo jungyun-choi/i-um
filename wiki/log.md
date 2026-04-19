@@ -5,6 +5,30 @@
 
 ---
 
+## [2026-04-19] feat | TDD 셋업 + 푸시 알림 구현
+
+- Jest 셋업: 서버(ts-jest + supertest), 모바일(ts-jest 순수 로직 / jest-expo 컴포넌트)
+- 총 23개 테스트 작성 및 통과 (서버 14개, 모바일 9개)
+- `CLAUDE.md` TDD 워크플로우 규칙 추가
+- 구현: `pushService.ts`, `routes/users.ts`, `usePushNotification` 훅
+- DB: `profiles` 테이블 추가 필요 (SQL은 feat-push-notification.md 참조)
+- 실기기 확인 필요: Expo Push 토큰 발급, 알림 수신
+
+---
+
+## [2026-04-19] decision | 프로덕션 로드맵 — 아이디어 회의
+
+- MVP 완성 후 프로덕션화 방향 논의
+- 핵심 전략: "AI가 써주는 일기" 차별점 집중, FamilyAlbum과 공유 기능 정면 경쟁 금지
+- Phase 0: 푸시 알림, 달력 탐색, 실패 재시도 UX (2주)
+- Phase 1: AI 월간 레터 ⭐, 1년 전 메모리 카드, 마일스톤 알림 (1~2달)
+- Phase 2: 배우자 초대, 조부모 공유 링크, AI 연간 레터 (2~3달)
+- Phase 3: 프리미엄 구독, 포토북, 하이라이트 영상 (3~6달)
+- 상세: `wiki/analysis/decision-2026-04-19-production-roadmap.md`
+- 기능 아이디어 전체: `wiki/topics/product-feature-ideas.md`
+
+---
+
 ## [2026-04-19] feat | MVP 실기기 테스트 셋업 완료
 
 - Expo Go Fabric 에러 해결: `<Stack>`/`<Tabs>` → `<Slot>` 전환
@@ -117,3 +141,19 @@
   - apps/mobile/app/_layout.tsx
   - apps/mobile/babel.config.js
   - apps/mobile/metro.config.js
+
+## [2026-04-19] commit | feat: 일기 스타일 선택 + 완성 모달 + 삭제 기능 + 다수 UX 개선
+
+- 커밋: `2051f5e` by jy.choi
+- 변경 파일 수: 17
+  - CLAUDE.md
+  - apps/mobile/app/(tabs)/_layout.tsx
+  - apps/mobile/app/_layout.tsx
+  - apps/mobile/app/_layout.tsx.bak
+  - apps/mobile/app/child/new.tsx
+
+## [2026-04-19] commit | docs: CLAUDE.md에 개발 규칙 및 인프라 정보 섹션 추가
+
+- 커밋: `31eb9bf` by jy.choi
+- 변경 파일 수: 1
+  - CLAUDE.md

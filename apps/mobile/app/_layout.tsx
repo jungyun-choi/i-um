@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { supabase } from '../src/lib/supabase';
 import { useRouter, useSegments } from 'expo-router';
 import { Session } from '@supabase/supabase-js';
+import { usePushNotification } from '../src/hooks/usePushNotification';
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ function AuthGate({ session }: { session: Session | null }) {
 export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(false);
+  usePushNotification();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {

@@ -41,6 +41,8 @@
 | [market-landscape.md](topics/market-landscape.md) | 육아 기록 앱 시장 전체 지형도, 트렌드, TAM 추정 |
 | [ium-differentiation.md](topics/ium-differentiation.md) | 이음의 3가지 핵심 차별점 및 포지셔닝 분석 |
 | [dev-environment.md](topics/dev-environment.md) | 개발 환경 설정, 기술 스택 확정, 남은 TODO |
+| [product-feature-ideas.md](topics/product-feature-ideas.md) | 프로덕션 기능 아이디어 전체 목록 (우선순위·복잡도 포함) |
+| [feat-push-notification.md](topics/feat-push-notification.md) | 푸시 알림 구현 — 일기 완성 시 Expo Push 발송 |
 
 ---
 
@@ -50,13 +52,14 @@
 |--------|------|------|
 | [competitor-comparison.md](analysis/competitor-comparison.md) | 비교 분석 | 2026-04-19 |
 | [decision-2026-04-19-tech-setup.md](analysis/decision-2026-04-19-tech-setup.md) | 기술 결정 4건 | 2026-04-19 |
+| [decision-2026-04-19-production-roadmap.md](analysis/decision-2026-04-19-production-roadmap.md) | 프로덕션 로드맵 — 아이디어 회의 결과 | 2026-04-19 |
 
 ---
 
 ## 통계
 
 - 총 소스: 0 (웹 리서치)
-- 총 wiki 페이지: 11
+- 총 wiki 페이지: 13
 - 마지막 ingest: 2026-04-19 (시장조사)
-- 마지막 decision: 2026-04-19 (실기기 셋업)
+- 마지막 decision: 2026-04-19 (프로덕션 로드맵)
 - 마지막 lint: —

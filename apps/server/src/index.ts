@@ -5,6 +5,7 @@ import childrenRoutes from './routes/children';
 import photosRoutes from './routes/photos';
 import diaryRoutes from './routes/diary';
 import milestonesRoutes from './routes/milestones';
+import usersRoutes from './routes/users';
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use('/children', childrenRoutes);
 app.use('/photos', photosRoutes);
 app.use('/diary', diaryRoutes);
 app.use('/milestones', milestonesRoutes);
+app.use('/users', usersRoutes);
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 

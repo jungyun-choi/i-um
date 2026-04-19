@@ -5,6 +5,7 @@ import { getImageBuffer } from '../services/s3Service';
 import { reverseGeocode } from '../services/geocodingService';
 import { generateDiary } from '../services/claudeService';
 import { detectMilestone } from '../lib/milestoneUtils';
+import { sendPushNotification } from '../services/pushService';
 
 export const diaryQueue = new Bull('diary', process.env.REDIS_URL!);
 
@@ -28,7 +29,7 @@ diaryQueue.process(async (job) => {
 
   const { data: child } = await supabase
     .from('children')
-    .select('name, birth_date')
+    .select('name, birth_date, user_id')
     .eq('id', childId)
     .single();
 
@@ -73,6 +74,23 @@ diaryQueue.process(async (job) => {
     .from('photos')
     .update({ location_name: locationName })
     .eq('id', photoId);
+
+  // 푸시 알림 발송
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('push_token')
+    .eq('id', child.user_id ?? '')
+    .single();
+
+  if (profile?.push_token) {
+    const title = milestone
+      ? `🎉 ${child.name}의 특별한 기억이 기록됐어요!`
+      : `✨ ${child.name}의 일기가 완성됐어요`;
+    const body = milestone
+      ? `"${milestone}" 마일스톤을 달성했어요`
+      : '지금 확인해보세요';
+    await sendPushNotification(profile.push_token, { title, body, data: { diaryId: diary?.id } });
+  }
 });
 
 diaryQueue.on('failed', async (job, err) => {

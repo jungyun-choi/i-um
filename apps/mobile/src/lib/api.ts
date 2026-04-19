@@ -49,6 +49,10 @@ export const api = {
   milestones: {
     list: (childId: string) => authFetch(`/milestones/${childId}`),
   },
+  users: {
+    savePushToken: (token: string) =>
+      authFetch('/users/push-token', { method: 'PATCH', body: JSON.stringify({ token }) }),
+  },
 };
 
 export async function uploadToS3(uploadUrl: string, fileUri: string) {
