@@ -490,3 +490,125 @@
 - 커밋: `0acaaf2` by jy.choi
 - 변경 파일 수: 1
   - apps/mobile/app/upload.tsx
+
+## [2026-04-20] commit | chore: EAS build config + app.json projectId placeholder
+
+- 커밋: `e550f49` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/app.json
+  - apps/mobile/eas.json
+
+## [2026-04-20] commit | feat: POST /children/:id/avatar-url — R2 presigned URL for avatar upload
+
+- 커밋: `ac1978c` by jy.choi
+- 변경 파일 수: 1
+  - apps/server/src/routes/children.ts
+
+## [2026-04-20] commit | feat: child avatar upload — R2 presigned URL + ImageManipulator compression
+
+- 커밋: `6076f7e` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/app/child/[id]/edit.tsx
+  - apps/mobile/src/lib/api.ts
+
+## [2026-04-20] commit | feat: monthly letters list, expo-image avatar, text-only diary card polish
+
+- 커밋: `0630315` by jy.choi
+- 변경 파일 수: 4
+  - apps/mobile/app/(tabs)/profile.tsx
+  - apps/mobile/app/letters.tsx
+  - apps/mobile/src/components/ChildAvatar.tsx
+  - apps/mobile/src/components/DiaryCard.tsx
+
+## [2026-04-20] commit | feat: upload screen auto-launches picker on mount
+
+- 커밋: `d1a613f` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/upload.tsx
+
+## [2026-04-20] commit | fix: diary route authorization + signup privacy link
+
+- 커밋: `7051c9d` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/app/(auth)/signup.tsx
+  - apps/server/src/routes/diary.ts
+
+## [2026-04-20] commit | feat: onboarding progress indicator + write keyboard fix
+
+- 커밋: `e89121f` by jy.choi
+- 변경 파일 수: 3
+  - apps/mobile/app/(auth)/signup.tsx
+  - apps/mobile/app/child/new.tsx
+  - apps/mobile/app/write.tsx
+
+## [2026-04-20] commit | feat: forgot-password screen + PhotoGrid expo-image + login UX polish
+
+- 커밋: `8bb75ef` by jy.choi
+- 변경 파일 수: 3
+  - apps/mobile/app/(auth)/forgot-password.tsx
+  - apps/mobile/app/(auth)/login.tsx
+  - apps/mobile/src/components/PhotoGrid.tsx
+
+## [2026-04-20] commit | fix: add ownership checks to milestones, monthlyLetters + children validation
+
+- 커밋: `35a9fef` by jy.choi
+- 변경 파일 수: 4
+  - apps/server/src/__tests__/milestonesRoute.test.ts
+  - apps/server/src/routes/children.ts
+  - apps/server/src/routes/milestones.ts
+  - apps/server/src/routes/monthlyLetters.ts
+
+## [2026-04-20] commit | feat: password reset flow — handle PASSWORD_RECOVERY deep link
+
+- 커밋: `7c14238` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/app/_layout.tsx
+  - apps/mobile/app/reset-password.tsx
+
+## [2026-04-20] commit | feat: rate limiting + diary content validation
+
+- 커밋: `c0d6369` by jy.choi
+- 변경 파일 수: 4
+  - apps/server/package.json
+  - apps/server/src/index.ts
+  - apps/server/src/routes/diary.ts
+  - package-lock.json
+
+## [2026-04-20] commit | feat: UX polish — premium text diary card + email validation + char limit
+
+- 커밋: `f0bad3c` by jy.choi
+- 변경 파일 수: 4
+  - apps/mobile/app/(auth)/login.tsx
+  - apps/mobile/app/(auth)/signup.tsx
+  - apps/mobile/app/write.tsx
+  - apps/mobile/src/components/DiaryCard.tsx
+
+## [2026-04-20] commit | chore: remove stale _layout.tsx.bak
+
+- 커밋: `4f2d4e6` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/_layout.tsx.bak
+
+## [2026-04-20] feat | 야간 자동 스프린트 — 프로덕션 수준 달성
+
+### Sprint #5 — forgot-password + PhotoGrid + login UX
+- `app/(auth)/forgot-password.tsx` 신규 생성 (Supabase resetPasswordForEmail)
+- PhotoGrid → expo-image 마이그레이션, borderRadius/gap 개선
+- login.tsx — "비밀번호를 잊으셨나요?" 링크 추가
+
+### Sprint #6 — 서버 보안 강화 + 비밀번호 재설정 플로우
+- milestones.ts — GET/POST에 `assertChildAccess()` 소유권 검증 추가
+- monthlyLetters.ts — GET/latest에 소유권 검증 추가
+- children.ts — POST input validation (name 필수, birth_date 형식, gender enum)
+- diary.ts — POST/PATCH content 10,000자 제한 + PATCH 빈값 방지
+- `app/reset-password.tsx` 신규 생성 (PASSWORD_RECOVERY deep link 처리)
+- `_layout.tsx` — `PASSWORD_RECOVERY` 이벤트 감지 → /reset-password로 라우팅
+- express-rate-limit 도입 — 전역 300req/15min, 사진 업로드 30req/hour
+- Jest 테스트 22개 모두 통과
+
+### Sprint #7 — UX 폴리시
+- DiaryCard text-only 카드 — dark journal 스타일 (2C2420 배경 + 인용구 글리프)
+- write.tsx — 9000자 이상 시 경고 표시
+- signup/login — 이메일 형식 클라이언트 검증 추가
+- `_layout.tsx.bak` 스테일 파일 제거
+

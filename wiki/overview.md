@@ -2,7 +2,7 @@
 title: 이음(i-um) 프로젝트 개요
 type: overview
 created: 2026-04-18
-updated: 2026-04-19
+updated: 2026-04-20
 sources: []
 tags: [overview, 육아, AI, 제로에포트]
 ---
@@ -54,25 +54,36 @@ LLM (감성 일기 생성)
 
 ---
 
-## 현재 상태
+## 현재 상태 (2026-04-20 기준)
 
+### 완료 ✅
 - [x] 프로젝트 아이디어 구체화
-- [x] GitHub 저장소 생성 (https://github.com/jungyun-choi/i-um)
-- [x] LLM Wiki 셋업
-- [x] 기술 스택 확정 (React Native + Expo, Node.js + Express, Supabase, Cloudflare R2, Claude Haiku)
+- [x] 기술 스택 확정 (React Native + Expo SDK 54, Node.js + Express, Supabase, Cloudflare R2, Claude Haiku 4.5)
 - [x] 시장 조사 및 경쟁 앱 분석 완료 (10개 앱)
-- [x] MVP 기능 정의 (Plan 문서 완료)
-- [x] 시스템 설계 완료 (Design 문서: ERD, API, 화면 설계)
-- [x] Phase 1 서버 구현 완료 (Express API, Bull Queue, Claude 일기 생성 Worker)
-- [x] Phase 1 모바일 구현 완료 (Expo Router, 인증, 업로드, 타임라인, 일기, 마일스톤)
-- [x] Supabase DB 스키마 적용 완료 (4개 테이블 + RLS)
-- [x] 서버 환경 변수 설정 (Supabase, R2)
-- [x] Expo Go 실기기 테스트 — 회원가입·로그인·아이 프로필 생성 동작 확인
-- [ ] ANTHROPIC_API_KEY 설정 → AI 일기 생성 테스트
-- [ ] Redis 설정 → Bull Queue 워커 활성화
-- [ ] 사진 업로드 → AI 일기 전체 플로우 E2E 테스트
-- [ ] Phase 2: 하이라이트 영상, 푸시 알림
-- [ ] Phase 3: 베타 테스트 (TestFlight)
+- [x] MVP 기능 정의 및 시스템 설계 (ERD, API, 화면 설계)
+- [x] **전체 Auth 플로우** — 회원가입, 로그인, 비밀번호 찾기, 비밀번호 재설정 (PASSWORD_RECOVERY deep link)
+- [x] **핵심 일기 플로우** — 사진 업로드 → AI 일기 생성 (Bull Queue + Claude Haiku), 텍스트 직접 작성
+- [x] **타임라인** — 월별 섹션, 무한 스크롤, 메모리 카드, 월간 레터
+- [x] **마일스톤** — 자동 감지 (백일, 돌, 생일 등) + 수동 기록 (첫걸음, 첫말)
+- [x] **가족 공유** — 초대 코드 생성/참여
+- [x] **월간 AI 레터** — 매달 1일 자동 생성, 아카이브 화면
+- [x] **푸시 알림** — Expo Notifications 설정, 알림 설정 화면
+- [x] **프로필** — 아바타 업로드, 아이 편집, 계정 삭제 (GDPR)
+- [x] **보안 강화** — 전체 엔드포인트 소유권 검증, rate limiting, input validation
+- [x] **UX 폴리시** — premium text diary card, 이메일 validation, char limit warning
+- [x] **개인정보처리방침** 화면
+- [x] 서버 Jest 테스트 22개 통과
+
+### 사용자가 직접 해야 할 작업 🔧
+- [ ] `npx eas login` → `npx eas project:init` → `app.json`의 `projectId` 자동 설정
+- [ ] `apps/mobile/.env`에 `EXPO_PUBLIC_EAS_PROJECT_ID=<value>` 추가
+- [ ] `eas.json`의 `appleTeamId`, `ascAppId` 설정 (App Store 등록 시)
+- [ ] 앱 아이콘 / 스플래시 디자인 자산 교체 (`apps/mobile/assets/`)
+
+### 다음 스프린트 후보
+- [ ] Phase 2: 하이라이트 영상 생성 (ffmpeg or Remotion)
+- [ ] 베타 테스트 (TestFlight)
+- [ ] 수익 모델 구현 (월 구독, RevenueCat)
 
 ---
 
