@@ -25,9 +25,16 @@ router.get('/', async (req: AuthRequest, res) => {
 
 router.post('/', async (req: AuthRequest, res) => {
   const { name, birth_date, gender } = req.body;
+  if (!name?.trim()) { res.status(400).json({ error: 'name required' }); return; }
+  if (!birth_date || !/^\d{4}-\d{2}-\d{2}$/.test(birth_date)) {
+    res.status(400).json({ error: 'birth_date must be YYYY-MM-DD' }); return;
+  }
+  if (gender && !['M', 'F', 'N'].includes(gender)) {
+    res.status(400).json({ error: 'gender must be M, F, or N' }); return;
+  }
   const { data, error } = await supabase
     .from('children')
-    .insert({ user_id: req.userId, name, birth_date, gender })
+    .insert({ user_id: req.userId, name: name.trim(), birth_date, gender: gender ?? 'N' })
     .select()
     .single();
   if (error) { res.status(400).json({ error: error.message }); return; }
