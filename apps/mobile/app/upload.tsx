@@ -244,18 +244,18 @@ export default function UploadScreen() {
               <Text style={styles.styleLabel}>일기 스타일</Text>
               <View style={styles.stylePills}>
                 <TouchableOpacity
-                  style={[styles.pill, style === 'emotional' && styles.pillActive]}
+                  style={[styles.pill, style === 'emotional' ? styles.pillActive : null]}
                   onPress={() => setStyle('emotional')}
                 >
-                  <Text style={[styles.pillText, style === 'emotional' && styles.pillTextActive]}>
+                  <Text style={[styles.pillText, style === 'emotional' ? styles.pillTextActive : null]}>
                     감성적
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.pill, style === 'factual' && styles.pillActive]}
+                  style={[styles.pill, style === 'factual' ? styles.pillActive : null]}
                   onPress={() => setStyle('factual')}
                 >
-                  <Text style={[styles.pillText, style === 'factual' && styles.pillTextActive]}>
+                  <Text style={[styles.pillText, style === 'factual' ? styles.pillTextActive : null]}>
                     사실 위주
                   </Text>
                 </TouchableOpacity>
@@ -266,7 +266,7 @@ export default function UploadScreen() {
               <Text style={styles.addMoreText}>+ 더 추가</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.uploadBtn, uploading && styles.btnDisabled]}
+              style={[styles.uploadBtn, uploading ? styles.btnDisabled : null]}
               onPress={handleUpload}
               disabled={uploading}
             >
