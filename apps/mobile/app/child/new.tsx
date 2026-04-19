@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
-  Platform, KeyboardAvoidingView, Keyboard, ScrollView, Alert,
+  Platform, KeyboardAvoidingView, Keyboard, ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { api } from '../../src/lib/api';
 import { useChildStore } from '../../src/stores/childStore';
+import { useToast } from '../../src/components/Toast';
 
 const GENDERS = [
   { value: 'M', label: '남자아이', emoji: '👦' },
@@ -19,6 +20,7 @@ export default function NewChildScreen() {
   const params = useLocalSearchParams<{ from?: string }>();
   const isOnboarding = params.from === 'onboarding';
   const setChildren = useChildStore((s) => s.setChildren);
+  const { showToast } = useToast();
   const [name, setName] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [gender, setGender] = useState('N');
@@ -33,11 +35,11 @@ export default function NewChildScreen() {
 
   async function handleCreate() {
     if (!name.trim()) {
-      Alert.alert('이름을 입력해주세요');
+      showToast('이름을 입력해주세요');
       return;
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
-      Alert.alert('생일 형식이 올바르지 않아요', 'YYYY-MM-DD 형식으로 입력해주세요.');
+      showToast('생일을 YYYY-MM-DD 형식으로 입력해주세요');
       return;
     }
     setLoading(true);
@@ -47,20 +49,14 @@ export default function NewChildScreen() {
       setChildren(children);
 
       if (isOnboarding) {
-        Alert.alert(
-          `${name.trim()}의 프로필이 만들어졌어요! 🎉`,
-          '첫 번째 사진을 올려서 AI 일기를 시작해볼까요?',
-          [
-            { text: '나중에', style: 'cancel', onPress: () => router.replace('/(tabs)/timeline') },
-            { text: '지금 찍기', onPress: () => router.replace('/upload') },
-          ],
-        );
+        showToast(`${name.trim()}의 프로필이 만들어졌어요 🎉`, 'success');
+        router.replace('/upload');
       } else {
         router.back();
       }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
-      Alert.alert('실패', msg || '다시 시도해주세요.');
+      showToast(msg || '다시 시도해주세요.');
     } finally {
       setLoading(false);
     }

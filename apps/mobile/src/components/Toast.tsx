@@ -20,9 +20,9 @@ export function useToast() {
 }
 
 const COLORS: Record<ToastType, string> = {
-  error: '#D44444',
-  success: '#4CAF50',
-  info: '#555555',
+  error: '#C0392B',
+  success: '#E8735A',
+  info: '#4A4A4A',
 };
 
 function ToastItem({ toast, onDone }: { toast: ToastMessage; onDone: (id: number) => void }) {
