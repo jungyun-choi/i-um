@@ -48,7 +48,9 @@ export function DiaryCard({ entry, allIds }: Props) {
           transition={200}
         />
       ) : (
-        <View style={styles.imagePlaceholder} />
+        <View style={styles.textOnlyHeader}>
+          <Text style={styles.textOnlyIcon}>✏️</Text>
+        </View>
       )}
 
       <View style={styles.body}>
@@ -88,7 +90,12 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   image: { width: '100%', height: CARD_IMAGE_H },
-  imagePlaceholder: { width: '100%', height: 120, backgroundColor: '#F5F2EC' },
+  textOnlyHeader: {
+    width: '100%', height: 72, backgroundColor: '#FFF6F3',
+    alignItems: 'center', justifyContent: 'center',
+    borderBottomWidth: 1, borderBottomColor: '#F5EDE8',
+  },
+  textOnlyIcon: { fontSize: 22 },
   body: { padding: 16, paddingTop: 14, paddingBottom: 18 },
   topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
   date: { fontSize: 13, fontWeight: '600', color: '#999', letterSpacing: 0.2 },

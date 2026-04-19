@@ -242,6 +242,18 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         )}
 
+        {/* 추억 */}
+        {activeChild && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>추억</Text>
+            <TouchableOpacity style={[styles.menuItem, styles.menuItemLast]} onPress={() => router.push('/letters')}>
+              <Text style={styles.menuIcon}>💌</Text>
+              <Text style={styles.menuText}>월간 레터 모아보기</Text>
+              <Text style={styles.menuArrow}>›</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* 설정 메뉴 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>설정</Text>

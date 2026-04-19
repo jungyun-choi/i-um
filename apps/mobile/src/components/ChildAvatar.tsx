@@ -1,4 +1,5 @@
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Image } from 'expo-image';
 
 interface Props {
   name: string;
@@ -11,8 +12,11 @@ export function ChildAvatar({ name, avatarUrl, size = 56 }: Props) {
   if (avatarUrl) {
     return (
       <Image
-        source={{ uri: avatarUrl }}
+        source={avatarUrl}
         style={[styles.image, { width: size, height: size, borderRadius: radius }]}
+        contentFit="cover"
+        cachePolicy="disk"
+        transition={150}
       />
     );
   }
@@ -24,7 +28,7 @@ export function ChildAvatar({ name, avatarUrl, size = 56 }: Props) {
 }
 
 const styles = StyleSheet.create({
-  image: { resizeMode: 'cover' },
+  image: {},
   placeholder: { backgroundColor: '#FFE0D9', alignItems: 'center', justifyContent: 'center' },
   initial: { color: '#E8735A', fontWeight: '600' },
 });
