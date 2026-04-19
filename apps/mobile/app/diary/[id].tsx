@@ -133,11 +133,15 @@ function DiaryPage({
     onActionsReady({ startEdit, confirmDelete, shareDiary });
   }
 
+  const photoPreviewUri = current?.photos?.s3_key
+    ? `${S3_BASE}/${current.photos.s3_key}`
+    : undefined;
+
   if (isLoading || !current) {
     return <View style={{ width: SCREEN_W }}><DiaryGenerating /></View>;
   }
   if (current.status === 'generating' || current.status === 'pending' || retrying) {
-    return <View style={{ width: SCREEN_W }}><DiaryGenerating /></View>;
+    return <View style={{ width: SCREEN_W }}><DiaryGenerating photoUri={photoPreviewUri} /></View>;
   }
 
   return (

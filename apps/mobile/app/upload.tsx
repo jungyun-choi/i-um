@@ -5,12 +5,15 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
+import * as Notifications from 'expo-notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api, uploadToS3 } from '../src/lib/api';
 import { useChildStore } from '../src/stores/childStore';
 import { useQueryClient } from '@tanstack/react-query';
 import { PhotoGrid } from '../src/components/PhotoGrid';
+import { DiaryGenerating } from '../src/components/DiaryGenerating';
 import { useToast } from '../src/components/Toast';
 import * as Haptics from 'expo-haptics';
 
@@ -173,6 +176,15 @@ export default function UploadScreen() {
       const result = await pollDiary(lastPhotoId);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       showDiaryModal(result);
+      // First-diary push prompt — ask once, at the highest-motivation moment
+      const asked = await AsyncStorage.getItem('push_prompt_shown');
+      if (!asked) {
+        await AsyncStorage.setItem('push_prompt_shown', '1');
+        const { status } = await Notifications.getPermissionsAsync();
+        if (status === 'undetermined') {
+          await Notifications.requestPermissionsAsync();
+        }
+      }
     } catch (e: unknown) {
       showToast(e instanceof Error ? e.message : '다시 시도해주세요.');
     } finally {
@@ -250,6 +262,13 @@ export default function UploadScreen() {
             </TouchableOpacity>
           </View>
         </>
+      )}
+
+      {/* AI 생성 풀스크린 오버레이 */}
+      {uploading && generatingText.includes('AI가') && photos.length > 0 && (
+        <View style={StyleSheet.absoluteFillObject}>
+          <DiaryGenerating photoUri={photos[photos.length - 1].uri} />
+        </View>
       )}
 
       {/* 일기 완성 모달 */}
