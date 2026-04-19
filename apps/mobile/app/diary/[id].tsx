@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, Alert, TextInput, Dimensions, ActivityIndicator,
@@ -79,18 +79,18 @@ function DiaryPage({
     onError: () => showToast('삭제에 실패했어요. 다시 시도해주세요.'),
   });
 
-  function startEdit() {
+  const startEdit = useCallback(() => {
     setDraft(current?.content ?? '');
     setEditing(true);
     onEditingChange(true);
-  }
+  }, [current?.content, onEditingChange]);
 
-  function confirmDelete() {
+  const confirmDelete = useCallback(() => {
     Alert.alert('일기 삭제', '이 일기를 삭제할까요? 사진도 함께 삭제됩니다.', [
       { text: '취소', style: 'cancel' },
       { text: '삭제', style: 'destructive', onPress: () => deleteMutation.mutate() },
     ]);
-  }
+  }, [deleteMutation]);
 
   async function retryGeneration() {
     const photoId = current?.photos?.id;
@@ -104,7 +104,7 @@ function DiaryPage({
     }
   }
 
-  async function shareDiary() {
+  const shareDiary = useCallback(async () => {
     if (!current?.content) return;
     try {
       const photoKey = current.photos?.s3_key;
@@ -125,13 +125,14 @@ function DiaryPage({
         showToast('공유에 실패했어요');
       }
     }
-  }
+  }, [current, dateStr, showToast]);
 
-  // 활성 페이지가 되면 날짜·액션을 부모에 등록
-  if (isActive) {
+  // 활성 페이지가 되면 날짜·액션을 부모에 등록 (render 중 setState 방지)
+  useEffect(() => {
+    if (!isActive) return;
     if (current) onDateChange(dateStr);
     onActionsReady({ startEdit, confirmDelete, shareDiary });
-  }
+  }, [isActive, current, dateStr, startEdit, confirmDelete, shareDiary, onDateChange, onActionsReady]);
 
   const photoPreviewUri = current?.photos?.s3_key
     ? `${S3_BASE}/${current.photos.s3_key}`

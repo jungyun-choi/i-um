@@ -104,6 +104,27 @@ export default function TimelineScreen() {
   const sections = groupEntriesByMonth(entries);
   const allIds = entries.map((e) => e.id).join(',');
 
+  // 최근 7일 활동 — 리텐션 핵심 지표
+  const weekActivity = (() => {
+    const KST_OFFSET = 9 * 60 * 60 * 1000;
+    const todayKST = new Date(Date.now() + KST_OFFSET);
+    const days: { label: string; active: boolean; isToday: boolean }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(todayKST.getTime() - i * 24 * 60 * 60 * 1000);
+      const ymd = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+      const labels = ['일', '월', '화', '수', '목', '금', '토'];
+      const label = i === 0 ? '오늘' : labels[d.getUTCDay()];
+      const active = entries.some((e) => {
+        const raw = e.photos?.taken_at ?? e.created_at;
+        const entryKST = new Date(new Date(raw).getTime() + KST_OFFSET);
+        const eymd = `${entryKST.getUTCFullYear()}-${String(entryKST.getUTCMonth() + 1).padStart(2, '0')}-${String(entryKST.getUTCDate()).padStart(2, '0')}`;
+        return eymd === ymd;
+      });
+      days.push({ label, active, isToday: i === 0 });
+    }
+    return days;
+  })();
+
   // "1년 전 오늘" 메모리 카드 계산
   const memoryEntry = (() => {
     const today = new Date();
@@ -238,6 +259,24 @@ export default function TimelineScreen() {
           ) : null}
         </View>
       </View>
+
+      {/* 7일 활동 스트립 */}
+      {entries.length > 0 && (
+        <View style={styles.weekStrip}>
+          {weekActivity.map((day, i) => (
+            <View key={i} style={styles.weekDay}>
+              <View style={[
+                styles.weekDot,
+                day.active ? styles.weekDotActive : null,
+                day.isToday && !day.active ? styles.weekDotToday : null,
+              ]} />
+              <Text style={[styles.weekLabel, day.isToday ? styles.weekLabelToday : null]}>
+                {day.label}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       {isLoading ? (
         <TimelineSkeletonList />
@@ -437,6 +476,22 @@ const styles = StyleSheet.create({
   datePillPlaceholder: { width: 80 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1, justifyContent: 'flex-end' },
   childName: { fontSize: 15, color: '#555', fontWeight: '500' },
+
+  // 7일 활동 스트립
+  weekStrip: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    paddingHorizontal: 24, paddingVertical: 10,
+    borderBottomWidth: 1, borderBottomColor: '#F0EDE6',
+  },
+  weekDay: { alignItems: 'center', gap: 4 },
+  weekDot: {
+    width: 8, height: 8, borderRadius: 4,
+    backgroundColor: '#EDE9E0',
+  },
+  weekDotActive: { backgroundColor: '#E8735A' },
+  weekDotToday: { borderWidth: 1.5, borderColor: '#E8735A', backgroundColor: 'transparent' },
+  weekLabel: { fontSize: 10, color: '#C8C4BC', fontWeight: '500' },
+  weekLabelToday: { color: '#E8735A', fontWeight: '700' },
 
   // FAB
   fabContainer: {
