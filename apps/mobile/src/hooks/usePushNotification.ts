@@ -23,7 +23,8 @@ export function usePushNotification() {
   const router = useRouter();
 
   useEffect(() => {
-    registerForPushNotifications();
+    // 앱 시작 시: 이미 허용된 경우에만 조용히 토큰 등록 (권한 다이얼로그 표시 안 함)
+    setupIfAlreadyGranted();
   }, []);
 
   // 알림 탭 → 해당 일기 화면으로 이동
@@ -37,7 +38,8 @@ export function usePushNotification() {
   }, [lastResponse, router]);
 }
 
-async function registerForPushNotifications() {
+// 이미 권한이 있을 때만 토큰 등록 (앱 시작 시 호출)
+async function setupIfAlreadyGranted() {
   if (!Device.isDevice) return;
 
   if (Platform.OS === 'android') {
@@ -48,18 +50,32 @@ async function registerForPushNotifications() {
     });
   }
 
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
-
-  if (existingStatus !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
+  const { status } = await Notifications.getPermissionsAsync();
+  if (status === 'granted') {
+    await registerToken();
   }
+}
 
-  if (finalStatus !== 'granted') return;
+// 첫 일기 생성 완료 시점에 호출 — 감동 순간에 권한 요청으로 전환율 극대화
+export async function requestPushPermission(): Promise<boolean> {
+  if (!Device.isDevice) return false;
 
-  // Expo Go에서는 SDK 53+ 이후 원격 푸시 미지원 — Development Build 필요
-  // projectId 없으면 조용히 skip (앱 크래시 방지)
+  const { status: existing } = await Notifications.getPermissionsAsync();
+  if (existing === 'granted') {
+    await registerToken();
+    return true;
+  }
+  if (existing === 'denied') return false; // 이미 거절한 경우 재요청 안 함
+
+  const { status } = await Notifications.requestPermissionsAsync();
+  if (status === 'granted') {
+    await registerToken();
+    return true;
+  }
+  return false;
+}
+
+async function registerToken() {
   try {
     const tokenData = await Notifications.getExpoPushTokenAsync({
       projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID,

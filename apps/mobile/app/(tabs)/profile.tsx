@@ -9,7 +9,7 @@ import Constants from 'expo-constants';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../src/lib/supabase';
 import { useChildStore } from '../../src/stores/childStore';
-import { getAgeText } from '../../src/lib/utils/age';
+import { getAgeText, formatBirthDate } from '../../src/lib/utils/age';
 import { ChildAvatar } from '../../src/components/ChildAvatar';
 import { api } from '../../src/lib/api';
 import { ProfileSkeletonCard } from '../../src/components/Skeleton';
@@ -223,7 +223,7 @@ export default function ProfileScreen() {
               <View style={styles.childInfo}>
                 <Text style={styles.childName}>{activeChild.name}</Text>
                 <Text style={styles.childAge}>{getAgeText(activeChild.birth_date)}</Text>
-                <Text style={styles.childBirth}>{activeChild.birth_date}</Text>
+                <Text style={styles.childBirth}>{formatBirthDate(activeChild.birth_date)}</Text>
               </View>
               <Text style={styles.editHint}>편집 ›</Text>
             </TouchableOpacity>
