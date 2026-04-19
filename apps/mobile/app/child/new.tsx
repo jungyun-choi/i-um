@@ -1,8 +1,9 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
-  Platform, KeyboardAvoidingView, Keyboard, ScrollView, Animated,
+  Platform, KeyboardAvoidingView, Keyboard, ScrollView, Modal, Pressable,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { api } from '../../src/lib/api';
@@ -15,6 +16,20 @@ const GENDERS = [
   { value: 'N', label: '선택 안함', emoji: '🧒' },
 ];
 
+function formatDateKorean(date: Date) {
+  const y = date.getFullYear();
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
+  return `${y}년 ${m}월 ${d}일`;
+}
+
+function dateToString(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 export default function NewChildScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ from?: string }>();
@@ -22,29 +37,26 @@ export default function NewChildScreen() {
   const setChildren = useChildStore((s) => s.setChildren);
   const { showToast } = useToast();
   const [name, setName] = useState('');
-  const [birthDate, setBirthDate] = useState('');
+  const [birthDate, setBirthDate] = useState<Date | null>(null);
+  const [showPicker, setShowPicker] = useState(false);
   const [gender, setGender] = useState('N');
   const [loading, setLoading] = useState(false);
 
-  function formatDateInput(text: string) {
-    const digits = text.replace(/\D/g, '').slice(0, 8);
-    if (digits.length <= 4) return digits;
-    if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
-    return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
-  }
+  const maxDate = new Date();
+  const minDate = new Date(maxDate.getFullYear() - 10, maxDate.getMonth(), maxDate.getDate());
 
   async function handleCreate() {
     if (!name.trim()) {
       showToast('이름을 입력해주세요');
       return;
     }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
-      showToast('생일을 YYYY-MM-DD 형식으로 입력해주세요');
+    if (!birthDate) {
+      showToast('생일을 선택해주세요');
       return;
     }
     setLoading(true);
     try {
-      await api.children.create({ name: name.trim(), birth_date: birthDate, gender });
+      await api.children.create({ name: name.trim(), birth_date: dateToString(birthDate!), gender });
       const children = await api.children.list();
       setChildren(children);
 
@@ -115,17 +127,48 @@ export default function NewChildScreen() {
           />
 
           <Text style={styles.label}>생일</Text>
-          <TextInput
-            style={styles.input}
-            value={birthDate}
-            onChangeText={(t) => setBirthDate(formatDateInput(t))}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor="#CCC"
-            keyboardType="numeric"
-            maxLength={10}
-            returnKeyType="done"
-            onSubmitEditing={() => Keyboard.dismiss()}
-          />
+          <TouchableOpacity
+            style={[styles.input, styles.dateBtn]}
+            onPress={() => { Keyboard.dismiss(); setShowPicker(true); }}
+            activeOpacity={0.75}
+          >
+            <Text style={birthDate ? styles.dateBtnText : styles.dateBtnPlaceholder}>
+              {birthDate ? formatDateKorean(birthDate) : '날짜를 선택해주세요'}
+            </Text>
+            <Text style={styles.dateBtnIcon}>📅</Text>
+          </TouchableOpacity>
+
+          {/* iOS: 모달 시트 / Android: 인라인 */}
+          {Platform.OS === 'ios' ? (
+            <Modal visible={showPicker} transparent animationType="slide">
+              <Pressable style={styles.pickerBackdrop} onPress={() => setShowPicker(false)} />
+              <View style={styles.pickerSheet}>
+                <View style={styles.pickerHeader}>
+                  <TouchableOpacity onPress={() => setShowPicker(false)}>
+                    <Text style={styles.pickerDone}>완료</Text>
+                  </TouchableOpacity>
+                </View>
+                <DateTimePicker
+                  value={birthDate ?? new Date()}
+                  mode="date"
+                  display="spinner"
+                  onChange={(_, date) => { if (date) setBirthDate(date); }}
+                  maximumDate={maxDate}
+                  minimumDate={minDate}
+                  locale="ko"
+                />
+              </View>
+            </Modal>
+          ) : showPicker && (
+            <DateTimePicker
+              value={birthDate ?? new Date()}
+              mode="date"
+              display="default"
+              onChange={(_, date) => { setShowPicker(false); if (date) setBirthDate(date); }}
+              maximumDate={maxDate}
+              minimumDate={minDate}
+            />
+          )}
 
           <Text style={styles.label}>성별</Text>
           <View style={styles.genderRow}>
@@ -186,6 +229,20 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderColor: '#E8E4DC', borderRadius: 14,
     padding: 15, fontSize: 16, backgroundColor: '#fff', color: '#1A1A1A',
   },
+  dateBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  dateBtnText: { fontSize: 16, color: '#1A1A1A' },
+  dateBtnPlaceholder: { fontSize: 16, color: '#CCC' },
+  dateBtnIcon: { fontSize: 18 },
+  pickerBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' },
+  pickerSheet: {
+    backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    paddingBottom: 32,
+  },
+  pickerHeader: {
+    flexDirection: 'row', justifyContent: 'flex-end',
+    paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8,
+  },
+  pickerDone: { fontSize: 16, color: '#E8735A', fontWeight: '700' },
 
   genderRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
   genderBtn: {

@@ -309,6 +309,19 @@ export default function UploadScreen() {
                 <Text style={styles.confirmBtnText}>일기 바로 보기 →</Text>
               </TouchableOpacity>
             </View>
+            <TouchableOpacity
+              style={styles.addMoreBtn}
+              onPress={() => {
+                setDiaryResult(null);
+                setPhotos([]);
+                slideAnim.setValue(SCREEN_H);
+                queryClient.invalidateQueries({ queryKey: ['timeline', activeChild?.id] });
+                pickPhotos();
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.addMoreBtnText}>📸 또 다른 순간 기록하기</Text>
+            </TouchableOpacity>
           </Animated.View>
         </Modal>
       )}
@@ -391,6 +404,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16, alignItems: 'center',
   },
   confirmBtnSecondaryText: { color: '#888', fontSize: 15, fontWeight: '600' },
+  addMoreBtnText: { fontSize: 14, color: '#E8735A', fontWeight: '500' },
   confirmBtn: {
     flex: 2, backgroundColor: '#E8735A', borderRadius: 14,
     paddingVertical: 16, alignItems: 'center',
