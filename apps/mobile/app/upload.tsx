@@ -30,10 +30,14 @@ interface SelectedPhoto {
 
 type DiaryStyle = 'emotional' | 'factual';
 
-interface DiaryResult {
+interface DiaryResultBase {
   id: string;
   content: string;
   milestone: string | null;
+}
+
+interface DiaryResult extends DiaryResultBase {
+  totalCount: number;
 }
 
 export default function UploadScreen() {
@@ -102,7 +106,7 @@ export default function UploadScreen() {
       setPhotos(selected);
   }
 
-  function pollDiary(photoId: string): Promise<DiaryResult> {
+  function pollDiary(photoId: string): Promise<DiaryResultBase> {
     return new Promise((resolve, reject) => {
       let attempts = 0;
       const timer = setInterval(async () => {
@@ -173,11 +177,11 @@ export default function UploadScreen() {
 
       setGeneratingText('AI가 일기를 쓰는 중...');
 
-      // Poll last photo's diary (most recent one for UX)
+      // Poll last photo's diary; others process in background
       const lastPhotoId = photoIds[photoIds.length - 1];
       const result = await pollDiary(lastPhotoId);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      showDiaryModal(result);
+      showDiaryModal({ ...result, totalCount: photoIds.length });
       // First-diary push prompt — ask once, at the highest-motivation moment
       const asked = await AsyncStorage.getItem('push_prompt_shown');
       if (!asked) {
@@ -285,7 +289,14 @@ export default function UploadScreen() {
             <View style={styles.sheetHandle} />
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetEmoji}>✨</Text>
-              <Text style={styles.sheetTitle}>일기가 완성됐어요!</Text>
+              <Text style={styles.sheetTitle}>
+                {diaryResult.totalCount > 1
+                  ? `${diaryResult.totalCount}개 일기가 생성됐어요!`
+                  : '일기가 완성됐어요!'}
+              </Text>
+              {diaryResult.totalCount > 1 && (
+                <Text style={styles.sheetSubtitle}>마지막 일기 미리보기예요</Text>
+              )}
               {diaryResult.milestone && (
                 <View style={styles.milestoneBadge}>
                   <Text style={styles.milestoneText}>🎉 {diaryResult.milestone}</Text>
@@ -303,10 +314,16 @@ export default function UploadScreen() {
                 style={styles.confirmBtn}
                 onPress={() => {
                   closeDiaryModal();
-                  if (diaryResult?.id) router.push(`/diary/${diaryResult.id}`);
+                  if (diaryResult.totalCount > 1) {
+                    // Multiple diaries — go to timeline to see all
+                  } else if (diaryResult?.id) {
+                    router.push(`/diary/${diaryResult.id}`);
+                  }
                 }}
               >
-                <Text style={styles.confirmBtnText}>일기 바로 보기 →</Text>
+                <Text style={styles.confirmBtnText}>
+                  {diaryResult.totalCount > 1 ? '타임라인에서 모두 보기 →' : '일기 바로 보기 →'}
+                </Text>
               </TouchableOpacity>
             </View>
             <TouchableOpacity
@@ -388,6 +405,7 @@ const styles = StyleSheet.create({
   sheetHeader: { alignItems: 'center', gap: 6, marginBottom: 20 },
   sheetEmoji: { fontSize: 40 },
   sheetTitle: { fontSize: 20, fontWeight: '700', color: '#1A1A1A' },
+  sheetSubtitle: { fontSize: 13, color: '#AAA', marginTop: 2 },
   milestoneBadge: {
     backgroundColor: '#FFF0EC', borderRadius: 20,
     paddingVertical: 4, paddingHorizontal: 14, marginTop: 4,

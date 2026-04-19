@@ -187,6 +187,33 @@ export default function ProfileScreen() {
           <ProfileSkeletonCard />
         ) : activeChild ? (
           <>
+            {/* 가족 공유 섹션 — 바이럴 루프 핵심 CTA, 최상단 배치 */}
+            <View style={styles.shareSection}>
+              <View style={styles.shareSectionTop}>
+                <View>
+                  <Text style={styles.shareSectionTitle}>함께 보면 더 특별해요</Text>
+                  <Text style={styles.shareSectionDesc}>파트너·조부모님도{'\n'}같이 볼 수 있어요 💑</Text>
+                </View>
+                <Text style={styles.shareSectionEmoji}>👨‍👩‍👧</Text>
+              </View>
+              <TouchableOpacity
+                style={[styles.shareBtnPrimary, inviting ? styles.shareBtnDisabled : null]}
+                onPress={handleInvite}
+                disabled={inviting}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.shareBtnPrimaryIcon}>🔗</Text>
+                <Text style={styles.shareBtnPrimaryText}>{inviting ? '초대 링크 생성 중...' : '가족 초대하기'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.joinCodeBtn}
+                onPress={() => setShowJoinModal(true)}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.joinCodeBtnText}>받은 초대 코드 입력하기</Text>
+              </TouchableOpacity>
+            </View>
+
             {/* 아이 프로필 카드 */}
             <TouchableOpacity
               style={styles.childCard}
@@ -211,31 +238,6 @@ export default function ProfileScreen() {
                 <StatBox value={formatRecordPeriod(stats.first_entry_date)} label="기록 중" />
               </View>
             )}
-
-            {/* 가족 공유 섹션 */}
-            <View style={styles.shareSection}>
-              <Text style={styles.shareSectionTitle}>가족과 함께 보기</Text>
-              <Text style={styles.shareSectionDesc}>파트너나 조부모님도 함께 볼 수 있어요</Text>
-              <View style={styles.shareButtons}>
-                <TouchableOpacity
-                  style={[styles.shareBtn, inviting ? styles.shareBtnDisabled : null]}
-                  onPress={handleInvite}
-                  disabled={inviting}
-                  activeOpacity={0.85}
-                >
-                  <Text style={styles.shareBtnIcon}>🔗</Text>
-                  <Text style={styles.shareBtnText}>{inviting ? '생성 중...' : '초대 보내기'}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.shareBtn, styles.shareBtnSecondary]}
-                  onPress={() => setShowJoinModal(true)}
-                  activeOpacity={0.85}
-                >
-                  <Text style={styles.shareBtnIcon}>🎟</Text>
-                  <Text style={[styles.shareBtnText, styles.shareBtnTextSecondary]}>코드로 참여하기</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
           </>
         ) : (
           <TouchableOpacity style={styles.addChildBtn} onPress={() => router.push('/child/new')}>
@@ -343,24 +345,26 @@ const styles = StyleSheet.create({
 
   // 가족 공유
   shareSection: {
-    backgroundColor: '#fff', marginHorizontal: 16, marginBottom: 16,
+    backgroundColor: '#FEF3EC', marginHorizontal: 16, marginBottom: 16,
     borderRadius: 20, padding: 20,
-    shadowColor: '#000', shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06, shadowRadius: 8, elevation: 2,
+    borderWidth: 1, borderColor: '#F5D5C5',
   },
-  shareSectionTitle: { fontSize: 16, fontWeight: '700', color: '#1A1A1A', marginBottom: 4 },
-  shareSectionDesc: { fontSize: 13, color: '#888', marginBottom: 16 },
-  shareButtons: { flexDirection: 'row', gap: 10 },
-  shareBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    backgroundColor: '#E8735A', borderRadius: 12,
-    paddingVertical: 12,
+  shareSectionTop: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 },
+  shareSectionTitle: { fontSize: 17, fontWeight: '700', color: '#2A1A10', marginBottom: 6 },
+  shareSectionDesc: { fontSize: 14, color: '#885040', lineHeight: 20 },
+  shareSectionEmoji: { fontSize: 40 },
+  shareBtnPrimary: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: '#E8735A', borderRadius: 14,
+    paddingVertical: 14, marginBottom: 10,
   },
-  shareBtnSecondary: { backgroundColor: '#F5F2EC' },
+  shareBtnPrimaryIcon: { fontSize: 16 },
+  shareBtnPrimaryText: { fontSize: 15, fontWeight: '700', color: '#fff' },
+  joinCodeBtn: {
+    alignItems: 'center', paddingVertical: 10,
+  },
+  joinCodeBtnText: { fontSize: 13, color: '#C06040', fontWeight: '500', textDecorationLine: 'underline' },
   shareBtnDisabled: { opacity: 0.6 },
-  shareBtnIcon: { fontSize: 16 },
-  shareBtnText: { fontSize: 13, fontWeight: '700', color: '#fff' },
-  shareBtnTextSecondary: { color: '#555' },
 
   section: {
     backgroundColor: '#fff', marginHorizontal: 16, marginBottom: 12,
