@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
-  KeyboardAvoidingView, Platform, ScrollView, Keyboard, ActivityIndicator,
+  KeyboardAvoidingView, Platform, ScrollView, Keyboard, ActivityIndicator, Alert,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -76,6 +76,32 @@ export default function EditChildScreen() {
     } finally {
       setUploadingAvatar(false);
     }
+  }
+
+  function handleDelete() {
+    Alert.alert(
+      `${child?.name} 삭제`,
+      '아이의 모든 일기, 사진, 마일스톤이 삭제됩니다. 되돌릴 수 없어요.',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제', style: 'destructive',
+          onPress: async () => {
+            setLoading(true);
+            try {
+              await api.children.delete(id);
+              const updated = await api.children.list();
+              setChildren(updated);
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              router.replace('/(tabs)/timeline');
+            } catch (e: unknown) {
+              showToast(e instanceof Error ? e.message : '삭제에 실패했어요');
+              setLoading(false);
+            }
+          },
+        },
+      ],
+    );
   }
 
   async function handleSave() {
@@ -181,6 +207,10 @@ export default function EditChildScreen() {
               </TouchableOpacity>
             ))}
           </View>
+
+          <TouchableOpacity style={styles.deleteBtn} onPress={handleDelete} disabled={loading}>
+            <Text style={styles.deleteBtnText}>이 아이 프로필 삭제</Text>
+          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -230,4 +260,7 @@ const styles = StyleSheet.create({
   genderEmoji: { fontSize: 22 },
   genderText: { fontSize: 12, color: '#888', fontWeight: '500' },
   genderTextActive: { color: '#E8735A', fontWeight: '700' },
+
+  deleteBtn: { marginTop: 32, marginBottom: 8, alignItems: 'center', paddingVertical: 12 },
+  deleteBtnText: { fontSize: 14, color: '#C0392B', textDecorationLine: 'underline' },
 });

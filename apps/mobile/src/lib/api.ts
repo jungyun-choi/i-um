@@ -28,6 +28,8 @@ export const api = {
       authFetch(`/children/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
     getAvatarUploadUrl: (id: string) =>
       authFetch(`/children/${id}/avatar-url`, { method: 'POST' }),
+    delete: (id: string) =>
+      authFetch(`/children/${id}`, { method: 'DELETE' }),
   },
   photos: {
     getUploadUrl: (body: { child_id: string; filename: string; taken_at?: string; gps_lat?: number; gps_lng?: number }) =>

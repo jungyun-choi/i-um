@@ -54,6 +54,24 @@ router.patch('/:id', async (req: AuthRequest, res) => {
   res.json(data);
 });
 
+router.delete('/:id', async (req: AuthRequest, res) => {
+  const { data: child } = await supabase
+    .from('children')
+    .select('id')
+    .eq('id', req.params.id)
+    .eq('user_id', req.userId!)
+    .maybeSingle();
+  if (!child) { res.status(403).json({ error: 'Not authorized' }); return; }
+
+  const { error } = await supabase
+    .from('children')
+    .delete()
+    .eq('id', req.params.id)
+    .eq('user_id', req.userId!);
+  if (error) { res.status(500).json({ error: error.message }); return; }
+  res.json({ ok: true });
+});
+
 // 아바타 업로드용 presigned URL 발급
 router.post('/:id/avatar-url', async (req: AuthRequest, res) => {
   const { data: child } = await supabase
