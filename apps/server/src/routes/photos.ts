@@ -54,6 +54,7 @@ router.post('/:id/process', async (req: AuthRequest, res) => {
     takenAt: photo.taken_at,
     gpsLat: photo.gps_lat,
     gpsLng: photo.gps_lng,
+    diaryStyle: req.body.diary_style ?? 'emotional',
   }, { attempts: 3, backoff: { type: 'exponential', delay: 5000 } });
 
   res.json({ status: 'queued' });

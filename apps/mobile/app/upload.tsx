@@ -1,19 +1,32 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  SafeAreaView, Alert, ActivityIndicator,
+  SafeAreaView, Alert, ActivityIndicator, Modal, Animated,
+  Dimensions, Pressable,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { useRouter } from 'expo-router';
 import { api, uploadToS3 } from '../src/lib/api';
 import { useChildStore } from '../src/stores/childStore';
 import { useQueryClient } from '@tanstack/react-query';
 import { PhotoGrid } from '../src/components/PhotoGrid';
 
+const { height: SCREEN_H } = Dimensions.get('window');
+
 interface SelectedPhoto {
   uri: string;
   fileName: string;
   takenAt?: string;
+  gpsLat?: number;
+  gpsLng?: number;
+}
+
+type DiaryStyle = 'emotional' | 'factual';
+
+interface DiaryResult {
+  content: string;
+  milestone: string | null;
 }
 
 export default function UploadScreen() {
@@ -22,6 +35,10 @@ export default function UploadScreen() {
   const activeChild = useChildStore((s) => s.activeChild);
   const [photos, setPhotos] = useState<SelectedPhoto[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [style, setStyle] = useState<DiaryStyle>('emotional');
+  const [generatingText, setGeneratingText] = useState('');
+  const [diaryResult, setDiaryResult] = useState<DiaryResult | null>(null);
+  const slideAnim = useRef(new Animated.Value(SCREEN_H)).current;
 
   async function pickPhotos() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -36,36 +53,113 @@ export default function UploadScreen() {
       exif: true,
     });
     if (!result.canceled) {
-      const selected = result.assets.map((a) => ({
-        uri: a.uri,
-        fileName: a.fileName ?? `photo_${Date.now()}.jpg`,
-        takenAt: a.exif?.DateTimeOriginal
-          ? new Date(a.exif.DateTimeOriginal.replace(/(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3')).toISOString()
-          : undefined,
+      const selected = await Promise.all(result.assets.map(async (a) => {
+        const compressed = await ImageManipulator.manipulateAsync(
+          a.uri,
+          [{ resize: { width: 1280 } }],
+          { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+        );
+        const baseName = (a.fileName ?? `photo_${Date.now()}`).replace(/\.[^.]+$/, '');
+        // GPS: iOS EXIF는 decimal degrees로 옴
+        const rawLat = a.exif?.GPSLatitude as number | undefined;
+        const rawLng = a.exif?.GPSLongitude as number | undefined;
+        const latRef = a.exif?.GPSLatitudeRef as string | undefined;
+        const lngRef = a.exif?.GPSLongitudeRef as string | undefined;
+        const gpsLat = rawLat != null ? (latRef === 'S' ? -rawLat : rawLat) : undefined;
+        const gpsLng = rawLng != null ? (lngRef === 'W' ? -rawLng : rawLng) : undefined;
+
+        return {
+          uri: compressed.uri,
+          fileName: `${baseName}.jpg`,
+          takenAt: (() => {
+            const raw = a.exif?.DateTimeOriginal ?? a.exif?.DateTime;
+            if (!raw) return undefined;
+            try {
+              return new Date(String(raw).replace(/(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3')).toISOString();
+            } catch { return undefined; }
+          })(),
+          gpsLat,
+          gpsLng,
+        };
       }));
       setPhotos(selected);
     }
   }
 
+  function pollDiary(photoId: string): Promise<DiaryResult> {
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      const timer = setInterval(async () => {
+        attempts++;
+        try {
+          const data = await api.photos.getDiary(photoId);
+          if (data.status === 'done') {
+            clearInterval(timer);
+            resolve({ content: data.content, milestone: data.milestone ?? null });
+          } else if (data.status === 'failed' || attempts > 60) {
+            clearInterval(timer);
+            reject(new Error('일기 생성에 실패했어요'));
+          }
+        } catch {
+          clearInterval(timer);
+          reject(new Error('일기 상태 확인 실패'));
+        }
+      }, 2000);
+    });
+  }
+
+  function showDiaryModal(result: DiaryResult) {
+    setDiaryResult(result);
+    Animated.spring(slideAnim, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 65,
+      friction: 11,
+    }).start();
+  }
+
+  function closeDiaryModal() {
+    Animated.timing(slideAnim, {
+      toValue: SCREEN_H,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+      setDiaryResult(null);
+      queryClient.invalidateQueries({ queryKey: ['timeline', activeChild?.id] });
+      router.back();
+    });
+  }
+
   async function handleUpload() {
     if (!activeChild || photos.length === 0) return;
     setUploading(true);
+    setGeneratingText('사진 업로드 중...');
     try {
+      const photoIds: string[] = [];
       for (const photo of photos) {
         const { upload_url, photo_id } = await api.photos.getUploadUrl({
           child_id: activeChild.id,
           filename: photo.fileName,
           taken_at: photo.takenAt,
+          gps_lat: photo.gpsLat,
+          gps_lng: photo.gpsLng,
         });
         await uploadToS3(upload_url, photo.uri);
-        await api.photos.process(photo_id);
+        await api.photos.process(photo_id, { diary_style: style });
+        photoIds.push(photo_id);
       }
-      queryClient.invalidateQueries({ queryKey: ['timeline', activeChild.id] });
-      router.back();
+
+      setGeneratingText('AI가 일기를 쓰는 중...');
+
+      // Poll last photo's diary (most recent one for UX)
+      const lastPhotoId = photoIds[photoIds.length - 1];
+      const result = await pollDiary(lastPhotoId);
+      showDiaryModal(result);
     } catch (e: unknown) {
-      Alert.alert('업로드 실패', e instanceof Error ? e.message : '다시 시도해주세요.');
+      Alert.alert('오류', e instanceof Error ? e.message : '다시 시도해주세요.');
     } finally {
       setUploading(false);
+      setGeneratingText('');
     }
   }
 
@@ -96,6 +190,29 @@ export default function UploadScreen() {
             />
           </ScrollView>
           <View style={styles.footer}>
+            {/* 일기 스타일 토글 */}
+            <View style={styles.styleContainer}>
+              <Text style={styles.styleLabel}>일기 스타일</Text>
+              <View style={styles.stylePills}>
+                <TouchableOpacity
+                  style={[styles.pill, style === 'emotional' && styles.pillActive]}
+                  onPress={() => setStyle('emotional')}
+                >
+                  <Text style={[styles.pillText, style === 'emotional' && styles.pillTextActive]}>
+                    감성적
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.pill, style === 'factual' && styles.pillActive]}
+                  onPress={() => setStyle('factual')}
+                >
+                  <Text style={[styles.pillText, style === 'factual' && styles.pillTextActive]}>
+                    사실 위주
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
             <TouchableOpacity style={styles.addMoreBtn} onPress={pickPhotos}>
               <Text style={styles.addMoreText}>+ 더 추가</Text>
             </TouchableOpacity>
@@ -105,13 +222,41 @@ export default function UploadScreen() {
               disabled={uploading}
             >
               {uploading ? (
-                <ActivityIndicator color="#fff" />
+                <View style={styles.uploadingRow}>
+                  <ActivityIndicator color="#fff" size="small" />
+                  <Text style={styles.uploadingText}>{generatingText}</Text>
+                </View>
               ) : (
                 <Text style={styles.uploadBtnText}>AI 일기 생성하기 ({photos.length}장)</Text>
               )}
             </TouchableOpacity>
           </View>
         </>
+      )}
+
+      {/* 일기 완성 모달 */}
+      {diaryResult && (
+        <Modal transparent animationType="none">
+          <Pressable style={styles.backdrop} onPress={closeDiaryModal} />
+          <Animated.View style={[styles.sheet, { transform: [{ translateY: slideAnim }] }]}>
+            <View style={styles.sheetHandle} />
+            <View style={styles.sheetHeader}>
+              <Text style={styles.sheetEmoji}>✨</Text>
+              <Text style={styles.sheetTitle}>일기가 완성됐어요!</Text>
+              {diaryResult.milestone && (
+                <View style={styles.milestoneBadge}>
+                  <Text style={styles.milestoneText}>🎉 {diaryResult.milestone}</Text>
+                </View>
+              )}
+            </View>
+            <ScrollView style={styles.diaryScroll} showsVerticalScrollIndicator={false}>
+              <Text style={styles.diaryContent}>{diaryResult.content}</Text>
+            </ScrollView>
+            <TouchableOpacity style={styles.confirmBtn} onPress={closeDiaryModal}>
+              <Text style={styles.confirmBtnText}>타임라인에서 보기</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </Modal>
       )}
     </SafeAreaView>
   );
@@ -134,6 +279,19 @@ const styles = StyleSheet.create({
   },
   pickBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   footer: { padding: 16, gap: 12 },
+  styleContainer: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingVertical: 4,
+  },
+  styleLabel: { fontSize: 14, color: '#555', fontWeight: '500' },
+  stylePills: { flexDirection: 'row', gap: 8 },
+  pill: {
+    paddingVertical: 6, paddingHorizontal: 16, borderRadius: 20,
+    backgroundColor: '#F0EDE6', borderWidth: 1, borderColor: 'transparent',
+  },
+  pillActive: { backgroundColor: '#FFF0EC', borderColor: '#E8735A' },
+  pillText: { fontSize: 14, color: '#888', fontWeight: '500' },
+  pillTextActive: { color: '#E8735A' },
   addMoreBtn: {
     backgroundColor: '#F5F2EC', borderRadius: 12,
     paddingVertical: 12, alignItems: 'center',
@@ -145,4 +303,35 @@ const styles = StyleSheet.create({
   },
   btnDisabled: { opacity: 0.6 },
   uploadBtnText: { color: '#fff', fontSize: 17, fontWeight: '600' },
+  uploadingRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  uploadingText: { color: '#fff', fontSize: 15, fontWeight: '500' },
+  // Modal
+  backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.45)' },
+  sheet: {
+    position: 'absolute', bottom: 0, left: 0, right: 0,
+    backgroundColor: '#FFFDF8', borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    paddingHorizontal: 24, paddingBottom: 40, maxHeight: SCREEN_H * 0.75,
+  },
+  sheetHandle: {
+    width: 40, height: 4, borderRadius: 2, backgroundColor: '#DDD',
+    alignSelf: 'center', marginTop: 12, marginBottom: 20,
+  },
+  sheetHeader: { alignItems: 'center', gap: 6, marginBottom: 20 },
+  sheetEmoji: { fontSize: 40 },
+  sheetTitle: { fontSize: 20, fontWeight: '700', color: '#1A1A1A' },
+  milestoneBadge: {
+    backgroundColor: '#FFF0EC', borderRadius: 20,
+    paddingVertical: 4, paddingHorizontal: 14, marginTop: 4,
+  },
+  milestoneText: { fontSize: 13, color: '#E8735A', fontWeight: '600' },
+  diaryScroll: { marginBottom: 20 },
+  diaryContent: {
+    fontSize: 16, lineHeight: 26, color: '#333',
+    backgroundColor: '#F9F6F0', borderRadius: 16, padding: 20,
+  },
+  confirmBtn: {
+    backgroundColor: '#E8735A', borderRadius: 14,
+    paddingVertical: 16, alignItems: 'center',
+  },
+  confirmBtnText: { color: '#fff', fontSize: 17, fontWeight: '600' },
 });

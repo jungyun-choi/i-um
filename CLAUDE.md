@@ -5,6 +5,26 @@ Claude Code는 이 파일을 읽고 wiki를 일관되게 유지합니다.
 
 ---
 
+## API 키 위치
+
+새 세션에서 환경변수 설정 시 참고:
+
+| 키 | 위치 |
+|----|------|
+| `ANTHROPIC_API_KEY` | `~/.zshrc` (export로 등록됨) |
+| `SUPABASE_URL` / `SUPABASE_SERVICE_KEY` | `apps/server/.env` (실제값 적용 완료) |
+| `SUPABASE_ANON_KEY` | `apps/mobile/.env` (실제값 적용 완료) |
+| `R2_ENDPOINT` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | `/Users/jungyun.choi/Dev/planeat-new/backend/scripts/upload_to_r2.py` 상단 하드코딩 |
+| `GEMINI_API_KEY` | `/Users/jungyun.choi/Dev/planeat-new/backend/.env` |
+| `REPLICATE_API_TOKEN` | `/Users/jungyun.choi/Dev/planeat-new/backend/.env` |
+| `KAKAO_REST_API_KEY` | 미발급 (Kakao Developers에서 신규 발급 필요) |
+| `REDIS_URL` | 미설정 (`brew install redis` 후 `redis://localhost:6379`) |
+
+> **주의**: `.env` 파일은 `.gitignore`에 포함되어 있어 git에 커밋되지 않음.
+> 서버 재시작 전 항상 `apps/server/.env` 확인 필요.
+
+---
+
 ## 프로젝트 개요
 
 **이음(i-um)**은 AI 기반 제로에포트 육아 기록 앱입니다.

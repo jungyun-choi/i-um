@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
-  SafeAreaView, Alert, Platform,
+  SafeAreaView, Alert, Platform, KeyboardAvoidingView, Keyboard, ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { api } from '../../src/lib/api';
@@ -46,7 +46,8 @@ export default function NewChildScreen() {
       setChildren(children);
       router.replace('/(tabs)/timeline');
     } catch (e: unknown) {
-      Alert.alert('실패', e instanceof Error ? e.message : '다시 시도해주세요.');
+      const msg = e instanceof Error ? e.message : String(e);
+      Alert.alert('실패', msg || '다시 시도해주세요.');
     } finally {
       setLoading(false);
     }
@@ -62,52 +63,63 @@ export default function NewChildScreen() {
         <View style={{ width: 40 }} />
       </View>
 
-      <View style={styles.form}>
-        <Text style={styles.label}>이름</Text>
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-          placeholder="아이 이름"
-          placeholderTextColor="#CCC"
-        />
-
-        <Text style={styles.label}>생일</Text>
-        <TextInput
-          style={styles.input}
-          value={birthDate}
-          onChangeText={(t) => setBirthDate(formatDateInput(t))}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor="#CCC"
-          keyboardType="numeric"
-          maxLength={10}
-        />
-
-        <Text style={styles.label}>성별</Text>
-        <View style={styles.genderRow}>
-          {GENDERS.map((g) => (
-            <TouchableOpacity
-              key={g.value}
-              style={[styles.genderBtn, gender === g.value && styles.genderBtnActive]}
-              onPress={() => setGender(g.value)}
-            >
-              <Text style={[styles.genderText, gender === g.value && styles.genderTextActive]}>
-                {g.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.footer}>
-        <TouchableOpacity
-          style={[styles.createBtn, loading && styles.btnDisabled]}
-          onPress={handleCreate}
-          disabled={loading}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+        <ScrollView
+          contentContainerStyle={styles.form}
+          keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.createBtnText}>{loading ? '생성 중...' : '시작하기'}</Text>
-        </TouchableOpacity>
-      </View>
+          <Text style={styles.label}>이름</Text>
+          <TextInput
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
+            placeholder="아이 이름"
+            placeholderTextColor="#CCC"
+            returnKeyType="next"
+          />
+
+          <Text style={styles.label}>생일</Text>
+          <TextInput
+            style={styles.input}
+            value={birthDate}
+            onChangeText={(t) => setBirthDate(formatDateInput(t))}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor="#CCC"
+            keyboardType="numeric"
+            maxLength={10}
+            returnKeyType="done"
+            onSubmitEditing={() => Keyboard.dismiss()}
+          />
+
+          <Text style={styles.label}>성별</Text>
+          <View style={styles.genderRow}>
+            {GENDERS.map((g) => (
+              <TouchableOpacity
+                key={g.value}
+                style={[styles.genderBtn, gender === g.value && styles.genderBtnActive]}
+                onPress={() => { Keyboard.dismiss(); setGender(g.value); }}
+              >
+                <Text style={[styles.genderText, gender === g.value && styles.genderTextActive]}>
+                  {g.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <View style={styles.footer}>
+            <TouchableOpacity
+              style={[styles.createBtn, loading && styles.btnDisabled]}
+              onPress={handleCreate}
+              disabled={loading}
+            >
+              <Text style={styles.createBtnText}>{loading ? '생성 중...' : '시작하기'}</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -120,7 +132,7 @@ const styles = StyleSheet.create({
   },
   cancel: { fontSize: 16, color: '#888' },
   title: { fontSize: 17, fontWeight: '600', color: '#1A1A1A' },
-  form: { flex: 1, padding: 24, gap: 8 },
+  form: { padding: 24, gap: 8, flexGrow: 1 },
   label: { fontSize: 14, fontWeight: '500', color: '#555', marginTop: 16 },
   input: {
     borderWidth: 1, borderColor: '#E5E5E5', borderRadius: 12,
@@ -134,7 +146,7 @@ const styles = StyleSheet.create({
   genderBtnActive: { borderColor: '#E8735A', backgroundColor: '#FFF0ED' },
   genderText: { fontSize: 14, color: '#888' },
   genderTextActive: { color: '#E8735A', fontWeight: '600' },
-  footer: { padding: 24 },
+  footer: { paddingTop: 32, paddingBottom: 8 },
   createBtn: {
     backgroundColor: '#E8735A', borderRadius: 14,
     paddingVertical: 16, alignItems: 'center',

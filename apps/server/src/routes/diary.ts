@@ -27,6 +27,30 @@ router.patch('/:id', async (req: AuthRequest, res) => {
   res.json(data);
 });
 
+router.delete('/:id', async (req: AuthRequest, res) => {
+  // 일기와 연결된 photo_id 먼저 조회
+  const { data: entry, error: fetchErr } = await supabase
+    .from('diary_entries')
+    .select('photo_id')
+    .eq('id', req.params.id)
+    .single();
+
+  if (fetchErr || !entry) { res.status(404).json({ error: 'Not found' }); return; }
+
+  // diary_entries 삭제 (photos는 cascade)
+  const { error } = await supabase
+    .from('diary_entries')
+    .delete()
+    .eq('id', req.params.id);
+
+  if (error) { res.status(400).json({ error: error.message }); return; }
+
+  // 연결된 photo 레코드도 삭제
+  await supabase.from('photos').delete().eq('id', entry.photo_id);
+
+  res.json({ ok: true });
+});
+
 router.get('/timeline/:childId', async (req: AuthRequest, res) => {
   const { cursor, limit = '20' } = req.query;
   let query = supabase

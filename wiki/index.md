@@ -40,6 +40,7 @@
 |--------|------|
 | [market-landscape.md](topics/market-landscape.md) | 육아 기록 앱 시장 전체 지형도, 트렌드, TAM 추정 |
 | [ium-differentiation.md](topics/ium-differentiation.md) | 이음의 3가지 핵심 차별점 및 포지셔닝 분석 |
+| [dev-environment.md](topics/dev-environment.md) | 개발 환경 설정, 기술 스택 확정, 남은 TODO |
 
 ---
 
@@ -48,12 +49,14 @@
 | 페이지 | 유형 | 날짜 |
 |--------|------|------|
 | [competitor-comparison.md](analysis/competitor-comparison.md) | 비교 분석 | 2026-04-19 |
+| [decision-2026-04-19-tech-setup.md](analysis/decision-2026-04-19-tech-setup.md) | 기술 결정 4건 | 2026-04-19 |
 
 ---
 
 ## 통계
 
 - 총 소스: 0 (웹 리서치)
-- 총 wiki 페이지: 9
+- 총 wiki 페이지: 11
 - 마지막 ingest: 2026-04-19 (시장조사)
+- 마지막 decision: 2026-04-19 (실기기 셋업)
 - 마지막 lint: —

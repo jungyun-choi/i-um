@@ -5,6 +5,17 @@
 
 ---
 
+## [2026-04-19] feat | MVP 실기기 테스트 셋업 완료
+
+- Expo Go Fabric 에러 해결: `<Stack>`/`<Tabs>` → `<Slot>` 전환
+- Supabase DB 스키마 적용 (Management API PAT 방식, IPv6 환경 우회)
+- Cloudflare R2 연동 (cookly-meal 버킷, i-um/ 프리픽스)
+- Claude 모델 Opus → Haiku 변경 (비용 절감)
+- 서버 환경 변수 실제값 적용 및 재시작
+- 회원가입 → 아이 프로필 생성까지 동작 확인
+- 남은 항목: ANTHROPIC_API_KEY, Redis, 사진 업로드 E2E 테스트
+- 관련 문서: [[wiki/analysis/decision-2026-04-19-tech-setup.md]], [[wiki/topics/dev-environment.md]]
+
 ## [2026-04-19] ingest | 시장조사 완료 — 육아 기록 앱 경쟁사 10개 분석
 
 - 조사 앱: FamilyAlbum, Tinybeans, Google Photos, Apple Photos, Glow Baby, 쑥쑥찰칵, 베이비타임, 베이비빌리, 23snaps, Lifecake(종료)
@@ -95,4 +106,14 @@
 
 - 커밋: `1de329e` by jy.choi
 - 변경 파일 수: 1
+  - apps/mobile/metro.config.js
+
+## [2026-04-19] commit | fix: Expo Go 호환성 수정 — 앱 렌더링 성공
+
+- 커밋: `a77f7b9` by jy.choi
+- 변경 파일 수: 9
+  - apps/mobile/app.json
+  - apps/mobile/app/(auth)/_layout.tsx
+  - apps/mobile/app/_layout.tsx
+  - apps/mobile/babel.config.js
   - apps/mobile/metro.config.js

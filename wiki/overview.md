@@ -59,13 +59,18 @@ LLM (감성 일기 생성)
 - [x] 프로젝트 아이디어 구체화
 - [x] GitHub 저장소 생성 (https://github.com/jungyun-choi/i-um)
 - [x] LLM Wiki 셋업
-- [x] 기술 스택 확정 (React Native + Expo, Node.js + Express, Supabase, AWS S3, Claude API)
+- [x] 기술 스택 확정 (React Native + Expo, Node.js + Express, Supabase, Cloudflare R2, Claude Haiku)
 - [x] 시장 조사 및 경쟁 앱 분석 완료 (10개 앱)
 - [x] MVP 기능 정의 (Plan 문서 완료)
 - [x] 시스템 설계 완료 (Design 문서: ERD, API, 화면 설계)
 - [x] Phase 1 서버 구현 완료 (Express API, Bull Queue, Claude 일기 생성 Worker)
 - [x] Phase 1 모바일 구현 완료 (Expo Router, 인증, 업로드, 타임라인, 일기, 마일스톤)
-- [ ] 환경 변수 설정 및 실기기 테스트
+- [x] Supabase DB 스키마 적용 완료 (4개 테이블 + RLS)
+- [x] 서버 환경 변수 설정 (Supabase, R2)
+- [x] Expo Go 실기기 테스트 — 회원가입·로그인·아이 프로필 생성 동작 확인
+- [ ] ANTHROPIC_API_KEY 설정 → AI 일기 생성 테스트
+- [ ] Redis 설정 → Bull Queue 워커 활성화
+- [ ] 사진 업로드 → AI 일기 전체 플로우 E2E 테스트
 - [ ] Phase 2: 하이라이트 영상, 푸시 알림
 - [ ] Phase 3: 베타 테스트 (TestFlight)
 

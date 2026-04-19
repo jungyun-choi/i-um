@@ -15,10 +15,11 @@ interface DiaryJob {
   takenAt: string;
   gpsLat: number | null;
   gpsLng: number | null;
+  diaryStyle: 'emotional' | 'factual';
 }
 
 diaryQueue.process(async (job) => {
-  const { photoId, childId, s3Key, takenAt, gpsLat, gpsLng }: DiaryJob = job.data;
+  const { photoId, childId, s3Key, takenAt, gpsLat, gpsLng, diaryStyle }: DiaryJob = job.data;
 
   await supabase
     .from('diary_entries')
@@ -48,6 +49,7 @@ diaryQueue.process(async (job) => {
     locationName,
     milestone,
     imageBase64,
+    style: diaryStyle ?? 'emotional',
   });
 
   const { data: diary } = await supabase

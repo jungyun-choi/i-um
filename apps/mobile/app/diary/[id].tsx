@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, SafeAreaView,
-  TouchableOpacity, Image, Alert, TextInput,
+  TouchableOpacity, Image, Alert, TextInput, Dimensions,
 } from 'react-native';
+
+const SCREEN_W = Dimensions.get('window').width;
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../src/lib/api';
@@ -40,6 +42,30 @@ export default function DiaryDetailScreen() {
     onError: () => Alert.alert('저장 실패', '다시 시도해주세요.'),
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: () => api.diary.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['timeline'] });
+      router.back();
+    },
+    onError: () => Alert.alert('삭제 실패', '다시 시도해주세요.'),
+  });
+
+  function confirmDelete() {
+    Alert.alert('일기 삭제', '이 일기를 삭제할까요? 사진도 함께 삭제됩니다.', [
+      { text: '취소', style: 'cancel' },
+      { text: '삭제', style: 'destructive', onPress: () => deleteMutation.mutate() },
+    ]);
+  }
+
+  function showOptions() {
+    Alert.alert('', '', [
+      { text: '편집', onPress: startEdit },
+      { text: '삭제', style: 'destructive', onPress: confirmDelete },
+      { text: '취소', style: 'cancel' },
+    ]);
+  }
+
   if (isLoading || !current) {
     return <DiaryGenerating />;
   }
@@ -65,8 +91,8 @@ export default function DiaryDetailScreen() {
         </TouchableOpacity>
         <Text style={styles.date}>{dateStr}</Text>
         {!editing && (
-          <TouchableOpacity onPress={startEdit}>
-            <Text style={styles.editBtn}>편집</Text>
+          <TouchableOpacity onPress={showOptions} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Text style={styles.editBtn}>···</Text>
           </TouchableOpacity>
         )}
         {editing && (
@@ -81,7 +107,14 @@ export default function DiaryDetailScreen() {
           <Image
             source={{ uri: `${S3_BASE}/${photo.s3_key}` }}
             style={styles.photo}
-            resizeMode="cover"
+            resizeMode="contain"
+            onLoad={(e) => {
+              const { width, height } = e.nativeEvent.source;
+              if (width && height) {
+                const ratio = height / width;
+                e.target.setNativeProps({ style: { height: SCREEN_W * ratio } });
+              }
+            }}
           />
         )}
 
@@ -124,7 +157,7 @@ const styles = StyleSheet.create({
   date: { fontSize: 16, fontWeight: '600', color: '#1A1A1A' },
   editBtn: { fontSize: 16, color: '#E8735A' },
   saveBtn: { fontSize: 16, color: '#E8735A', fontWeight: '600' },
-  photo: { width: '100%', height: 320 },
+  photo: { width: SCREEN_W, height: SCREEN_W, backgroundColor: '#F5F2EC' },
   body: { padding: 20 },
   milestoneBadge: {
     fontSize: 16, fontWeight: '600', color: '#E8735A',

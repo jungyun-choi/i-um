@@ -30,14 +30,16 @@ export const api = {
   photos: {
     getUploadUrl: (body: { child_id: string; filename: string; taken_at?: string; gps_lat?: number; gps_lng?: number }) =>
       authFetch('/photos/upload-url', { method: 'POST', body: JSON.stringify(body) }),
-    process: (id: string) =>
-      authFetch(`/photos/${id}/process`, { method: 'POST' }),
+    process: (id: string, body?: { diary_style?: 'emotional' | 'factual' }) =>
+      authFetch(`/photos/${id}/process`, { method: 'POST', body: JSON.stringify(body ?? {}) }),
     getDiary: (id: string) => authFetch(`/photos/${id}/diary`),
   },
   diary: {
     get: (id: string) => authFetch(`/diary/${id}`),
     update: (id: string, content: string) =>
       authFetch(`/diary/${id}`, { method: 'PATCH', body: JSON.stringify({ content }) }),
+    delete: (id: string) =>
+      authFetch(`/diary/${id}`, { method: 'DELETE' }),
     timeline: (childId: string, cursor?: string, limit = 20) => {
       const params = new URLSearchParams({ limit: String(limit) });
       if (cursor) params.set('cursor', cursor);
