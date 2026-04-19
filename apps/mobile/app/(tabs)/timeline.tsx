@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
 import {
-  View, Text, StyleSheet, SectionList, TouchableOpacity,
+  View, Text, StyleSheet, TouchableOpacity,
   SafeAreaView, ActivityIndicator, RefreshControl, Modal,
-  Pressable, ScrollView,
+  Pressable, ScrollView, type NativeScrollEvent, type NativeSyntheticEvent,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useTimeline } from '../../src/hooks/useTimeline';
@@ -15,9 +15,12 @@ export default function TimelineScreen() {
   const activeChild = useChildStore((s) => s.activeChild);
   const children = useChildStore((s) => s.children);
   const setActiveChild = useChildStore((s) => s.setActiveChild);
-  const [showPicker, setShowPicker] = useState(false);
+  const [showChildPicker, setShowChildPicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [pickerYear, setPickerYear] = useState('');
   const [activeMonth, setActiveMonth] = useState<string | null>(null);
-  const listRef = useRef<SectionList>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  const sectionViewRefs = useRef<Record<string, View | null>>({});
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } =
     useTimeline(activeChild?.id);
@@ -25,14 +28,49 @@ export default function TimelineScreen() {
   const entries = data?.pages.flatMap((p) => p.entries) ?? [];
   const sections = groupEntriesByMonth(entries);
 
-  function jumpToMonth(monthKey: string, index: number) {
+  const monthsWithData = new Set(sections.map((s) => s.monthKey));
+  const yearsAvailable = [...new Set(sections.map((s) => s.monthKey.slice(0, 4)))].sort();
+
+  const currentMonth = activeMonth ?? sections[0]?.monthKey ?? '';
+  const currentYear = currentMonth.slice(0, 4);
+
+  function openDatePicker() {
+    setPickerYear(currentYear || new Date().getFullYear().toString());
+    setShowDatePicker(true);
+  }
+
+  function jumpToMonth(monthKey: string) {
     setActiveMonth(monthKey);
-    listRef.current?.scrollToLocation({
-      sectionIndex: index,
-      itemIndex: 0,
-      animated: true,
-      viewOffset: 0,
-    });
+    setShowDatePicker(false);
+    setTimeout(() => {
+      const sectionView = sectionViewRefs.current[monthKey];
+      if (sectionView && scrollRef.current) {
+        sectionView.measureLayout(
+          scrollRef.current as any,
+          (_x, y) => scrollRef.current?.scrollTo({ y, animated: true }),
+          () => {},
+        );
+      }
+    }, 350);
+  }
+
+  // 스크롤 중 현재 보이는 월 추적
+  const sectionYCache = useRef<Record<string, number>>({});
+
+  function handleScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
+    const scrollY = e.nativeEvent.contentOffset.y;
+    // infinite scroll
+    const { layoutMeasurement, contentOffset, contentSize } = e.nativeEvent;
+    if (layoutMeasurement.height + contentOffset.y >= contentSize.height - 600) {
+      if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+    }
+    // 현재 섹션 추적
+    let current = sections[0]?.monthKey ?? null;
+    for (const section of sections) {
+      const y = sectionYCache.current[section.monthKey];
+      if (y != null && scrollY >= y - 60) current = section.monthKey;
+    }
+    if (current && current !== activeMonth) setActiveMonth(current);
   }
 
   if (!activeChild && children.length === 0) {
@@ -46,13 +84,26 @@ export default function TimelineScreen() {
     );
   }
 
+  const yearIndex = yearsAvailable.indexOf(pickerYear);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.appName}>이음</Text>
+
+        {/* 현재 달 표시 — 탭하면 피커 오픈 */}
+        {sections.length > 0 ? (
+          <TouchableOpacity style={styles.datePill} onPress={openDatePicker}>
+            <Text style={styles.datePillText}>{formatMonthLabel(currentMonth)}</Text>
+            <Text style={styles.datePillChevron}>▾</Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.datePillPlaceholder} />
+        )}
+
         <View style={styles.headerRight}>
           {children.length > 1 ? (
-            <TouchableOpacity onPress={() => setShowPicker(true)}>
+            <TouchableOpacity onPress={() => setShowChildPicker(true)}>
               <Text style={styles.childName}>{activeChild?.name} ▼</Text>
             </TouchableOpacity>
           ) : activeChild ? (
@@ -66,31 +117,6 @@ export default function TimelineScreen() {
         </View>
       </View>
 
-      {/* 월 퀵점프 바 */}
-      {sections.length > 1 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.monthBar}
-          contentContainerStyle={styles.monthBarContent}
-        >
-          {sections.map((section, index) => {
-            const isActive = (activeMonth ?? sections[0].monthKey) === section.monthKey;
-            return (
-              <TouchableOpacity
-                key={section.monthKey}
-                style={[styles.monthChip, isActive && styles.monthChipActive]}
-                onPress={() => jumpToMonth(section.monthKey, index)}
-              >
-                <Text style={[styles.monthChipText, isActive && styles.monthChipTextActive]}>
-                  {formatMonthLabel(section.monthKey)}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      )}
-
       {isLoading ? (
         <ActivityIndicator style={styles.loader} color="#E8735A" />
       ) : entries.length === 0 ? (
@@ -102,47 +128,102 @@ export default function TimelineScreen() {
           </TouchableOpacity>
         </View>
       ) : (
-        <SectionList
-          ref={listRef}
-          sections={sections}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <DiaryCard entry={item} />}
-          renderSectionHeader={({ section }) => (
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionHeaderText}>{formatMonthLabel(section.monthKey)}</Text>
-            </View>
-          )}
+        <ScrollView
+          ref={scrollRef}
+          style={styles.scrollView}
           contentContainerStyle={styles.list}
           refreshControl={<RefreshControl refreshing={false} onRefresh={refetch} />}
-          onEndReached={() => hasNextPage && fetchNextPage()}
-          onEndReachedThreshold={0.3}
-          stickySectionHeadersEnabled={true}
-          onViewableItemsChanged={({ viewableItems }) => {
-            const first = viewableItems[0];
-            if (first?.section) {
-              setActiveMonth((first.section as typeof sections[0]).monthKey);
-            }
-          }}
-          viewabilityConfig={{ itemVisiblePercentThreshold: 10 }}
-          ListFooterComponent={
-            isFetchingNextPage
-              ? <ActivityIndicator color="#E8735A" style={{ marginVertical: 16 }} />
-              : null
-          }
-        />
+          onScroll={handleScroll}
+          scrollEventThrottle={200}
+        >
+          {sections.map((section) => (
+            <View key={section.monthKey}>
+              <View
+                ref={(ref) => { sectionViewRefs.current[section.monthKey] = ref; }}
+                onLayout={(e) => { sectionYCache.current[section.monthKey] = e.nativeEvent.layout.y; }}
+                style={styles.sectionHeader}
+              >
+                <Text style={styles.sectionHeaderText}>{formatMonthLabel(section.monthKey)}</Text>
+              </View>
+              {section.data.map((item) => (
+                <DiaryCard key={item.id} entry={item} />
+              ))}
+            </View>
+          ))}
+          {isFetchingNextPage && (
+            <ActivityIndicator color="#E8735A" style={{ marginVertical: 16 }} />
+          )}
+        </ScrollView>
       )}
 
-      <Modal visible={showPicker} transparent animationType="fade">
-        <Pressable style={styles.overlay} onPress={() => setShowPicker(false)}>
-          <View style={styles.picker}>
-            <Text style={styles.pickerTitle}>아이 선택</Text>
+      {/* 연/월 피커 시트 */}
+      <Modal visible={showDatePicker} transparent animationType="slide">
+        <Pressable style={styles.overlay} onPress={() => setShowDatePicker(false)}>
+          <Pressable style={styles.pickerSheet} onPress={() => {}}>
+            {/* 연도 스위처 */}
+            <View style={styles.yearRow}>
+              <TouchableOpacity
+                onPress={() => yearIndex > 0 && setPickerYear(yearsAvailable[yearIndex - 1])}
+                style={styles.yearArrow}
+                disabled={yearIndex <= 0}
+              >
+                <Text style={[styles.yearArrowText, yearIndex <= 0 && styles.yearArrowDisabled]}>‹</Text>
+              </TouchableOpacity>
+              <Text style={styles.yearLabel}>{pickerYear}년</Text>
+              <TouchableOpacity
+                onPress={() => yearIndex < yearsAvailable.length - 1 && setPickerYear(yearsAvailable[yearIndex + 1])}
+                style={styles.yearArrow}
+                disabled={yearIndex >= yearsAvailable.length - 1}
+              >
+                <Text style={[styles.yearArrowText, yearIndex >= yearsAvailable.length - 1 && styles.yearArrowDisabled]}>›</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* 월 그리드 */}
+            <View style={styles.monthGrid}>
+              {Array.from({ length: 12 }, (_, i) => {
+                const monthNum = String(i + 1).padStart(2, '0');
+                const monthKey = `${pickerYear}-${monthNum}`;
+                const hasData = monthsWithData.has(monthKey);
+                const isActive = currentMonth === monthKey;
+                return (
+                  <TouchableOpacity
+                    key={monthKey}
+                    style={styles.monthCell}
+                    onPress={() => hasData && jumpToMonth(monthKey)}
+                    disabled={!hasData}
+                    activeOpacity={hasData ? 0.7 : 1}
+                  >
+                    <View style={[styles.monthCellInner, isActive && styles.monthCellActive]}>
+                      <Text style={[
+                        styles.monthCellText,
+                        isActive && styles.monthCellTextActive,
+                        !hasData && styles.monthCellTextDisabled,
+                      ]}>
+                        {i + 1}월
+                      </Text>
+                    </View>
+                    {hasData && !isActive && <View style={styles.monthDot} />}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* 아이 선택 시트 */}
+      <Modal visible={showChildPicker} transparent animationType="fade">
+        <Pressable style={styles.overlay} onPress={() => setShowChildPicker(false)}>
+          <View style={styles.childSheet}>
+            <Text style={styles.childSheetTitle}>아이 선택</Text>
             {children.map((child) => (
               <TouchableOpacity
                 key={child.id}
-                style={[styles.pickerItem, activeChild?.id === child.id && styles.pickerItemActive]}
-                onPress={() => { setActiveChild(child); setShowPicker(false); }}
+                style={[styles.childItem, activeChild?.id === child.id && styles.childItemActive]}
+                onPress={() => { setActiveChild(child); setShowChildPicker(false); }}
               >
-                <Text style={[styles.pickerItemText, activeChild?.id === child.id && styles.pickerItemTextActive]}>
+                <Text style={[styles.childItemText, activeChild?.id === child.id && styles.childItemTextActive]}>
                   {child.name}
                 </Text>
                 {activeChild?.id === child.id && <Text style={styles.check}>✓</Text>}
@@ -157,34 +238,36 @@ export default function TimelineScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFDF8' },
+
   header: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    flexDirection: 'row', alignItems: 'center',
     paddingHorizontal: 20, paddingVertical: 12,
   },
-  appName: { fontSize: 24, fontWeight: '700', color: '#E8735A' },
-  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  appName: { fontSize: 24, fontWeight: '700', color: '#E8735A', flex: 1 },
+  datePill: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    paddingVertical: 6, paddingHorizontal: 12,
+    backgroundColor: '#F5F2EC', borderRadius: 20,
+  },
+  datePillText: { fontSize: 14, fontWeight: '600', color: '#555' },
+  datePillChevron: { fontSize: 11, color: '#AAA', marginTop: 1 },
+  datePillPlaceholder: { width: 80 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1, justifyContent: 'flex-end' },
   childName: { fontSize: 15, color: '#555', fontWeight: '500' },
   uploadBtn: {
     backgroundColor: '#E8735A', width: 36, height: 36,
     borderRadius: 18, alignItems: 'center', justifyContent: 'center',
   },
   uploadBtnText: { color: '#fff', fontSize: 22, fontWeight: '400', lineHeight: 28 },
-  monthBar: { maxHeight: 48, borderBottomWidth: 1, borderBottomColor: '#F0EDE6' },
-  monthBarContent: { paddingHorizontal: 16, paddingVertical: 8, gap: 8 },
-  monthChip: {
-    paddingVertical: 4, paddingHorizontal: 14,
-    borderRadius: 16, backgroundColor: '#F5F2EC',
-  },
-  monthChipActive: { backgroundColor: '#E8735A' },
-  monthChipText: { fontSize: 13, color: '#888', fontWeight: '500' },
-  monthChipTextActive: { color: '#fff' },
+
   sectionHeader: {
     backgroundColor: '#FFFDF8',
     paddingHorizontal: 16, paddingTop: 20, paddingBottom: 8,
     borderBottomWidth: 1, borderBottomColor: '#F0EDE6',
   },
   sectionHeaderText: { fontSize: 13, fontWeight: '600', color: '#AAA', letterSpacing: 0.5 },
-  list: { paddingBottom: 32 },
+  scrollView: { flex: 1 },
+  list: { paddingBottom: 32, paddingHorizontal: 16, paddingTop: 8 },
   loader: { marginTop: 60 },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFDF8', padding: 32 },
   emptyFeed: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
@@ -195,18 +278,43 @@ const styles = StyleSheet.create({
     paddingVertical: 14, paddingHorizontal: 28, alignItems: 'center',
   },
   addBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
-  picker: {
+
+  // 연/월 피커
+  pickerSheet: {
+    backgroundColor: '#FFFDF8', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    paddingTop: 8, paddingBottom: 40,
+  },
+  yearRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    paddingVertical: 16, gap: 32,
+  },
+  yearArrow: { padding: 8 },
+  yearArrowText: { fontSize: 28, color: '#333', fontWeight: '300' },
+  yearArrowDisabled: { color: '#DDD' },
+  yearLabel: { fontSize: 18, fontWeight: '700', color: '#222', minWidth: 72, textAlign: 'center' },
+  monthGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, paddingBottom: 8 },
+  monthCell: { width: '25%', alignItems: 'center', paddingVertical: 10 },
+  monthCellInner: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 14 },
+  monthCellActive: { backgroundColor: '#E8735A' },
+  monthCellText: { fontSize: 15, fontWeight: '500', color: '#333' },
+  monthCellTextActive: { color: '#fff' },
+  monthCellTextDisabled: { color: '#D0CFC9' },
+  monthDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: '#E8735A', marginTop: 2 },
+
+  // 아이 선택
+  childSheet: {
     backgroundColor: '#FFFDF8', borderTopLeftRadius: 20, borderTopRightRadius: 20,
     padding: 20, paddingBottom: 40,
   },
-  pickerTitle: { fontSize: 15, fontWeight: '600', color: '#888', marginBottom: 12, textAlign: 'center' },
-  pickerItem: {
+  childSheetTitle: { fontSize: 15, fontWeight: '600', color: '#888', marginBottom: 12, textAlign: 'center' },
+  childItem: {
     flexDirection: 'row', alignItems: 'center', paddingVertical: 16,
     borderBottomWidth: 1, borderBottomColor: '#F0EDE6',
   },
-  pickerItemActive: {},
-  pickerItemText: { fontSize: 17, color: '#333', flex: 1 },
-  pickerItemTextActive: { color: '#E8735A', fontWeight: '600' },
+  childItemActive: {},
+  childItemText: { fontSize: 17, color: '#333', flex: 1 },
+  childItemTextActive: { color: '#E8735A', fontWeight: '600' },
   check: { fontSize: 18, color: '#E8735A' },
 });
