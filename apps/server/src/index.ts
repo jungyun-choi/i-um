@@ -21,6 +21,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,
+  message: { error: '요청이 너무 많아요. 잠시 후 다시 시도해주세요.' },
   standardHeaders: true,
   legacyHeaders: false,
 }));

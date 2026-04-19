@@ -2,12 +2,13 @@ import { useState, useRef, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, Alert, TextInput, Dimensions, ActivityIndicator,
-  FlatList, type ViewToken,
+  FlatList, type ViewToken, Share, Platform,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as FileSystem from 'expo-file-system';
 import { api } from '../../src/lib/api';
 import { formatDisplayDate } from '../../src/lib/utils/date';
 import { useDiaryGeneration } from '../../src/hooks/useDiaryGeneration';
@@ -17,7 +18,7 @@ import { useToast } from '../../src/components/Toast';
 const SCREEN_W = Dimensions.get('window').width;
 const S3_BASE = process.env.EXPO_PUBLIC_S3_BASE_URL ?? '';
 
-interface PageActions { startEdit: () => void; confirmDelete: () => void; }
+interface PageActions { startEdit: () => void; confirmDelete: () => void; shareDiary: () => void; }
 
 // ─── 단일 페이지 ──────────────────────────────────────────────────────────────
 
@@ -103,10 +104,33 @@ function DiaryPage({
     }
   }
 
+  async function shareDiary() {
+    if (!current?.content) return;
+    try {
+      const photoKey = current.photos?.s3_key;
+      const text = `${dateStr}\n\n${current.content}\n\n📲 이음 앱으로 함께 기록해요`;
+
+      if (photoKey && Platform.OS === 'ios') {
+        const photoUrl = `${S3_BASE}/${photoKey}`;
+        const localUri = `${FileSystem.cacheDirectory}share_${Date.now()}.jpg`;
+        const { status } = await FileSystem.downloadAsync(photoUrl, localUri);
+        if (status === 200) {
+          await Share.share({ url: localUri, message: text });
+          return;
+        }
+      }
+      await Share.share({ message: text });
+    } catch (e: unknown) {
+      if (e instanceof Error && e.message !== 'The user did not share') {
+        showToast('공유에 실패했어요');
+      }
+    }
+  }
+
   // 활성 페이지가 되면 날짜·액션을 부모에 등록
   if (isActive) {
     if (current) onDateChange(dateStr);
-    onActionsReady({ startEdit, confirmDelete });
+    onActionsReady({ startEdit, confirmDelete, shareDiary });
   }
 
   if (isLoading || !current) {
@@ -202,6 +226,7 @@ export default function DiaryDetailScreen() {
     const actions = activeActionsRef.current;
     if (!actions) return;
     Alert.alert('', '', [
+      { text: '공유', onPress: actions.shareDiary },
       { text: '편집', onPress: actions.startEdit },
       { text: '삭제', style: 'destructive', onPress: actions.confirmDelete },
       { text: '취소', style: 'cancel' },

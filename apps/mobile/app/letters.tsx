@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   View, Text, StyleSheet, FlatList,
   TouchableOpacity, Modal, ScrollView,
-  ActivityIndicator,
+  ActivityIndicator, Share,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -23,6 +23,13 @@ function formatYearMonth(yearMonth: string) {
 }
 
 function LetterModal({ letter, onClose }: { letter: Letter; onClose: () => void }) {
+  async function handleShare() {
+    await Share.share({
+      message: `💌 ${formatYearMonth(letter.year_month)} 월간 레터\n\n${letter.content}\n\n📲 이음 앱으로 아이의 성장을 함께 기록해요`,
+      title: `${formatYearMonth(letter.year_month)} 이음 월간 레터`,
+    });
+  }
+
   return (
     <Modal visible animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={styles.modalContainer}>
@@ -31,7 +38,9 @@ function LetterModal({ letter, onClose }: { letter: Letter; onClose: () => void 
             <Text style={styles.modalBack}>←</Text>
           </TouchableOpacity>
           <Text style={styles.modalTitle}>{formatYearMonth(letter.year_month)} 레터</Text>
-          <View style={{ width: 32 }} />
+          <TouchableOpacity onPress={handleShare} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Text style={styles.modalShare}>공유</Text>
+          </TouchableOpacity>
         </View>
         <ScrollView contentContainerStyle={styles.modalContent}>
           <Text style={styles.modalIcon}>💌</Text>
@@ -150,6 +159,7 @@ const styles = StyleSheet.create({
   },
   modalBack: { fontSize: 24, color: '#1A1A1A', width: 32 },
   modalTitle: { fontSize: 17, fontWeight: '700', color: '#1A1A1A' },
+  modalShare: { fontSize: 15, color: '#E8735A', fontWeight: '600', width: 32, textAlign: 'right' },
   modalContent: { padding: 28, alignItems: 'center' },
   modalIcon: { fontSize: 52, marginBottom: 12 },
   modalYearMonth: { fontSize: 16, fontWeight: '700', color: '#E8735A', marginBottom: 20 },
