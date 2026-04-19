@@ -5,6 +5,17 @@
 
 ---
 
+## [2026-04-20] feat | 프로덕션 품질 스프린트 — 초대 UI + 토스트 + ErrorBoundary
+
+- `feat/invite-ui`: 프로필 탭 가족 공유 섹션 — 초대 코드 생성(Share.share) + JoinModal 6자리 입력
+- `feat/global-toast`: 슬라이드업 토스트 시스템 (Toast.tsx, ToastProvider) — API 에러 Alert 교체
+  - 토스트 색상: error `#C0392B`, success `#E8735A` (브랜드 통일)
+  - upload.tsx, diary/[id].tsx, child/new.tsx 에러 → 토스트 전환
+- `feat/onboarding-ux`: 온보딩 전환율 개선 — child 생성 후 Alert 제거, 바로 upload 화면으로
+- `feat/error-boundary`: ErrorBoundary 클래스 컴포넌트 — JS 크래시 폴백 UI, 스토어 제출 필수
+
+---
+
 ## [2026-04-19] feat | TDD 셋업 + 푸시 알림 구현
 
 - Jest 셋업: 서버(ts-jest + supertest), 모바일(ts-jest 순수 로직 / jest-expo 컴포넌트)
@@ -264,3 +275,118 @@
 - 커밋: `f99f647` by jy.choi
 - 변경 파일 수: 1
   - apps/mobile/app/upload.tsx
+
+## [2026-04-20] commit | fix: Hermes TypeError 재발 방지 — style 배열 & onPress boolean 패턴 수정
+
+- 커밋: `e37c385` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/(tabs)/timeline.tsx
+
+## [2026-04-20] commit | fix: tabBarLabelStyle fontWeight 제거 — iOS native bridge 타입 오류 수정
+
+- 커밋: `fa16059` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/(tabs)/_layout.tsx
+
+## [2026-04-20] commit | fix: TabBar 타입 오류 수정 2차
+
+- 커밋: `388ebd6` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/app/(tabs)/_layout.tsx
+  - apps/mobile/src/hooks/usePushNotification.ts
+
+## [2026-04-20] commit | feat: 마일스톤 알림 스케줄러 — 매일 오전 9시 자동 발송
+
+- 커밋: `bfce209` by jy.choi
+- 변경 파일 수: 2
+  - apps/server/src/index.ts
+  - apps/server/src/workers/milestoneScheduler.ts
+
+## [2026-04-20] commit | feat: first_word / first_step 수동 기록 기능
+
+- 커밋: `df9cfad` by jy.choi
+- 변경 파일 수: 4
+  - apps/mobile/app/(tabs)/milestones.tsx
+  - apps/mobile/src/lib/api.ts
+  - apps/server/src/__tests__/milestonesRoute.test.ts
+  - apps/server/src/routes/milestones.ts
+
+## [2026-04-20] commit | feat: AI 월간 레터 — 매달 1일 Claude로 편지 생성 + 타임라인 카드
+
+- 커밋: `a63bddc` by jy.choi
+- 변경 파일 수: 6
+  - apps/mobile/app/(tabs)/timeline.tsx
+  - apps/mobile/src/lib/api.ts
+  - apps/server/src/__tests__/monthlyLetterScheduler.test.ts
+  - apps/server/src/index.ts
+  - apps/server/src/routes/monthlyLetters.ts
+
+## [2026-04-20] commit | refactor: SafeAreaView 전체 react-native-safe-area-context로 마이그레이션
+
+- 커밋: `c9dfe10` by jy.choi
+- 변경 파일 수: 10
+  - apps/mobile/app/(auth)/login.tsx
+  - apps/mobile/app/(auth)/signup.tsx
+  - apps/mobile/app/(auth)/welcome.tsx
+  - apps/mobile/app/(tabs)/milestones.tsx
+  - apps/mobile/app/(tabs)/profile.tsx
+
+## [2026-04-20] commit | feat: 온보딩 플로우 — 빈 화면을 따뜻한 첫 경험으로
+
+- 커밋: `c5294cf` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/app/(tabs)/timeline.tsx
+  - apps/mobile/app/child/new.tsx
+
+## [2026-04-20] commit | refactor: welcome 화면 3단계 스와이프 슬라이더로 개선
+
+- 커밋: `60501fc` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/(auth)/welcome.tsx
+
+## [2026-04-20] commit | feat: Skeleton shimmer UI — ActivityIndicator 전면 교체
+
+- 커밋: `b8fa05f` by jy.choi
+- 변경 파일 수: 4
+  - apps/mobile/app/(tabs)/milestones.tsx
+  - apps/mobile/app/(tabs)/profile.tsx
+  - apps/mobile/app/(tabs)/timeline.tsx
+  - apps/mobile/src/components/Skeleton.tsx
+
+## [2026-04-20] commit | feat: 가족 공유 — invite_codes + family_members (서버 + API 클라이언트)
+
+- 커밋: `aa31b2f` by jy.choi
+- 변경 파일 수: 4
+  - apps/mobile/src/lib/api.ts
+  - apps/server/src/index.ts
+  - apps/server/src/routes/children.ts
+  - apps/server/src/routes/invites.ts
+
+## [2026-04-20] commit | feat: 가족 초대 UI — 초대 보내기 + 코드 참여 모달
+
+- 커밋: `872eebb` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/(tabs)/profile.tsx
+
+## [2026-04-20] commit | feat: 글로벌 에러 토스트 시스템 구현
+
+- 커밋: `2332dd0` by jy.choi
+- 변경 파일 수: 4
+  - apps/mobile/app/_layout.tsx
+  - apps/mobile/app/diary/[id].tsx
+  - apps/mobile/app/upload.tsx
+  - apps/mobile/src/components/Toast.tsx
+
+## [2026-04-20] commit | feat: 온보딩 전환율 개선 + 토스트 색상 정제
+
+- 커밋: `9c028df` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/app/child/new.tsx
+  - apps/mobile/src/components/Toast.tsx
+
+## [2026-04-20] commit | feat: 앱 전체 ErrorBoundary — 크래시 화이트스크린 방지
+
+- 커밋: `c2ea8cc` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/app/_layout.tsx
+  - apps/mobile/src/components/ErrorBoundary.tsx
