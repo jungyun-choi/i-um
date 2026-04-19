@@ -10,6 +10,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { api } from '../../src/lib/api';
 import { useChildStore } from '../../src/stores/childStore';
+import { MilestoneSkeletonList } from '../../src/components/Skeleton';
 import { getDday, getAgeText } from '../../src/lib/utils/age';
 import { getExpectedDate, MILESTONE_META } from '../../src/lib/utils/milestone';
 
@@ -219,7 +220,7 @@ export default function MilestonesScreen() {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>{activeChild.name}의 특별한 순간</Text>
       {isLoading ? (
-        <ActivityIndicator color="#E8735A" style={{ marginTop: 40 }} />
+        <MilestoneSkeletonList />
       ) : (
         <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
           {(achieved as MilestoneData[]).length > 0 && (

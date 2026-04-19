@@ -7,6 +7,7 @@ import { useChildStore } from '../../src/stores/childStore';
 import { getAgeText } from '../../src/lib/utils/age';
 import { ChildAvatar } from '../../src/components/ChildAvatar';
 import { api } from '../../src/lib/api';
+import { ProfileSkeletonCard } from '../../src/components/Skeleton';
 
 function StatBox({ value, label }: { value: string | number; label: string }) {
   return (
@@ -32,7 +33,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const activeChild = useChildStore((s) => s.activeChild);
 
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['diary-stats', activeChild?.id],
     queryFn: () => api.diary.stats(activeChild!.id),
     enabled: !!activeChild,
@@ -50,7 +51,9 @@ export default function ProfileScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={styles.title}>프로필</Text>
 
-        {activeChild ? (
+        {!activeChild || statsLoading ? (
+          <ProfileSkeletonCard />
+        ) : activeChild ? (
           <>
             {/* 아이 프로필 카드 */}
             <TouchableOpacity

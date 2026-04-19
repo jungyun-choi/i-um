@@ -13,6 +13,7 @@ import { DiaryCard } from '../../src/components/DiaryCard';
 import { MemoryCard } from '../../src/components/MemoryCard';
 import { groupEntriesByMonth, formatMonthLabel } from '../../src/utils/groupByMonth';
 import { api } from '../../src/lib/api';
+import { TimelineSkeletonList } from '../../src/components/Skeleton';
 
 interface MonthlyLetter {
   id: string;
@@ -221,7 +222,7 @@ export default function TimelineScreen() {
       </View>
 
       {isLoading ? (
-        <ActivityIndicator style={styles.loader} color="#E8735A" />
+        <TimelineSkeletonList />
       ) : entries.length === 0 ? (
         <View style={styles.emptyFeed}>
           <Text style={styles.emptyFeedEmoji}>📷</Text>
