@@ -20,18 +20,23 @@ function makeQueryClient() {
 
 const queryClient = makeQueryClient();
 
-function AuthGate({ session }: { session: Session | null }) {
+function AuthGate({ session, isRecovery }: { session: Session | null; isRecovery: boolean }) {
   const router = useRouter();
   const segments = useSegments();
 
   useEffect(() => {
+    if (isRecovery) {
+      router.replace('/reset-password');
+      return;
+    }
     const inAuth = segments[0] === '(auth)';
+    const inReset = segments[0] === 'reset-password';
     if (!session && !inAuth) {
       router.replace('/(auth)/welcome');
-    } else if (session && inAuth) {
+    } else if (session && (inAuth || inReset)) {
       router.replace('/(tabs)/timeline');
     }
-  }, [session, segments]);
+  }, [session, segments, isRecovery]);
 
   return null;
 }
@@ -39,6 +44,7 @@ function AuthGate({ session }: { session: Session | null }) {
 export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);
   const [ready, setReady] = useState(false);
+  const [isRecovery, setIsRecovery] = useState(false);
   usePushNotification();
 
   useEffect(() => {
@@ -46,7 +52,12 @@ export default function RootLayout() {
       setSession(session);
       setReady(true);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsRecovery(true);
+      } else {
+        setIsRecovery(false);
+      }
       setSession(session);
     });
     return () => subscription.unsubscribe();
@@ -58,7 +69,7 @@ export default function RootLayout() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
-          <AuthGate session={session} />
+          <AuthGate session={session} isRecovery={isRecovery} />
           <Slot />
         </ToastProvider>
       </QueryClientProvider>
