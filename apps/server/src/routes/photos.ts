@@ -8,9 +8,26 @@ import { diaryQueue } from '../workers/diaryWorker';
 const router = Router();
 router.use(requireAuth);
 
+const FREE_MONTHLY_LIMIT = 10;
+
 // S3 presigned URL 발급 + DB 레코드 생성
 router.post('/upload-url', async (req: AuthRequest, res) => {
   const { child_id, filename, taken_at, gps_lat, gps_lng } = req.body;
+
+  // 월간 무료 한도 체크 (photos 테이블 기준 — diary_entries에 user_id 없음)
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const { count } = await supabase
+    .from('photos')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', req.userId)
+    .gte('created_at', monthStart);
+
+  if ((count ?? 0) >= FREE_MONTHLY_LIMIT) {
+    res.status(402).json({ error: 'monthly_limit_reached', limit: FREE_MONTHLY_LIMIT });
+    return;
+  }
+
   const photoId = uuid();
   const s3Key = buildS3Key(req.userId!, photoId, filename);
   const uploadUrl = await getUploadUrl(s3Key, 'image/jpeg');

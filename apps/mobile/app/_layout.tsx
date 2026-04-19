@@ -14,9 +14,10 @@ import { ErrorBoundary } from '../src/components/ErrorBoundary';
 SplashScreen.preventAutoHideAsync();
 
 // Global Pretendard — Android requires explicit fontFamily (fontWeight alone insufficient)
-const _defaultTextStyle = { fontFamily: 'Pretendard-Regular' };
-Text.defaultProps = { ...(Text.defaultProps ?? {}), style: _defaultTextStyle };
-TextInput.defaultProps = { ...(TextInput.defaultProps ?? {}), style: _defaultTextStyle };
+// @ts-ignore — defaultProps removed from RN types but still works at runtime
+Text.defaultProps = { style: { fontFamily: 'Pretendard-Regular' } };
+// @ts-ignore
+TextInput.defaultProps = { style: { fontFamily: 'Pretendard-Regular' } };
 
 function makeQueryClient() {
   return new QueryClient({

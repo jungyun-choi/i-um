@@ -612,3 +612,79 @@
 - signup/login — 이메일 형식 클라이언트 검증 추가
 - `_layout.tsx.bak` 스테일 파일 제거
 
+
+## [2026-04-20] commit | fix: show failed diary state in timeline cards
+
+- 커밋: `bbf3961` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/src/components/DiaryCard.tsx
+
+## [2026-04-20] commit | feat: child profile deletion
+
+- 커밋: `987b528` by jy.choi
+- 변경 파일 수: 3
+  - apps/mobile/app/child/[id]/edit.tsx
+  - apps/mobile/src/lib/api.ts
+  - apps/server/src/routes/children.ts
+
+## [2026-04-20] commit | feat: sprint-10 production polish — network errors, UX fixes, milestone family notifications
+
+- 커밋: `66f6e63` by jy.choi
+- 변경 파일 수: 6
+  - apps/mobile/app/(tabs)/profile.tsx
+  - apps/mobile/app/(tabs)/timeline.tsx
+  - apps/mobile/app/upload.tsx
+  - apps/mobile/src/components/DiaryCard.tsx
+  - apps/mobile/src/lib/api.ts
+
+## [2026-04-20] commit | feat: sprint-11 — diary/letter share + rate limit UX
+
+- 커밋: `22e4227` by jy.choi
+- 변경 파일 수: 3
+  - apps/mobile/app/diary/[id].tsx
+  - apps/mobile/app/letters.tsx
+  - apps/server/src/index.ts
+
+## [2026-04-20] commit | feat: sprint-12 — Aha moment loading experience + push prompt timing
+
+- 커밋: `94bbf06` by jy.choi
+- 변경 파일 수: 3
+  - apps/mobile/app/diary/[id].tsx
+  - apps/mobile/app/upload.tsx
+  - apps/mobile/src/components/DiaryGenerating.tsx
+
+## [2026-04-20] commit | fix: TypeScript clean + app.json description for App Store
+
+- 커밋: `802e2c4` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/app.json
+  - apps/mobile/app/diary/[id].tsx
+
+## [2026-04-20] commit | fix: tab bar safe area + icon polish (sprint-13)
+
+- 커밋: `6ed68e4` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/(tabs)/_layout.tsx
+
+## [2026-04-20] commit | feat: Pretendard 폰트 전역 적용 (sprint-14)
+
+- 커밋: `3001d5d` by jy.choi
+- 변경 파일 수: 7
+  - apps/mobile/app/(tabs)/_layout.tsx
+  - apps/mobile/app/_layout.tsx
+  - apps/mobile/assets/fonts/Pretendard-Bold.otf
+  - apps/mobile/assets/fonts/Pretendard-Medium.otf
+  - apps/mobile/assets/fonts/Pretendard-Regular.otf
+
+## [2026-04-20] commit | feat: install expo-splash-screen for font-gated splash (sprint-15)
+
+- 커밋: `ce8e1b7` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/package.json
+  - package-lock.json
+
+## [2026-04-20] commit | feat: Pretendard 전역 적용 (Text.defaultProps)
+
+- 커밋: `36b1208` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/_layout.tsx
