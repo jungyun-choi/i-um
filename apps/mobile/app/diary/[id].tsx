@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, SafeAreaView,
-  TouchableOpacity, Image, Alert, TextInput, Dimensions, ActivityIndicator,
+  TouchableOpacity, Alert, TextInput, Dimensions, ActivityIndicator,
 } from 'react-native';
+import { Image } from 'expo-image';
 
 const SCREEN_W = Dimensions.get('window').width;
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -19,6 +20,7 @@ export default function DiaryDetailScreen() {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
+  const [imgRatio, setImgRatio] = useState(1);
 
   const { data: diary, isLoading } = useQuery({
     queryKey: ['diary', id],
@@ -121,15 +123,14 @@ export default function DiaryDetailScreen() {
       <ScrollView>
         {photo?.s3_key && (
           <Image
-            source={{ uri: `${S3_BASE}/${photo.s3_key}` }}
-            style={styles.photo}
-            resizeMode="contain"
+            source={`${S3_BASE}/${photo.s3_key}`}
+            style={[styles.photo, { height: SCREEN_W * imgRatio }]}
+            contentFit="cover"
+            cachePolicy="disk"
+            transition={200}
             onLoad={(e) => {
-              const { width, height } = e.nativeEvent.source;
-              if (width && height) {
-                const ratio = height / width;
-                e.target.setNativeProps({ style: { height: SCREEN_W * ratio } });
-              }
+              const { width, height } = e.source;
+              if (width && height) setImgRatio(height / width);
             }}
           />
         )}
@@ -186,7 +187,7 @@ const styles = StyleSheet.create({
   date: { fontSize: 16, fontWeight: '600', color: '#1A1A1A' },
   editBtn: { fontSize: 16, color: '#E8735A' },
   saveBtn: { fontSize: 16, color: '#E8735A', fontWeight: '600' },
-  photo: { width: SCREEN_W, height: SCREEN_W, backgroundColor: '#F5F2EC' },
+  photo: { width: SCREEN_W, backgroundColor: '#F5F2EC' },
   body: { padding: 20 },
   milestoneBadge: {
     fontSize: 16, fontWeight: '600', color: '#E8735A',

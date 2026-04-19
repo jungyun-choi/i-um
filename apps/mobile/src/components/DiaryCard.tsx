@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 
 const CARD_IMAGE_H = Dimensions.get('window').width * 0.62;
@@ -37,9 +38,11 @@ export function DiaryCard({ entry }: Props) {
     >
       {photo?.s3_key ? (
         <Image
-          source={{ uri: `${S3_BASE}/${photo.s3_key}` }}
+          source={`${S3_BASE}/${photo.s3_key}`}
           style={styles.image}
-          resizeMode="cover"
+          contentFit="cover"
+          cachePolicy="disk"
+          transition={200}
         />
       ) : (
         <View style={styles.imagePlaceholder} />
