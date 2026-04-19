@@ -28,17 +28,18 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: '#FFFDF8',
-          borderTopColor: '#F0EDE6',
-          borderTopWidth: 1,
-          height: tabBarHeight,
-          paddingBottom: Platform.OS === 'ios' ? insets.bottom : 8,
-          paddingTop: 6,
-        },
         tabBarActiveTintColor: '#E8735A',
         tabBarInactiveTintColor: '#C0BAB0',
-        tabBarLabelStyle: { fontSize: 11, fontFamily: 'Pretendard-Medium' },
+        tabBarStyle: {
+          height: tabBarHeight,
+          backgroundColor: '#FFFDF9',
+          borderTopColor: '#F0EBE3',
+          borderTopWidth: 1,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          marginBottom: Platform.OS === 'ios' ? 0 : 4,
+        },
       }}
     >
       <Tabs.Screen
