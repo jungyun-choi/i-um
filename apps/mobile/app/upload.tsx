@@ -1,12 +1,13 @@
 import { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  SafeAreaView, Alert, ActivityIndicator, Modal, Animated,
+  Alert, ActivityIndicator, Modal, Animated,
   Dimensions, Pressable,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { api, uploadToS3 } from '../src/lib/api';
 import { useChildStore } from '../src/stores/childStore';
 import { useQueryClient } from '@tanstack/react-query';

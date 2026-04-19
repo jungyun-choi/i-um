@@ -1,9 +1,10 @@
 import { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  SafeAreaView, ActivityIndicator, RefreshControl, Modal,
+  ActivityIndicator, RefreshControl, Modal,
   Pressable, ScrollView, type NativeScrollEvent, type NativeSyntheticEvent,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTimeline } from '../../src/hooks/useTimeline';

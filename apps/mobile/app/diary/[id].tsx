@@ -1,12 +1,13 @@
 import { useState, useRef, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, SafeAreaView,
+  View, Text, StyleSheet, ScrollView,
   TouchableOpacity, Alert, TextInput, Dimensions, ActivityIndicator,
   FlatList, type ViewToken,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../../src/lib/api';
 import { useDiaryGeneration } from '../../src/hooks/useDiaryGeneration';
 import { DiaryGenerating } from '../../src/components/DiaryGenerating';

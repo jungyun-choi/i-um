@@ -1,8 +1,9 @@
 import {
-  View, Text, StyleSheet, ScrollView, SafeAreaView,
+  View, Text, StyleSheet, ScrollView,
   ActivityIndicator, TouchableOpacity, Dimensions, Modal,
   TextInput, KeyboardAvoidingView, Platform, Pressable, Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';

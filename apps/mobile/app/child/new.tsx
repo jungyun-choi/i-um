@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
-  SafeAreaView, Alert, Platform, KeyboardAvoidingView, Keyboard, ScrollView,
+  Alert, Platform, KeyboardAvoidingView, Keyboard, ScrollView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { api } from '../../src/lib/api';
 import { useQueryClient } from '@tanstack/react-query';
