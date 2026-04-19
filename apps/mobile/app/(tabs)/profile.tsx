@@ -281,6 +281,9 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
+        <TouchableOpacity onPress={() => router.push('/privacy')}>
+          <Text style={styles.privacyLink}>개인정보처리방침</Text>
+        </TouchableOpacity>
         <Text style={styles.version}>이음 v1.0.0</Text>
       </ScrollView>
 
@@ -377,7 +380,8 @@ const styles = StyleSheet.create({
   },
   menuComingSoonText: { fontSize: 11, color: '#AAA', fontWeight: '500' },
 
-  version: { textAlign: 'center', fontSize: 12, color: '#CCC', marginTop: 8 },
+  privacyLink: { textAlign: 'center', fontSize: 12, color: '#BBBBBB', marginTop: 16, textDecorationLine: 'underline' },
+  version: { textAlign: 'center', fontSize: 12, color: '#CCC', marginTop: 4, marginBottom: 8 },
 
   // JoinModal
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },

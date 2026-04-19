@@ -9,6 +9,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../../src/lib/api';
+import { formatDisplayDate } from '../../src/lib/utils/date';
 import { useDiaryGeneration } from '../../src/hooks/useDiaryGeneration';
 import { DiaryGenerating } from '../../src/components/DiaryGenerating';
 import { useToast } from '../../src/components/Toast';
@@ -54,8 +55,8 @@ function DiaryPage({
 
   const current = polledDiary?.status === 'done' ? polledDiary : diary;
   const photo = current?.photos;
-  const date = photo?.taken_at ? new Date(photo.taken_at) : current ? new Date(current.created_at) : new Date();
-  const dateStr = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
+  const rawDate = photo?.taken_at ?? (current?.created_at ?? new Date().toISOString());
+  const dateStr = formatDisplayDate(rawDate);
 
   const updateMutation = useMutation({
     mutationFn: (content: string) => api.diary.update(diaryId, content),

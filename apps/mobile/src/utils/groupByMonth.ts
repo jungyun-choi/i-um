@@ -12,12 +12,14 @@ export interface MonthSection {
   data: DiaryEntry[];
 }
 
+import { toKSTMonthKey } from '../lib/utils/date';
+
 export function groupEntriesByMonth(entries: DiaryEntry[]): MonthSection[] {
   const map = new Map<string, DiaryEntry[]>();
 
   for (const entry of entries) {
     const dateStr = entry.photos?.taken_at ?? entry.created_at;
-    const monthKey = dateStr.slice(0, 7); // 'YYYY-MM'
+    const monthKey = toKSTMonthKey(dateStr);
     if (!map.has(monthKey)) map.set(monthKey, []);
     map.get(monthKey)!.push(entry);
   }
