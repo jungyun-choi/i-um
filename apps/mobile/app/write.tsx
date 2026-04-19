@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
   KeyboardAvoidingView, Platform, ScrollView, Alert,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -39,6 +40,7 @@ export default function WriteScreen() {
   const inputRef = useRef<TextInput>(null);
 
   const [date, setDate] = useState(todayKST());
+  const [showPicker, setShowPicker] = useState(false);
   const [content, setContent] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -129,7 +131,7 @@ export default function WriteScreen() {
           showsVerticalScrollIndicator={false}
         >
           {/* 날짜 선택 */}
-          <View style={styles.datePicker}>
+          <View style={styles.dateRow}>
             <TouchableOpacity
               style={styles.dateArrow}
               onPress={() => setDate(shiftDate(date, -1))}
@@ -137,12 +139,14 @@ export default function WriteScreen() {
             >
               <Text style={styles.dateArrowText}>‹</Text>
             </TouchableOpacity>
-            <View style={styles.dateCenter}>
+            <TouchableOpacity style={styles.dateCenter} onPress={() => setShowPicker(true)} activeOpacity={0.7}>
               <Text style={styles.dateLabel}>{formatDateLabel(date)}</Text>
-              {isToday && <View style={styles.todayBadge}><Text style={styles.todayBadgeText}>오늘</Text></View>}
-            </View>
+              {isToday
+                ? <View style={styles.todayBadge}><Text style={styles.todayBadgeText}>오늘</Text></View>
+                : <Text style={styles.dateTapHint}>탭해서 날짜 변경</Text>}
+            </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.dateArrow, isToday ? styles.dateArrowDisabled : null]}
+              style={styles.dateArrow}
               onPress={() => { if (!isToday) setDate(shiftDate(date, 1)); }}
               disabled={isToday}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
@@ -150,6 +154,27 @@ export default function WriteScreen() {
               <Text style={[styles.dateArrowText, isToday ? styles.dateArrowTextDisabled : null]}>›</Text>
             </TouchableOpacity>
           </View>
+
+          {/* iOS: 인라인 피커, Android: 탭 시 표시 */}
+          {showPicker && (
+            <DateTimePicker
+              value={date}
+              mode="date"
+              display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+              maximumDate={today}
+              locale="ko"
+              onChange={(_, selected) => {
+                if (Platform.OS === 'android') setShowPicker(false);
+                if (selected) setDate(selected);
+              }}
+              style={Platform.OS === 'ios' ? styles.iosPicker : undefined}
+            />
+          )}
+          {showPicker && Platform.OS === 'ios' && (
+            <TouchableOpacity style={styles.pickerDone} onPress={() => setShowPicker(false)}>
+              <Text style={styles.pickerDoneText}>완료</Text>
+            </TouchableOpacity>
+          )}
 
           {/* 아이 이름 */}
           {activeChild && (
@@ -206,21 +231,27 @@ const styles = StyleSheet.create({
 
   scroll: { flexGrow: 1, paddingHorizontal: 20, paddingBottom: 40 },
 
-  datePicker: {
+  dateRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingVertical: 20,
   },
   dateArrow: { padding: 8 },
-  dateArrowDisabled: {},
   dateArrowText: { fontSize: 28, color: '#555', fontWeight: '300', lineHeight: 32 },
   dateArrowTextDisabled: { color: '#DDD' },
   dateCenter: { flex: 1, alignItems: 'center', gap: 6 },
   dateLabel: { fontSize: 16, fontWeight: '600', color: '#333' },
+  dateTapHint: { fontSize: 11, color: '#BFBAB3' },
   todayBadge: {
     backgroundColor: '#FEF0EA', borderRadius: 10,
     paddingVertical: 3, paddingHorizontal: 10,
   },
   todayBadgeText: { fontSize: 11, fontWeight: '700', color: '#E8735A' },
+  iosPicker: { height: 160 },
+  pickerDone: {
+    alignSelf: 'flex-end', paddingVertical: 8, paddingHorizontal: 16,
+    marginBottom: 4,
+  },
+  pickerDoneText: { fontSize: 15, fontWeight: '600', color: '#E8735A' },
 
   childLabel: {
     fontSize: 13, fontWeight: '600', color: '#C0B8AE',
