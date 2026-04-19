@@ -3,6 +3,7 @@
     "name": "이음",
     "slug": "i-um",
     "version": "1.0.0",
+    "description": "사진 한 장으로 완성되는 AI 육아 일기. 아이의 특별한 순간을 자동으로 기록해요.",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

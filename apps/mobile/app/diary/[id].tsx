@@ -8,7 +8,7 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import { api } from '../../src/lib/api';
 import { formatDisplayDate } from '../../src/lib/utils/date';
 import { useDiaryGeneration } from '../../src/hooks/useDiaryGeneration';
