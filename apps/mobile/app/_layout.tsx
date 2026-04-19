@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Slot } from 'expo-router';
+import { Text, TextInput } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { supabase } from '../src/lib/supabase';
 import { useRouter, useSegments } from 'expo-router';
@@ -11,6 +12,11 @@ import { ToastProvider } from '../src/components/Toast';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
 
 SplashScreen.preventAutoHideAsync();
+
+// Global Pretendard — Android requires explicit fontFamily (fontWeight alone insufficient)
+const _defaultTextStyle = { fontFamily: 'Pretendard-Regular' };
+Text.defaultProps = { ...(Text.defaultProps ?? {}), style: _defaultTextStyle };
+TextInput.defaultProps = { ...(TextInput.defaultProps ?? {}), style: _defaultTextStyle };
 
 function makeQueryClient() {
   return new QueryClient({
