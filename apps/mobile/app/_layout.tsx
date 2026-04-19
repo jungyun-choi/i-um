@@ -3,6 +3,7 @@ import { Slot } from 'expo-router';
 import { Text, TextInput } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { supabase } from '../src/lib/supabase';
+import { api } from '../src/lib/api';
 import { useRouter, useSegments } from 'expo-router';
 import { Session } from '@supabase/supabase-js';
 import { useFonts } from 'expo-font';
@@ -34,6 +35,15 @@ const queryClient = makeQueryClient();
 function AuthGate({ session, isRecovery }: { session: Session | null; isRecovery: boolean }) {
   const router = useRouter();
   const segments = useSegments();
+  const [hasChildren, setHasChildren] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (session) {
+      api.children.list().then((data) => setHasChildren(data.length > 0)).catch(() => setHasChildren(true));
+    } else {
+      setHasChildren(null);
+    }
+  }, [session]);
 
   useEffect(() => {
     if (isRecovery) {
@@ -45,9 +55,14 @@ function AuthGate({ session, isRecovery }: { session: Session | null; isRecovery
     if (!session && !inAuth) {
       router.replace('/(auth)/welcome');
     } else if (session && (inAuth || inReset)) {
-      router.replace('/(tabs)/timeline');
+      if (hasChildren === false) {
+        router.replace('/child/new?from=onboarding');
+      } else if (hasChildren === true) {
+        router.replace('/(tabs)/timeline');
+      }
+      // hasChildren === null → still loading, wait
     }
-  }, [session, segments, isRecovery]);
+  }, [session, segments, isRecovery, hasChildren]);
 
   return null;
 }
