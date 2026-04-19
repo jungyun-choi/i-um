@@ -28,6 +28,7 @@ export default function TimelineScreen() {
 
   const entries = data?.pages.flatMap((p) => p.entries) ?? [];
   const sections = groupEntriesByMonth(entries);
+  const allIds = entries.map((e) => e.id).join(',');
 
   // "1년 전 오늘" 메모리 카드 계산
   const memoryEntry = (() => {
@@ -168,7 +169,7 @@ export default function TimelineScreen() {
                 <Text style={styles.sectionHeaderText}>{formatMonthLabel(section.monthKey)}</Text>
               </View>
               {section.data.map((item) => (
-                <DiaryCard key={item.id} entry={item} />
+                <DiaryCard key={item.id} entry={item} allIds={allIds} />
               ))}
             </View>
           ))}
