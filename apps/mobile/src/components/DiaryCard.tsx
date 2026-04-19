@@ -13,13 +13,14 @@ interface Props {
     photos?: { id: string; s3_key: string; taken_at: string | null; location_name?: string | null } | null;
     status?: string;
   };
+  allIds?: string;
 }
 
 const S3_BASE = process.env.EXPO_PUBLIC_S3_BASE_URL ?? '';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
-export function DiaryCard({ entry }: Props) {
+export function DiaryCard({ entry, allIds }: Props) {
   const router = useRouter();
   const photo = entry.photos;
   const date = new Date(photo?.taken_at ?? entry.created_at);
@@ -33,7 +34,7 @@ export function DiaryCard({ entry }: Props) {
   return (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => router.push(`/diary/${entry.id}`)}
+      onPress={() => router.push(allIds ? `/diary/${entry.id}?ids=${allIds}` : `/diary/${entry.id}`)}
       activeOpacity={0.85}
     >
       {photo?.s3_key ? (
