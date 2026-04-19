@@ -14,11 +14,10 @@ import { api } from '../../src/lib/api';
 import { useChildStore } from '../../src/stores/childStore';
 import { MilestoneSkeletonList } from '../../src/components/Skeleton';
 import { getDday, getAgeText } from '../../src/lib/utils/age';
-import { getExpectedDate, MILESTONE_META } from '../../src/lib/utils/milestone';
+import { getExpectedDate, MILESTONE_META, ORDERED_MILESTONE_TYPES, formatMilestoneDate, isDatePast } from '../../src/lib/utils/milestone';
 
 const SCREEN_W = Dimensions.get('window').width;
 const S3_BASE = process.env.EXPO_PUBLIC_S3_BASE_URL ?? '';
-const EXPECTED_MILESTONES = Object.keys(MILESTONE_META);
 const EVENT_TYPES = new Set(['first_word', 'first_step']);
 
 function todayString() {
@@ -90,9 +89,7 @@ interface PendingCardProps {
 function PendingCard({ milestone, onRecord }: PendingCardProps) {
   const meta = MILESTONE_META[milestone.type] ?? { emoji: '⭐', label: milestone.type };
   const dday = milestone.expectedDate ? getDday(milestone.expectedDate) : null;
-  const isPast = milestone.expectedDate
-    ? new Date(milestone.expectedDate) < new Date()
-    : false;
+  const isPast = milestone.expectedDate ? isDatePast(milestone.expectedDate) : false;
   const isEvent = EVENT_TYPES.has(milestone.type);
 
   return (
@@ -102,7 +99,7 @@ function PendingCard({ milestone, onRecord }: PendingCardProps) {
         <View>
           <Text style={styles.pendingLabel}>{meta.label}</Text>
           {milestone.expectedDate ? (
-            <Text style={styles.pendingDate}>{milestone.expectedDate}</Text>
+            <Text style={styles.pendingDate}>{formatMilestoneDate(milestone.expectedDate)}</Text>
           ) : (
             <Text style={styles.pendingDate}>언제 일어날지 몰라요</Text>
           )}
@@ -249,7 +246,7 @@ export default function MilestonesScreen() {
   }
 
   const achievedTypes = new Set((achieved as MilestoneData[]).map((m) => m.type));
-  const pending: MilestoneData[] = EXPECTED_MILESTONES
+  const pending: MilestoneData[] = ORDERED_MILESTONE_TYPES
     .filter((type) => !achievedTypes.has(type))
     .map((type) => ({ type, expectedDate: getExpectedDate(activeChild.birth_date, type) }));
 

@@ -13,8 +13,8 @@ describe('detectMilestone', () => {
     expect(detectMilestone(BIRTH, daysAfter(BIRTH, 7))).toBe('week_1');
   });
 
-  it('생후 8일 (±1 범위 밖) null', () => {
-    expect(detectMilestone(BIRTH, daysAfter(BIRTH, 8))).toBeNull();
+  it('생후 9일 (±1 범위 밖) null', () => {
+    expect(detectMilestone(BIRTH, daysAfter(BIRTH, 9))).toBeNull();
   });
 
   it('생후 100일 day_100 반환', () => {
