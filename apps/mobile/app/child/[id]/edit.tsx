@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
   KeyboardAvoidingView, Platform, ScrollView, Keyboard, ActivityIndicator, Alert,
+  Modal, Pressable,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -28,24 +30,38 @@ export default function EditChildScreen() {
 
   const child = children.find((c) => c.id === id);
 
+  function parseBirthDate(s?: string): Date | null {
+    if (!s) return null;
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
   const [name, setName] = useState(child?.name ?? '');
-  const [birthDate, setBirthDate] = useState(child?.birth_date ?? '');
+  const [birthDate, setBirthDate] = useState<Date | null>(parseBirthDate(child?.birth_date));
+  const [showPicker, setShowPicker] = useState(false);
   const [gender, setGender] = useState(child?.gender ?? 'N');
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(child?.avatar_url ?? null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const maxDate = new Date();
+  const minDate = new Date(maxDate.getFullYear() - 10, maxDate.getMonth(), maxDate.getDate());
+
+  function formatDateKorean(d: Date) {
+    return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+  }
+
+  function dateToString(d: Date) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
   useEffect(() => {
     if (!child) router.back();
   }, [child]);
-
-  function formatDateInput(text: string) {
-    const digits = text.replace(/\D/g, '').slice(0, 8);
-    if (digits.length <= 4) return digits;
-    if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
-    return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
-  }
 
   async function handlePickAvatar() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -106,14 +122,11 @@ export default function EditChildScreen() {
 
   async function handleSave() {
     if (!name.trim()) { showToast('이름을 입력해주세요'); return; }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
-      showToast('생일을 YYYY-MM-DD 형식으로 입력해주세요');
-      return;
-    }
+    if (!birthDate) { showToast('생일을 선택해주세요'); return; }
     setLoading(true);
     try {
       const body: Parameters<typeof api.children.update>[1] = {
-        name: name.trim(), birth_date: birthDate, gender,
+        name: name.trim(), birth_date: dateToString(birthDate), gender,
       };
       if (avatarUrl) body.avatar_url = avatarUrl;
       await api.children.update(id, body);
@@ -179,17 +192,47 @@ export default function EditChildScreen() {
           />
 
           <Text style={styles.label}>생일</Text>
-          <TextInput
-            style={styles.input}
-            value={birthDate}
-            onChangeText={(t) => setBirthDate(formatDateInput(t))}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor="#CCC"
-            keyboardType="numeric"
-            maxLength={10}
-            returnKeyType="done"
-            onSubmitEditing={() => Keyboard.dismiss()}
-          />
+          <TouchableOpacity
+            style={[styles.input, styles.dateBtn]}
+            onPress={() => { Keyboard.dismiss(); setShowPicker(true); }}
+            activeOpacity={0.75}
+          >
+            <Text style={birthDate ? styles.dateBtnText : styles.dateBtnPlaceholder}>
+              {birthDate ? formatDateKorean(birthDate) : '날짜를 선택해주세요'}
+            </Text>
+            <Text style={styles.dateBtnIcon}>📅</Text>
+          </TouchableOpacity>
+
+          {Platform.OS === 'ios' ? (
+            <Modal visible={showPicker} transparent animationType="slide">
+              <Pressable style={styles.pickerBackdrop} onPress={() => setShowPicker(false)} />
+              <View style={styles.pickerSheet}>
+                <View style={styles.pickerHeader}>
+                  <TouchableOpacity onPress={() => setShowPicker(false)}>
+                    <Text style={styles.pickerDone}>완료</Text>
+                  </TouchableOpacity>
+                </View>
+                <DateTimePicker
+                  value={birthDate ?? new Date()}
+                  mode="date"
+                  display="spinner"
+                  onChange={(_, date) => { if (date) setBirthDate(date); }}
+                  maximumDate={maxDate}
+                  minimumDate={minDate}
+                  locale="ko"
+                />
+              </View>
+            </Modal>
+          ) : showPicker && (
+            <DateTimePicker
+              value={birthDate ?? new Date()}
+              mode="date"
+              display="default"
+              onChange={(_, date) => { setShowPicker(false); if (date) setBirthDate(date); }}
+              maximumDate={maxDate}
+              minimumDate={minDate}
+            />
+          )}
 
           <Text style={styles.label}>성별</Text>
           <View style={styles.genderRow}>
@@ -263,4 +306,12 @@ const styles = StyleSheet.create({
 
   deleteBtn: { marginTop: 32, marginBottom: 8, alignItems: 'center', paddingVertical: 12 },
   deleteBtnText: { fontSize: 14, color: '#C0392B', textDecorationLine: 'underline' },
+  dateBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  dateBtnText: { fontSize: 16, color: '#1A1A1A' },
+  dateBtnPlaceholder: { fontSize: 16, color: '#CCC' },
+  dateBtnIcon: { fontSize: 18 },
+  pickerBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' },
+  pickerSheet: { backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, paddingBottom: 32 },
+  pickerHeader: { flexDirection: 'row', justifyContent: 'flex-end', paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 },
+  pickerDone: { fontSize: 16, color: '#E8735A', fontWeight: '700' },
 });

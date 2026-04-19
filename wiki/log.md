@@ -698,3 +698,13 @@
   - apps/mobile/app/_layout.tsx
   - apps/mobile/app/upload.tsx
   - apps/mobile/src/components/PaywallModal.tsx
+
+## [2026-04-20] commit | feat: Sprint #18 — 온보딩 플로우 완성
+
+- 커밋: `e67789e` by jy.choi
+- 변경 파일 수: 5
+  - apps/mobile/app/_layout.tsx
+  - apps/mobile/app/child/new.tsx
+  - apps/mobile/app/upload.tsx
+  - apps/mobile/package.json
+  - package-lock.json
