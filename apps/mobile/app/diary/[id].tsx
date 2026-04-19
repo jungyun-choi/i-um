@@ -44,11 +44,12 @@ function DiaryPage({
   const [imgRatio, setImgRatio] = useState(1);
   const [retrying, setRetrying] = useState(false);
 
-  const { data: diary, isLoading } = useQuery({
+  const { data: diary, isLoading, error, refetch } = useQuery({
     queryKey: ['diary', diaryId],
     queryFn: () => api.diary.get(diaryId),
     enabled: !!diaryId,
     staleTime: 1000 * 60 * 5,
+    retry: 1,
   });
 
   const { diary: polledDiary } = useDiaryGeneration(
@@ -148,10 +149,19 @@ function DiaryPage({
     );
   }
   if (!current) {
+    const errMsg = error instanceof Error ? error.message : '알 수 없는 오류';
     return (
-      <View style={{ width: SCREEN_W, flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12 }}>
+      <View style={{ width: SCREEN_W, flex: 1, justifyContent: 'center', alignItems: 'center', gap: 12, paddingHorizontal: 40 }}>
         <Text style={{ fontSize: 32 }}>😔</Text>
         <Text style={{ fontSize: 15, color: '#888' }}>일기를 불러올 수 없어요</Text>
+        <Text style={{ fontSize: 11, color: '#CCC', textAlign: 'center' }}>{errMsg}</Text>
+        <Text style={{ fontSize: 10, color: '#DDD' }}>id: {diaryId.slice(0, 8)}…</Text>
+        <TouchableOpacity
+          onPress={() => refetch()}
+          style={{ marginTop: 8, backgroundColor: '#E8735A', borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10 }}
+        >
+          <Text style={{ color: '#fff', fontSize: 14 }}>다시 시도</Text>
+        </TouchableOpacity>
       </View>
     );
   }

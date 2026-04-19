@@ -884,3 +884,19 @@
   - apps/mobile/metro.config.js
   - apps/mobile/package.json
   - package-lock.json
+
+## [2026-04-20] commit | feat: 마일스톤 → 발자국 용어 전면 교체
+
+- 커밋: `be4457e` by jy.choi
+- 변경 파일 수: 5
+  - apps/mobile/app/(tabs)/_layout.tsx
+  - apps/mobile/app/(tabs)/milestones.tsx
+  - apps/mobile/app/(tabs)/profile.tsx
+  - apps/mobile/app/child/[id]/edit.tsx
+  - apps/mobile/src/components/PaywallModal.tsx
+
+## [2026-04-20] commit | fix: 일기 상세 흰화면/느린 로딩 수정
+
+- 커밋: `84bf58b` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/diary/[id].tsx

@@ -39,18 +39,23 @@ router.post('/', async (req: AuthRequest, res) => {
 });
 
 async function assertDiaryAccess(entryId: string, userId: string) {
-  const { data } = await supabase
+  const { data: entry } = await supabase
     .from('diary_entries')
-    .select('photo_id, child_id, children!inner(user_id), family_members!left(user_id)')
+    .select('photo_id, child_id, children!inner(user_id)')
     .eq('id', entryId)
     .single();
-  if (!data) return null;
-  const owned = (data.children as any)?.user_id === userId;
-  const shared = Array.isArray(data.family_members)
-    ? data.family_members.some((m: any) => m.user_id === userId)
-    : (data.family_members as any)?.user_id === userId;
-  if (!owned && !shared) return null;
-  return data as { photo_id: string | null; child_id: string };
+  if (!entry) return null;
+  const owned = (entry.children as any)?.user_id === userId;
+  if (owned) return entry as { photo_id: string | null; child_id: string };
+
+  const { data: shared } = await supabase
+    .from('family_members')
+    .select('id')
+    .eq('child_id', entry.child_id)
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (!shared) return null;
+  return entry as { photo_id: string | null; child_id: string };
 }
 
 router.get('/:id', async (req: AuthRequest, res) => {
