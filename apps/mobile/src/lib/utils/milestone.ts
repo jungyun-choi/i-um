@@ -35,9 +35,31 @@ export const MILESTONE_META: Record<string, { emoji: string; label: string }> = 
   '2nd_year': { emoji: '🎈', label: '두돌' },
 };
 
+// 마일스톤 화면 표시 순서 (legacy·중복 키 제외)
+export const ORDERED_MILESTONE_TYPES: string[] = [
+  'week_1', 'week_2', 'month_1', 'day_50', 'day_100',
+  'month_6', 'dol', 'month_18', 'year_2', 'year_3',
+  'first_word', 'first_step',
+];
+
 // DB에 저장된 type key → 사용자 표시용 한국어 label
 export function getMilestoneDisplayLabel(type: string): string {
   return MILESTONE_META[type]?.label ?? type;
+}
+
+// "YYYY-MM-DD" → "YYYY년 M월 D일" 표시용 포맷
+export function formatMilestoneDate(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return `${y}년 ${m}월 ${d}일`;
+}
+
+// 두 날짜 문자열 비교 (로컬 기준, UTC 오차 없음)
+export function isDatePast(dateStr: string): boolean {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const target = new Date(y, m - 1, d);
+  const todayMid = new Date();
+  todayMid.setHours(0, 0, 0, 0);
+  return target < todayMid;
 }
 
 export function getExpectedDate(birthDate: string, type: string): string | undefined {
