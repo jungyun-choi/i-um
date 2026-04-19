@@ -250,12 +250,9 @@ export default function ProfileScreen() {
             <Text style={styles.menuText}>아이 추가</Text>
             <Text style={styles.menuArrow}>›</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.menuItem, styles.menuItemLast]}>
+          <TouchableOpacity style={[styles.menuItem, styles.menuItemLast]} onPress={() => router.push('/notification-settings')}>
             <Text style={styles.menuIcon}>🔔</Text>
             <Text style={styles.menuText}>알림 설정</Text>
-            <View style={styles.menuComingSoon}>
-              <Text style={styles.menuComingSoonText}>준비 중</Text>
-            </View>
             <Text style={styles.menuArrow}>›</Text>
           </TouchableOpacity>
         </View>
