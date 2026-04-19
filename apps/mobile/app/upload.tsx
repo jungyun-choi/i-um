@@ -12,6 +12,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api, uploadToS3 } from '../src/lib/api';
 import { useChildStore } from '../src/stores/childStore';
+import { getAgeText } from '../src/lib/utils/age';
 import { useQueryClient } from '@tanstack/react-query';
 import { PhotoGrid } from '../src/components/PhotoGrid';
 import { DiaryGenerating } from '../src/components/DiaryGenerating';
@@ -138,7 +139,7 @@ export default function UploadScreen() {
     }).start();
   }
 
-  function closeDiaryModal() {
+  function closeDiaryModal(destination?: () => void) {
     Animated.timing(slideAnim, {
       toValue: SCREEN_H,
       duration: 300,
@@ -146,7 +147,11 @@ export default function UploadScreen() {
     }).start(() => {
       setDiaryResult(null);
       queryClient.invalidateQueries({ queryKey: ['timeline', activeChild?.id] });
-      router.back();
+      if (destination) {
+        destination();
+      } else {
+        router.back();
+      }
     });
   }
 
@@ -227,6 +232,12 @@ export default function UploadScreen() {
             />
           </ScrollView>
           <View style={styles.footer}>
+            {/* 아이 나이 컨텍스트 */}
+            {activeChild?.birth_date && (
+              <Text style={styles.ageContext}>
+                📅 {getAgeText(activeChild.birth_date)}의 순간을 기록해요
+              </Text>
+            )}
             {/* 일기 스타일 토글 */}
             <View style={styles.styleContainer}>
               <Text style={styles.styleLabel}>일기 스타일</Text>
@@ -281,7 +292,7 @@ export default function UploadScreen() {
       {/* 일기 완성 모달 */}
       {diaryResult && (
         <Modal transparent animationType="none">
-          <Pressable style={styles.backdrop} onPress={closeDiaryModal} />
+          <Pressable style={styles.backdrop} onPress={() => { closeDiaryModal(); }} />
           <Animated.View style={[styles.sheet, { transform: [{ translateY: slideAnim }] }]}>
             <View style={styles.sheetHandle} />
             <View style={styles.sheetHeader}>
@@ -291,6 +302,11 @@ export default function UploadScreen() {
                   ? `${diaryResult.totalCount}개 일기가 생성됐어요!`
                   : '일기가 완성됐어요!'}
               </Text>
+              {activeChild?.birth_date && (
+                <Text style={styles.sheetAgeLabel}>
+                  {getAgeText(activeChild.birth_date)} 기준
+                </Text>
+              )}
               {diaryResult.totalCount > 1 && (
                 <Text style={styles.sheetSubtitle}>마지막 일기 미리보기예요</Text>
               )}
@@ -304,17 +320,18 @@ export default function UploadScreen() {
               <Text style={styles.diaryContent}>{diaryResult.content}</Text>
             </ScrollView>
             <View style={styles.modalBtnRow}>
-              <TouchableOpacity style={styles.confirmBtnSecondary} onPress={closeDiaryModal}>
+              <TouchableOpacity style={styles.confirmBtnSecondary} onPress={() => { closeDiaryModal(); }}>
                 <Text style={styles.confirmBtnSecondaryText}>타임라인</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.confirmBtn}
                 onPress={() => {
-                  closeDiaryModal();
                   if (diaryResult.totalCount > 1) {
-                    // Multiple diaries — go to timeline to see all
+                    closeDiaryModal(() => router.replace('/(tabs)/timeline'));
                   } else if (diaryResult?.id) {
-                    router.push(`/diary/${diaryResult.id}`);
+                    closeDiaryModal(() => router.push(`/diary/${diaryResult.id}`));
+                  } else {
+                    closeDiaryModal();
                   }
                 }}
               >
@@ -362,6 +379,7 @@ const styles = StyleSheet.create({
   },
   pickBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   footer: { padding: 16, gap: 12 },
+  ageContext: { fontSize: 13, color: '#B8A898', textAlign: 'center', fontStyle: 'italic' },
   styleContainer: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingVertical: 4,
@@ -402,6 +420,7 @@ const styles = StyleSheet.create({
   sheetHeader: { alignItems: 'center', gap: 6, marginBottom: 20 },
   sheetEmoji: { fontSize: 40 },
   sheetTitle: { fontSize: 20, fontWeight: '700', color: '#1A1A1A' },
+  sheetAgeLabel: { fontSize: 12, color: '#E8735A', fontWeight: '600', marginTop: 4, opacity: 0.8 },
   sheetSubtitle: { fontSize: 13, color: '#AAA', marginTop: 2 },
   milestoneBadge: {
     backgroundColor: '#FFF0EC', borderRadius: 20,
