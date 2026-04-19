@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import {
-  View, Text, StyleSheet, TextInput, TouchableOpacity, Alert,
+  View, Text, StyleSheet, TextInput, TouchableOpacity,
+  KeyboardAvoidingView, Platform, ScrollView, Keyboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { api } from '../../../src/lib/api';
 import { useChildStore } from '../../../src/stores/childStore';
+import { useToast } from '../../../src/components/Toast';
 
 const GENDERS = [
-  { value: 'M', label: '남자아이' },
-  { value: 'F', label: '여자아이' },
-  { value: 'N', label: '선택 안함' },
+  { value: 'M', label: '남자아이', emoji: '👦' },
+  { value: 'F', label: '여자아이', emoji: '👧' },
+  { value: 'N', label: '선택 안함', emoji: '🧒' },
 ];
 
 export default function EditChildScreen() {
@@ -18,6 +20,7 @@ export default function EditChildScreen() {
   const router = useRouter();
   const children = useChildStore((s) => s.children);
   const setChildren = useChildStore((s) => s.setChildren);
+  const { showToast } = useToast();
 
   const child = children.find((c) => c.id === id);
 
@@ -38,18 +41,20 @@ export default function EditChildScreen() {
   }
 
   async function handleSave() {
-    if (!name.trim()) { Alert.alert('이름을 입력해주세요'); return; }
+    if (!name.trim()) { showToast('이름을 입력해주세요'); return; }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
-      Alert.alert('생일 형식이 올바르지 않아요', 'YYYY-MM-DD 형식으로 입력해주세요.'); return;
+      showToast('생일을 YYYY-MM-DD 형식으로 입력해주세요');
+      return;
     }
     setLoading(true);
     try {
       await api.children.update(id, { name: name.trim(), birth_date: birthDate, gender });
       const updated = await api.children.list();
       setChildren(updated);
+      showToast('저장됐어요', 'success');
       router.back();
     } catch (e: unknown) {
-      Alert.alert('저장 실패', e instanceof Error ? e.message : '다시 시도해주세요.');
+      showToast(e instanceof Error ? e.message : '저장에 실패했어요. 다시 시도해주세요.');
     } finally {
       setLoading(false);
     }
@@ -63,48 +68,59 @@ export default function EditChildScreen() {
         </TouchableOpacity>
         <Text style={styles.title}>프로필 편집</Text>
         <TouchableOpacity onPress={handleSave} disabled={loading}>
-          <Text style={[styles.save, loading && styles.saveDisabled]}>
+          <Text style={[styles.save, loading ? styles.saveDisabled : null]}>
             {loading ? '저장 중' : '저장'}
           </Text>
         </TouchableOpacity>
       </View>
 
-      <View style={styles.form}>
-        <Text style={styles.label}>이름</Text>
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-          placeholder="아이 이름"
-          placeholderTextColor="#CCC"
-        />
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+        <ScrollView
+          contentContainerStyle={styles.form}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.label}>이름</Text>
+          <TextInput
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
+            placeholder="아이 이름"
+            placeholderTextColor="#CCC"
+            returnKeyType="next"
+          />
 
-        <Text style={styles.label}>생일</Text>
-        <TextInput
-          style={styles.input}
-          value={birthDate}
-          onChangeText={(t) => setBirthDate(formatDateInput(t))}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor="#CCC"
-          keyboardType="numeric"
-          maxLength={10}
-        />
+          <Text style={styles.label}>생일</Text>
+          <TextInput
+            style={styles.input}
+            value={birthDate}
+            onChangeText={(t) => setBirthDate(formatDateInput(t))}
+            placeholder="YYYY-MM-DD"
+            placeholderTextColor="#CCC"
+            keyboardType="numeric"
+            maxLength={10}
+            returnKeyType="done"
+            onSubmitEditing={() => Keyboard.dismiss()}
+          />
 
-        <Text style={styles.label}>성별</Text>
-        <View style={styles.genderRow}>
-          {GENDERS.map((g) => (
-            <TouchableOpacity
-              key={g.value}
-              style={[styles.genderBtn, gender === g.value && styles.genderBtnActive]}
-              onPress={() => setGender(g.value)}
-            >
-              <Text style={[styles.genderText, gender === g.value && styles.genderTextActive]}>
-                {g.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
+          <Text style={styles.label}>성별</Text>
+          <View style={styles.genderRow}>
+            {GENDERS.map((g) => (
+              <TouchableOpacity
+                key={g.value}
+                style={[styles.genderBtn, gender === g.value ? styles.genderBtnActive : null]}
+                onPress={() => { Keyboard.dismiss(); setGender(g.value); }}
+                activeOpacity={0.75}
+              >
+                <Text style={styles.genderEmoji}>{g.emoji}</Text>
+                <Text style={[styles.genderText, gender === g.value ? styles.genderTextActive : null]}>
+                  {g.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -119,18 +135,19 @@ const styles = StyleSheet.create({
   title: { fontSize: 17, fontWeight: '600', color: '#1A1A1A' },
   save: { fontSize: 16, color: '#E8735A', fontWeight: '600' },
   saveDisabled: { opacity: 0.5 },
-  form: { flex: 1, padding: 24, gap: 8 },
-  label: { fontSize: 14, fontWeight: '500', color: '#555', marginTop: 16 },
+  form: { padding: 24, gap: 8 },
+  label: { fontSize: 14, fontWeight: '600', color: '#555', marginTop: 16 },
   input: {
-    borderWidth: 1, borderColor: '#E5E5E5', borderRadius: 12,
-    padding: 14, fontSize: 16, backgroundColor: '#fff',
+    borderWidth: 1.5, borderColor: '#E8E4DC', borderRadius: 14,
+    padding: 15, fontSize: 16, backgroundColor: '#fff', color: '#1A1A1A',
   },
   genderRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
   genderBtn: {
-    flex: 1, borderWidth: 1, borderColor: '#E5E5E5', borderRadius: 10,
-    paddingVertical: 12, alignItems: 'center', backgroundColor: '#fff',
+    flex: 1, borderWidth: 1.5, borderColor: '#E8E4DC', borderRadius: 14,
+    paddingVertical: 14, alignItems: 'center', backgroundColor: '#fff', gap: 4,
   },
   genderBtnActive: { borderColor: '#E8735A', backgroundColor: '#FFF0ED' },
-  genderText: { fontSize: 14, color: '#888' },
-  genderTextActive: { color: '#E8735A', fontWeight: '600' },
+  genderEmoji: { fontSize: 22 },
+  genderText: { fontSize: 12, color: '#888', fontWeight: '500' },
+  genderTextActive: { color: '#E8735A', fontWeight: '700' },
 });
