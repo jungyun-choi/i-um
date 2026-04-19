@@ -21,7 +21,8 @@ const S3_BASE = process.env.EXPO_PUBLIC_S3_BASE_URL ?? '';
 const EVENT_TYPES = new Set(['first_word', 'first_step']);
 
 function todayString() {
-  return new Date().toISOString().split('T')[0];
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 interface MilestoneData {
@@ -69,7 +70,7 @@ function AchievedCard({ milestone }: { milestone: MilestoneData }) {
           <Text style={styles.achievedAge}>{ageAtMilestone}</Text>
         )}
         {milestone.date && (
-          <Text style={styles.achievedDate}>{milestone.date}</Text>
+          <Text style={styles.achievedDate}>{formatMilestoneDate(milestone.date)}</Text>
         )}
       </View>
       {milestone.diary_id && (

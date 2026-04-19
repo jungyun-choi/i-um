@@ -25,7 +25,9 @@ function StatBox({ value, label }: { value: string | number; label: string }) {
 
 function formatRecordPeriod(firstDate: string | null): string {
   if (!firstDate) return '아직 없음';
-  const days = Math.floor((Date.now() - new Date(firstDate).getTime()) / (1000 * 60 * 60 * 24));
+  const [fy, fm, fd] = firstDate.split('-').map(Number);
+  const first = new Date(fy, fm - 1, fd);
+  const days = Math.floor((Date.now() - first.getTime()) / (1000 * 60 * 60 * 24));
   if (days === 0) return '오늘 시작';
   if (days < 30) return `${days}일째`;
   if (days < 365) return `${Math.floor(days / 30)}개월째`;
