@@ -1,8 +1,9 @@
 import {
   View, Text, StyleSheet, ScrollView,
   ActivityIndicator, TouchableOpacity, Dimensions, Modal,
-  TextInput, KeyboardAvoidingView, Platform, Pressable, Alert,
+  Platform, Pressable, Alert,
 } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
@@ -129,20 +130,30 @@ interface RecordModalProps {
 }
 
 function RecordModal({ visible, type, childId, onClose, onSaved }: RecordModalProps) {
-  const [date, setDate] = useState(todayString());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showAndroidPicker, setShowAndroidPicker] = useState(false);
   const [saving, setSaving] = useState(false);
   const meta = type ? (MILESTONE_META[type] ?? { emoji: '⭐', label: type }) : null;
 
+  const maxDate = new Date();
+  const minDate = new Date(maxDate.getFullYear() - 10, maxDate.getMonth(), maxDate.getDate());
+
+  function dateToString(d: Date) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function formatDateKorean(d: Date) {
+    return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+  }
+
   async function handleSave() {
     if (!type) return;
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(date)) {
-      Alert.alert('날짜 형식 오류', 'YYYY-MM-DD 형식으로 입력해주세요.');
-      return;
-    }
     setSaving(true);
     try {
-      await api.milestones.create({ child_id: childId, type, date });
+      await api.milestones.create({ child_id: childId, type, date: dateToString(selectedDate) });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       onSaved();
       onClose();
@@ -157,24 +168,46 @@ function RecordModal({ visible, type, childId, onClose, onSaved }: RecordModalPr
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <Pressable style={styles.modalBackdrop} onPress={onClose} />
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.modalWrapper}>
+      <View style={styles.modalWrapper}>
         <View style={styles.modalSheet}>
           <View style={styles.modalHandle} />
-          {meta && (
-            <Text style={styles.modalEmoji}>{meta.emoji}</Text>
-          )}
-          <Text style={styles.modalTitle}>{meta?.label} 날짜를 입력해주세요</Text>
-          <Text style={styles.modalSub}>아이가 처음으로 {meta?.label}을(를) 한 날이에요</Text>
+          {meta && <Text style={styles.modalEmoji}>{meta.emoji}</Text>}
+          <Text style={styles.modalTitle}>{meta?.label}한 날을 알려주세요</Text>
+          <Text style={styles.modalSub}>정확하지 않아도 괜찮아요</Text>
 
-          <TextInput
-            style={styles.dateInput}
-            value={date}
-            onChangeText={setDate}
-            placeholder="YYYY-MM-DD"
-            placeholderTextColor="#CCC"
-            keyboardType="numbers-and-punctuation"
-            maxLength={10}
-          />
+          {Platform.OS === 'ios' ? (
+            <DateTimePicker
+              value={selectedDate}
+              mode="date"
+              display="spinner"
+              onChange={(_, date) => { if (date) setSelectedDate(date); }}
+              maximumDate={maxDate}
+              minimumDate={minDate}
+              locale="ko"
+              style={styles.datePicker}
+            />
+          ) : (
+            <>
+              <TouchableOpacity
+                style={styles.dateDisplayBtn}
+                onPress={() => setShowAndroidPicker(true)}
+                activeOpacity={0.75}
+              >
+                <Text style={styles.dateDisplayText}>{formatDateKorean(selectedDate)}</Text>
+                <Text style={styles.dateDisplayIcon}>📅</Text>
+              </TouchableOpacity>
+              {showAndroidPicker && (
+                <DateTimePicker
+                  value={selectedDate}
+                  mode="date"
+                  display="default"
+                  onChange={(_, date) => { setShowAndroidPicker(false); if (date) setSelectedDate(date); }}
+                  maximumDate={maxDate}
+                  minimumDate={minDate}
+                />
+              )}
+            </>
+          )}
 
           <TouchableOpacity
             style={[styles.saveBtn, saving ? styles.saveBtnDisabled : null]}
@@ -189,7 +222,7 @@ function RecordModal({ visible, type, childId, onClose, onSaved }: RecordModalPr
             <Text style={styles.cancelBtnText}>취소</Text>
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 }
@@ -371,13 +404,15 @@ const styles = StyleSheet.create({
   },
   modalEmoji: { fontSize: 48, marginBottom: 12 },
   modalTitle: { fontSize: 18, fontWeight: '700', color: '#1A1A1A', marginBottom: 6, textAlign: 'center' },
-  modalSub: { fontSize: 14, color: '#888', marginBottom: 24, textAlign: 'center' },
-  dateInput: {
-    width: '100%', height: 52, borderWidth: 1.5, borderColor: '#E8E4DC',
-    borderRadius: 14, paddingHorizontal: 16, fontSize: 17, color: '#1A1A1A',
-    textAlign: 'center', letterSpacing: 2, marginBottom: 16,
-    backgroundColor: '#FAFAF8',
+  modalSub: { fontSize: 14, color: '#888', marginBottom: 8, textAlign: 'center' },
+  datePicker: { width: '100%', marginBottom: 8 },
+  dateDisplayBtn: {
+    width: '100%', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    borderWidth: 1.5, borderColor: '#E8E4DC', borderRadius: 14,
+    paddingHorizontal: 16, paddingVertical: 15, marginBottom: 16, backgroundColor: '#FAFAF8',
   },
+  dateDisplayText: { fontSize: 16, color: '#1A1A1A', fontWeight: '500' },
+  dateDisplayIcon: { fontSize: 18 },
   saveBtn: {
     width: '100%', height: 52, backgroundColor: '#E8735A',
     borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginBottom: 12,
