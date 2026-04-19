@@ -65,6 +65,8 @@ export const api = {
   users: {
     savePushToken: (token: string) =>
       authFetch('/users/push-token', { method: 'PATCH', body: JSON.stringify({ token }) }),
+    deleteAccount: () =>
+      authFetch('/users/me', { method: 'DELETE' }),
   },
 };
 

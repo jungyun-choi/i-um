@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView,
-  Share, Modal, TextInput, Pressable, KeyboardAvoidingView, Platform,
+  Share, Modal, TextInput, Pressable, KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -107,6 +107,7 @@ export default function ProfileScreen() {
   const setChildren = useChildStore((s) => s.setChildren);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [inviting, setInviting] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['diary-stats', activeChild?.id],
@@ -137,6 +138,43 @@ export default function ProfileScreen() {
       { text: '취소', style: 'cancel' },
       { text: '로그아웃', style: 'destructive', onPress: () => supabase.auth.signOut() },
     ]);
+  }
+
+  function handleDeleteAccount() {
+    Alert.alert(
+      '계정 삭제',
+      '정말요? 모든 일기, 사진, 마일스톤이 영구적으로 삭제됩니다.\n되돌릴 수 없어요.',
+      [
+        { text: '취소', style: 'cancel' },
+        {
+          text: '삭제 진행',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert(
+              '마지막 확인',
+              '아이의 모든 기록이 삭제됩니다. 계속하시겠어요?',
+              [
+                { text: '아니요, 돌아가기', style: 'cancel' },
+                {
+                  text: '네, 삭제합니다',
+                  style: 'destructive',
+                  onPress: async () => {
+                    setDeletingAccount(true);
+                    try {
+                      await api.users.deleteAccount();
+                      await supabase.auth.signOut();
+                    } catch {
+                      setDeletingAccount(false);
+                      Alert.alert('오류', '계정 삭제에 실패했어요. 다시 시도해주세요.');
+                    }
+                  },
+                },
+              ],
+            );
+          },
+        },
+      ],
+    );
   }
 
   return (
@@ -223,9 +261,23 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.section}>
-          <TouchableOpacity style={[styles.menuItem, styles.menuItemLast]} onPress={handleLogout}>
+          <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
             <Text style={styles.menuIcon}>🚪</Text>
             <Text style={[styles.menuText, styles.menuTextDanger]}>로그아웃</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.menuItem, styles.menuItemLast]}
+            onPress={handleDeleteAccount}
+            disabled={deletingAccount}
+          >
+            {deletingAccount ? (
+              <ActivityIndicator size="small" color="#C0392B" style={{ marginRight: 12 }} />
+            ) : (
+              <Text style={[styles.menuIcon, { opacity: 0.7 }]}>🗑</Text>
+            )}
+            <Text style={[styles.menuText, styles.menuTextDelete]}>
+              {deletingAccount ? '삭제 중...' : '계정 및 데이터 삭제'}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -316,7 +368,8 @@ const styles = StyleSheet.create({
   menuItemLast: { borderBottomWidth: 0 },
   menuIcon: { fontSize: 18, marginRight: 12 },
   menuText: { flex: 1, fontSize: 16, color: '#333' },
-  menuTextDanger: { color: '#D44' },
+  menuTextDanger: { color: '#D44444' },
+  menuTextDelete: { color: '#C0392B', fontSize: 15 },
   menuArrow: { fontSize: 18, color: '#CCC' },
   menuComingSoon: {
     backgroundColor: '#F5F2EC', borderRadius: 8,
