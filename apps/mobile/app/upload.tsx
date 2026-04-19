@@ -141,7 +141,11 @@ export default function UploadScreen() {
     setGeneratingText('사진 업로드 중...');
     try {
       const photoIds: string[] = [];
-      for (const photo of photos) {
+      for (let i = 0; i < photos.length; i++) {
+        const photo = photos[i];
+        setGeneratingText(photos.length > 1
+          ? `사진 업로드 중... (${i + 1}/${photos.length})`
+          : '사진 업로드 중...');
         const { upload_url, photo_id } = await api.photos.getUploadUrl({
           child_id: activeChild.id,
           filename: photo.fileName,
