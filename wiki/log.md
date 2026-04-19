@@ -167,3 +167,19 @@
   - apps/mobile/jest.config.js
   - apps/mobile/package.json
   - apps/mobile/src/__tests__/dateUtils.test.ts
+
+## [2026-04-19] commit | feat: 월별 달력 탐색 구현 (SectionList + 퀵점프 바)
+
+- 커밋: `c9bee10` by jy.choi
+- 변경 파일 수: 5
+  - CLAUDE.md
+  - apps/mobile/app/(tabs)/timeline.tsx
+  - apps/mobile/src/__tests__/groupByMonth.test.ts
+  - apps/mobile/src/hooks/usePushNotification.ts
+  - apps/mobile/src/utils/groupByMonth.ts
+
+## [2026-04-19] commit | feat: calendar navigation — date picker sheet + scroll jump fix
+
+- 커밋: `3ac50be` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/(tabs)/timeline.tsx
