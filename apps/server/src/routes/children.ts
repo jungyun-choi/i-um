@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { requireAuth, AuthRequest } from '../middleware/auth';
 import { supabase } from '../lib/supabase';
+import { getUploadUrl } from '../services/s3Service';
+import { v4 as uuidv4 } from 'uuid';
 
 const router = Router();
 router.use(requireAuth);
@@ -43,6 +45,22 @@ router.patch('/:id', async (req: AuthRequest, res) => {
     .single();
   if (error) { res.status(400).json({ error: error.message }); return; }
   res.json(data);
+});
+
+// 아바타 업로드용 presigned URL 발급
+router.post('/:id/avatar-url', async (req: AuthRequest, res) => {
+  const { data: child } = await supabase
+    .from('children')
+    .select('id')
+    .eq('id', req.params.id)
+    .eq('user_id', req.userId!)
+    .maybeSingle();
+  if (!child) { res.status(403).json({ error: 'Not authorized' }); return; }
+
+  const key = `i-um/avatars/${req.params.id}/${uuidv4()}.jpg`;
+  const uploadUrl = await getUploadUrl(key, 'image/jpeg');
+  const publicUrl = `${process.env.S3_PUBLIC_BASE_URL}/${key}`;
+  res.json({ upload_url: uploadUrl, public_url: publicUrl, key });
 });
 
 export default router;
