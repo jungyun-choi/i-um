@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
-  KeyboardAvoidingView, Platform, ScrollView, Keyboard,
+  KeyboardAvoidingView, Platform, ScrollView, Keyboard, ActivityIndicator,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { api } from '../../../src/lib/api';
+import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as Haptics from 'expo-haptics';
+import { api, uploadToS3 } from '../../../src/lib/api';
 import { useChildStore } from '../../../src/stores/childStore';
 import { useToast } from '../../../src/components/Toast';
 
@@ -27,6 +31,9 @@ export default function EditChildScreen() {
   const [name, setName] = useState(child?.name ?? '');
   const [birthDate, setBirthDate] = useState(child?.birth_date ?? '');
   const [gender, setGender] = useState(child?.gender ?? 'N');
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(child?.avatar_url ?? null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -40,6 +47,37 @@ export default function EditChildScreen() {
     return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6)}`;
   }
 
+  async function handlePickAvatar() {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') { showToast('사진 라이브러리 접근 권한이 필요해요'); return; }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.85,
+    });
+    if (result.canceled) return;
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setUploadingAvatar(true);
+    try {
+      const compressed = await ImageManipulator.manipulateAsync(
+        result.assets[0].uri,
+        [{ resize: { width: 400 } }],
+        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+      );
+      const { upload_url, public_url } = await api.children.getAvatarUploadUrl(id);
+      await uploadToS3(upload_url, compressed.uri);
+      setAvatarUri(compressed.uri);
+      setAvatarUrl(public_url);
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : '사진 업로드에 실패했어요');
+    } finally {
+      setUploadingAvatar(false);
+    }
+  }
+
   async function handleSave() {
     if (!name.trim()) { showToast('이름을 입력해주세요'); return; }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) {
@@ -48,9 +86,14 @@ export default function EditChildScreen() {
     }
     setLoading(true);
     try {
-      await api.children.update(id, { name: name.trim(), birth_date: birthDate, gender });
+      const body: Parameters<typeof api.children.update>[1] = {
+        name: name.trim(), birth_date: birthDate, gender,
+      };
+      if (avatarUrl) body.avatar_url = avatarUrl;
+      await api.children.update(id, body);
       const updated = await api.children.list();
       setChildren(updated);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       showToast('저장됐어요', 'success');
       router.back();
     } catch (e: unknown) {
@@ -59,6 +102,8 @@ export default function EditChildScreen() {
       setLoading(false);
     }
   }
+
+  const displayAvatar = avatarUri ?? avatarUrl;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -80,6 +125,23 @@ export default function EditChildScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          {/* 아바타 선택 */}
+          <TouchableOpacity style={styles.avatarWrapper} onPress={handlePickAvatar} disabled={uploadingAvatar}>
+            {displayAvatar ? (
+              <Image source={displayAvatar} style={styles.avatar} contentFit="cover" />
+            ) : (
+              <View style={styles.avatarPlaceholder}>
+                <Text style={styles.avatarInitial}>{name[0] ?? '?'}</Text>
+              </View>
+            )}
+            <View style={styles.avatarEditBadge}>
+              {uploadingAvatar
+                ? <ActivityIndicator size="small" color="#fff" />
+                : <Text style={styles.avatarEditIcon}>📷</Text>}
+            </View>
+          </TouchableOpacity>
+          <Text style={styles.avatarHint}>탭해서 사진 변경</Text>
+
           <Text style={styles.label}>이름</Text>
           <TextInput
             style={styles.input}
@@ -135,7 +197,25 @@ const styles = StyleSheet.create({
   title: { fontSize: 17, fontWeight: '600', color: '#1A1A1A' },
   save: { fontSize: 16, color: '#E8735A', fontWeight: '600' },
   saveDisabled: { opacity: 0.5 },
-  form: { padding: 24, gap: 8 },
+  form: { padding: 24, gap: 8, alignItems: 'stretch' },
+
+  // 아바타
+  avatarWrapper: { alignSelf: 'center', marginTop: 8, marginBottom: 4 },
+  avatar: { width: 96, height: 96, borderRadius: 48 },
+  avatarPlaceholder: {
+    width: 96, height: 96, borderRadius: 48,
+    backgroundColor: '#FFE0D9', alignItems: 'center', justifyContent: 'center',
+  },
+  avatarInitial: { fontSize: 40, color: '#E8735A', fontWeight: '600' },
+  avatarEditBadge: {
+    position: 'absolute', bottom: 0, right: 0,
+    width: 30, height: 30, borderRadius: 15,
+    backgroundColor: '#E8735A', alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2, borderColor: '#FFFDF8',
+  },
+  avatarEditIcon: { fontSize: 14 },
+  avatarHint: { textAlign: 'center', fontSize: 12, color: '#BBB', marginBottom: 12 },
+
   label: { fontSize: 14, fontWeight: '600', color: '#555', marginTop: 16 },
   input: {
     borderWidth: 1.5, borderColor: '#E8E4DC', borderRadius: 14,
