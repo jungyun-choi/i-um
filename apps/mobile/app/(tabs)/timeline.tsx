@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { useTimeline } from '../../src/hooks/useTimeline';
 import { useChildStore } from '../../src/stores/childStore';
 import { DiaryCard } from '../../src/components/DiaryCard';
+import { MemoryCard } from '../../src/components/MemoryCard';
 import { groupEntriesByMonth, formatMonthLabel } from '../../src/utils/groupByMonth';
 
 export default function TimelineScreen() {
@@ -27,6 +28,24 @@ export default function TimelineScreen() {
 
   const entries = data?.pages.flatMap((p) => p.entries) ?? [];
   const sections = groupEntriesByMonth(entries);
+
+  // "1년 전 오늘" 메모리 카드 계산
+  const memoryEntry = (() => {
+    const today = new Date();
+    for (let yearsAgo = 1; yearsAgo <= 5; yearsAgo++) {
+      const target = new Date(today.getFullYear() - yearsAgo, today.getMonth(), today.getDate());
+      const found = entries.find((e) => {
+        const d = new Date(e.photos?.taken_at ?? e.created_at);
+        return (
+          d.getFullYear() === target.getFullYear() &&
+          d.getMonth() === target.getMonth() &&
+          Math.abs(d.getDate() - target.getDate()) <= 2
+        );
+      });
+      if (found) return { entry: found, yearsAgo };
+    }
+    return null;
+  })();
 
   const monthsWithData = new Set(sections.map((s) => s.monthKey));
   const yearsAvailable = [...new Set(sections.map((s) => s.monthKey.slice(0, 4)))].sort();
@@ -136,6 +155,9 @@ export default function TimelineScreen() {
           onScroll={handleScroll}
           scrollEventThrottle={200}
         >
+          {memoryEntry && (
+            <MemoryCard entry={memoryEntry.entry} yearsAgo={memoryEntry.yearsAgo} />
+          )}
           {sections.map((section) => (
             <View key={section.monthKey}>
               <View
