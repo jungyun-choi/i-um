@@ -688,3 +688,13 @@
 - 커밋: `36b1208` by jy.choi
 - 변경 파일 수: 1
   - apps/mobile/app/_layout.tsx
+
+## [2026-04-20] commit | feat: Sprint #17 — empty state 개선 + 월간 구독 게이트
+
+- 커밋: `d956450` by jy.choi
+- 변경 파일 수: 7
+  - .claude/scheduled_tasks.lock
+  - apps/mobile/app/(tabs)/milestones.tsx
+  - apps/mobile/app/_layout.tsx
+  - apps/mobile/app/upload.tsx
+  - apps/mobile/src/components/PaywallModal.tsx
