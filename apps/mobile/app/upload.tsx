@@ -56,8 +56,8 @@ export default function UploadScreen() {
       const selected = await Promise.all(result.assets.map(async (a) => {
         const compressed = await ImageManipulator.manipulateAsync(
           a.uri,
-          [{ resize: { width: 1280 } }],
-          { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+          [{ resize: { width: 1024 } }],
+          { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
         );
         const baseName = (a.fileName ?? `photo_${Date.now()}`).replace(/\.[^.]+$/, '');
         // GPS: iOS EXIF는 decimal degrees로 옴
