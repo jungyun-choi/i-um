@@ -5,10 +5,40 @@ import { sendPushNotification } from '../services/pushService';
 
 const MILESTONE_ALERTS: { type: string; days: number; title: string; body: (name: string) => string }[] = [
   {
-    type: 'baekil',
+    type: 'week_1',
+    days: 7,
+    title: '🌱 생후 7일이에요!',
+    body: (name) => `${name}이(가) 태어난 지 일주일이 됐어요. 오늘의 순간을 기록해보세요.`,
+  },
+  {
+    type: 'week_2',
+    days: 14,
+    title: '🌿 생후 2주예요!',
+    body: (name) => `${name}이(가) 두 주를 함께했어요. 소중한 이 순간을 담아보세요.`,
+  },
+  {
+    type: 'month_1',
+    days: 30,
+    title: '🎀 생후 한 달이에요!',
+    body: (name) => `${name}이(가) 태어난 지 한 달이 됐어요. 첫 달의 특별한 순간을 기록해보세요.`,
+  },
+  {
+    type: 'day_50',
+    days: 50,
+    title: '🌸 생후 50일이에요!',
+    body: (name) => `${name}이(가) 50일을 맞이했어요. 무럭무럭 자라고 있어요!`,
+  },
+  {
+    type: 'day_100',
     days: 100,
     title: '🎂 백일이에요!',
     body: (name) => `${name}이(가) 태어난 지 100일이 됐어요. 오늘의 특별한 순간을 기록해보세요.`,
+  },
+  {
+    type: 'month_6',
+    days: 180,
+    title: '🌻 생후 6개월이에요!',
+    body: (name) => `${name}이(가) 반 돌을 맞이했어요. 6개월의 성장을 기록해보세요.`,
   },
   {
     type: 'dol',
@@ -17,10 +47,22 @@ const MILESTONE_ALERTS: { type: string; days: number; title: string; body: (name
     body: (name) => `${name}이(가) 태어난 지 1년이 됐어요. 지난 1년의 소중한 추억을 돌아보세요.`,
   },
   {
-    type: '2nd_year',
+    type: 'month_18',
+    days: 545,
+    title: '🚀 생후 18개월이에요!',
+    body: (name) => `${name}이(가) 18개월을 맞이했어요. 점점 커가는 ${name}을 기록해보세요.`,
+  },
+  {
+    type: 'year_2',
     days: 730,
     title: '🎈 두 돌이에요!',
     body: (name) => `${name}이(가) 두 살이 됐어요. 무럭무럭 자라고 있는 ${name}의 이야기를 기록해보세요.`,
+  },
+  {
+    type: 'year_3',
+    days: 1095,
+    title: '🌟 세 돌이에요!',
+    body: (name) => `${name}이(가) 세 살이 됐어요. 세 돌을 축하하며 오늘을 기록해보세요.`,
   },
 ];
 
@@ -34,7 +76,6 @@ async function checkMilestoneAlerts() {
 
   if (error || !children?.length) return;
 
-  // Collect owner IDs + family member IDs for all children
   const { data: familyMembers } = await supabase
     .from('family_members')
     .select('child_id, user_id');
@@ -62,7 +103,10 @@ async function checkMilestoneAlerts() {
   const tokenByUser = Object.fromEntries(profiles.map((p) => [p.id, p.push_token]));
 
   for (const child of children) {
-    const days = differenceInDays(today, new Date(child.birth_date));
+    // Use local date parsing to avoid UTC offset issues
+    const [by, bm, bd] = child.birth_date.split('-').map(Number);
+    const birthDate = new Date(by, bm - 1, bd);
+    const days = differenceInDays(today, birthDate);
 
     for (const milestone of MILESTONE_ALERTS) {
       if (days !== milestone.days) continue;
@@ -76,7 +120,6 @@ async function checkMilestoneAlerts() {
 
       if (existing) continue;
 
-      // Notify owner + all family members
       const recipients = [child.user_id, ...(familyByChild.get(child.id) ?? [])];
       const uniqueRecipients = [...new Set(recipients)];
 
@@ -96,7 +139,7 @@ async function checkMilestoneAlerts() {
 }
 
 export function startMilestoneScheduler() {
-  // 매일 오전 9시 실행
+  // Run daily at 9am KST
   cron.schedule('0 9 * * *', () => {
     checkMilestoneAlerts().catch((e) => console.error('Milestone scheduler error:', e));
   });

@@ -8,7 +8,8 @@ import { diaryQueue } from '../workers/diaryWorker';
 const router = Router();
 router.use(requireAuth);
 
-const FREE_MONTHLY_LIMIT = 10;
+// Beta: generous limit; tighten when RevenueCat paywall launches
+const FREE_MONTHLY_LIMIT = 30;
 
 // S3 presigned URL 발급 + DB 레코드 생성
 router.post('/upload-url', async (req: AuthRequest, res) => {
