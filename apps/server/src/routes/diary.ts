@@ -5,6 +5,35 @@ import { supabase } from '../lib/supabase';
 const router = Router();
 router.use(requireAuth);
 
+// 텍스트 전용 일기 생성 (사진 없음)
+router.post('/', async (req: AuthRequest, res) => {
+  const { child_id, content, date } = req.body;
+  if (!child_id || !content?.trim()) {
+    res.status(400).json({ error: 'child_id and content required' });
+    return;
+  }
+
+  // 소유권 확인 (직접 소유 또는 family_member)
+  const [ownedRes, memberRes] = await Promise.all([
+    supabase.from('children').select('id').eq('id', child_id).eq('user_id', req.userId!).maybeSingle(),
+    supabase.from('family_members').select('id').eq('child_id', child_id).eq('user_id', req.userId!).maybeSingle(),
+  ]);
+  if (!ownedRes.data && !memberRes.data) {
+    res.status(403).json({ error: 'Not authorized' });
+    return;
+  }
+
+  const created_at = date ? new Date(date).toISOString() : new Date().toISOString();
+  const { data, error } = await supabase
+    .from('diary_entries')
+    .insert({ child_id, content: content.trim(), status: 'done', created_at })
+    .select()
+    .single();
+
+  if (error) { res.status(400).json({ error: error.message }); return; }
+  res.status(201).json(data);
+});
+
 router.get('/:id', async (req: AuthRequest, res) => {
   const { data, error } = await supabase
     .from('diary_entries')
