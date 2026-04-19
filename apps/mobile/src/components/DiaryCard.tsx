@@ -32,6 +32,34 @@ export function DiaryCard({ entry, allIds }: Props) {
   const dateStr = `${month}월 ${day}일 ${weekday}요일`;
 
   const isPending = entry.status === 'generating' || entry.status === 'pending';
+  const isTextOnly = !photo?.s3_key;
+
+  if (isTextOnly) {
+    return (
+      <TouchableOpacity
+        style={styles.textCard}
+        onPress={() => router.push(allIds ? `/diary/${entry.id}?ids=${allIds}` : `/diary/${entry.id}`)}
+        activeOpacity={0.85}
+      >
+        <View style={styles.textCardInner}>
+          <Text style={styles.quoteGlyph}>"</Text>
+          {isPending ? (
+            <Text style={styles.generating}>AI가 일기를 쓰고 있어요...</Text>
+          ) : entry.content ? (
+            <Text style={styles.textCardContent} numberOfLines={4}>{entry.content}</Text>
+          ) : null}
+          <View style={styles.textCardFooter}>
+            <Text style={styles.textCardDate}>{dateStr}</Text>
+            {entry.milestone && (
+              <View style={styles.milestoneBadge}>
+                <Text style={styles.milestoneText}>🎉 {entry.milestone}</Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  }
 
   return (
     <TouchableOpacity
@@ -39,19 +67,13 @@ export function DiaryCard({ entry, allIds }: Props) {
       onPress={() => router.push(allIds ? `/diary/${entry.id}?ids=${allIds}` : `/diary/${entry.id}`)}
       activeOpacity={0.85}
     >
-      {photo?.s3_key ? (
-        <Image
-          source={`${S3_BASE}/${photo.s3_key}`}
-          style={styles.image}
-          contentFit="cover"
-          cachePolicy="disk"
-          transition={200}
-        />
-      ) : (
-        <View style={styles.textOnlyHeader}>
-          <Text style={styles.textOnlyIcon}>✏️</Text>
-        </View>
-      )}
+      <Image
+        source={`${S3_BASE}/${photo!.s3_key}`}
+        style={styles.image}
+        contentFit="cover"
+        cachePolicy="disk"
+        transition={200}
+      />
 
       <View style={styles.body}>
         <View style={styles.topRow}>
@@ -78,6 +100,7 @@ export function DiaryCard({ entry, allIds }: Props) {
 }
 
 const styles = StyleSheet.create({
+  // Photo diary card
   card: {
     backgroundColor: '#fff',
     borderRadius: 20,
@@ -90,21 +113,62 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   image: { width: '100%', height: CARD_IMAGE_H },
-  textOnlyHeader: {
-    width: '100%', height: 72, backgroundColor: '#FFF6F3',
-    alignItems: 'center', justifyContent: 'center',
-    borderBottomWidth: 1, borderBottomColor: '#F5EDE8',
-  },
-  textOnlyIcon: { fontSize: 22 },
   body: { padding: 16, paddingTop: 14, paddingBottom: 18 },
   topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
   date: { fontSize: 13, fontWeight: '600', color: '#999', letterSpacing: 0.2 },
+  location: { fontSize: 12, color: '#BBB', marginBottom: 8 },
+  content: { fontSize: 15, color: '#444', lineHeight: 23, letterSpacing: 0.1 },
+  generating: { fontSize: 14, color: '#C5C0B8', fontStyle: 'italic' },
+
+  // Text-only diary card — journal entry style
+  textCard: {
+    marginBottom: 16,
+    borderRadius: 20,
+    overflow: 'hidden',
+    shadowColor: '#1A1A1A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.07,
+    shadowRadius: 12,
+    elevation: 3,
+  },
+  textCardInner: {
+    backgroundColor: '#2C2420',
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 20,
+    minHeight: 140,
+  },
+  quoteGlyph: {
+    fontSize: 52,
+    color: 'rgba(232,115,90,0.35)',
+    fontWeight: '700',
+    lineHeight: 44,
+    marginBottom: 4,
+  },
+  textCardContent: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.88)',
+    lineHeight: 26,
+    letterSpacing: 0.1,
+    fontStyle: 'italic',
+    flex: 1,
+    marginBottom: 16,
+  },
+  textCardFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.1)',
+    paddingTop: 12,
+    marginTop: 4,
+  },
+  textCardDate: { fontSize: 12, fontWeight: '600', color: 'rgba(255,255,255,0.45)', letterSpacing: 0.3 },
+
+  // Shared
   milestoneBadge: {
     backgroundColor: '#FFF0ED', borderRadius: 12,
     paddingVertical: 3, paddingHorizontal: 10,
   },
   milestoneText: { fontSize: 11, fontWeight: '700', color: '#E8735A' },
-  location: { fontSize: 12, color: '#BBB', marginBottom: 8 },
-  content: { fontSize: 15, color: '#444', lineHeight: 23, letterSpacing: 0.1 },
-  generating: { fontSize: 14, color: '#C5C0B8', fontStyle: 'italic' },
 });

@@ -24,6 +24,10 @@ export default function LoginScreen() {
       showToast('이메일과 비밀번호를 입력해주세요');
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      showToast('올바른 이메일 주소를 입력해주세요');
+      return;
+    }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email: trimmedEmail, password });

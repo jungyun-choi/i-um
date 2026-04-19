@@ -177,7 +177,9 @@ export default function WriteScreen() {
           </TouchableOpacity>
 
           {/* 글자 수 */}
-          <Text style={styles.charCount}>{content.length}자</Text>
+          <Text style={[styles.charCount, content.length > 9000 ? styles.charCountWarn : null]}>
+            {content.length}자{content.length > 9000 ? ` / 10,000` : ''}
+          </Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -232,4 +234,5 @@ const styles = StyleSheet.create({
   },
 
   charCount: { fontSize: 12, color: '#C8C4BC', textAlign: 'right', marginTop: 8 },
+  charCountWarn: { color: '#E8735A', fontWeight: '600' },
 });
