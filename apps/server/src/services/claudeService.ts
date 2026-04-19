@@ -35,15 +35,17 @@ export async function generateDiary(ctx: DiaryContext): Promise<string> {
     ? `임신 중 (출산 ${Math.abs(days)}일 전)`
     : `${ageText} (생후 ${days}일)`;
 
-  const userPrompt = `[아이 정보]
+  const userPrompt = `⚠️ 이 일기는 사진 촬영일(${dateText}) 시점에서 쓴 일기입니다. 반드시 그날을 기준으로 작성하세요. 현재 실제 날짜와 혼동하지 마세요.
+
+[아이 정보]
 - 이름: ${ctx.childName}
-- 현재 나이: ${ageDescription}${milestoneText ? `\n- 오늘의 특별한 날: ${milestoneText}` : ''}
+- 사진 촬영 시점의 나이: ${ageDescription}${milestoneText ? `\n- 특별한 날: ${milestoneText}` : ''}
 
 [사진 촬영 정보]
-- 날짜: ${dateText}
+- 날짜: ${dateText} (이 날짜 기준으로 일기 작성)
 - 장소: ${ctx.locationName ?? '알 수 없음'}
 
-첨부 사진을 보고, 이 날의 육아 일기를 2~3문단으로 써주세요.
+첨부 사진을 보고, ${dateText}에 쓴 육아 일기를 2~3문단으로 써주세요.
 - 사진 속 상황을 구체적으로 묘사하세요
 - ${ctx.childName}의 표정과 행동에서 느껴지는 감정을 담아주세요
 - 150~250자 내외로 작성해주세요`;
