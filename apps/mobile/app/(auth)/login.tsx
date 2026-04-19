@@ -100,6 +100,14 @@ export default function LoginScreen() {
             >
               <Text style={styles.btnText}>{loading ? '로그인 중...' : '로그인'}</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.forgotBtn}
+              onPress={() => router.push('/(auth)/forgot-password')}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.forgotText}>비밀번호를 잊으셨나요?</Text>
+            </TouchableOpacity>
           </View>
 
           <TouchableOpacity onPress={() => router.push('/(auth)/signup')} style={styles.switchRow}>
@@ -154,6 +162,9 @@ const styles = StyleSheet.create({
   },
   btnDisabled: { opacity: 0.6, shadowOpacity: 0 },
   btnText: { color: '#fff', fontSize: 17, fontWeight: '700' },
+
+  forgotBtn: { alignItems: 'center', paddingVertical: 4 },
+  forgotText: { fontSize: 14, color: '#AAA' },
 
   switchRow: { flexDirection: 'row', justifyContent: 'center', marginTop: 8 },
   switchText: { fontSize: 15, color: '#888' },
