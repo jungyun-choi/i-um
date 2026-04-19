@@ -25,6 +25,7 @@ interface SelectedPhoto {
 type DiaryStyle = 'emotional' | 'factual';
 
 interface DiaryResult {
+  id: string;
   content: string;
   milestone: string | null;
 }
@@ -95,7 +96,7 @@ export default function UploadScreen() {
           const data = await api.photos.getDiary(photoId);
           if (data.status === 'done') {
             clearInterval(timer);
-            resolve({ content: data.content, milestone: data.milestone ?? null });
+            resolve({ id: data.id, content: data.content, milestone: data.milestone ?? null });
           } else if (data.status === 'failed' || attempts > 60) {
             clearInterval(timer);
             reject(new Error('일기 생성에 실패했어요'));
@@ -252,9 +253,20 @@ export default function UploadScreen() {
             <ScrollView style={styles.diaryScroll} showsVerticalScrollIndicator={false}>
               <Text style={styles.diaryContent}>{diaryResult.content}</Text>
             </ScrollView>
-            <TouchableOpacity style={styles.confirmBtn} onPress={closeDiaryModal}>
-              <Text style={styles.confirmBtnText}>타임라인에서 보기</Text>
-            </TouchableOpacity>
+            <View style={styles.modalBtnRow}>
+              <TouchableOpacity style={styles.confirmBtnSecondary} onPress={closeDiaryModal}>
+                <Text style={styles.confirmBtnSecondaryText}>타임라인</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.confirmBtn}
+                onPress={() => {
+                  closeDiaryModal();
+                  if (diaryResult?.id) router.push(`/diary/${diaryResult.id}`);
+                }}
+              >
+                <Text style={styles.confirmBtnText}>일기 바로 보기 →</Text>
+              </TouchableOpacity>
+            </View>
           </Animated.View>
         </Modal>
       )}
@@ -329,9 +341,15 @@ const styles = StyleSheet.create({
     fontSize: 16, lineHeight: 26, color: '#333',
     backgroundColor: '#F9F6F0', borderRadius: 16, padding: 20,
   },
-  confirmBtn: {
-    backgroundColor: '#E8735A', borderRadius: 14,
+  modalBtnRow: { flexDirection: 'row', gap: 10 },
+  confirmBtnSecondary: {
+    flex: 1, backgroundColor: '#F0EDE6', borderRadius: 14,
     paddingVertical: 16, alignItems: 'center',
   },
-  confirmBtnText: { color: '#fff', fontSize: 17, fontWeight: '600' },
+  confirmBtnSecondaryText: { color: '#888', fontSize: 15, fontWeight: '600' },
+  confirmBtn: {
+    flex: 2, backgroundColor: '#E8735A', borderRadius: 14,
+    paddingVertical: 16, alignItems: 'center',
+  },
+  confirmBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });
