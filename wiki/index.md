@@ -46,6 +46,7 @@
 | [feat-calendar-navigation.md](topics/feat-calendar-navigation.md) | 월별 달력 탐색 — 타임라인 SectionList + 퀵점프 바 |
 | [feat-retry-ux.md](topics/feat-retry-ux.md) | 일기 생성 실패 재시도 UX |
 | [feat-memory-card.md](topics/feat-memory-card.md) | "1년 전 오늘" 메모리 카드 — Retention 기능 |
+| [feat-profile-milestone.md](topics/feat-profile-milestone.md) | 프로필 통계 카드 + 마일스톤 탭 전면 개선 |
 
 ---
 

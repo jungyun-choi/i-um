@@ -203,3 +203,64 @@
 - 커밋: `625d5bf` by jy.choi
 - 변경 파일 수: 1
   - apps/mobile/app/(auth)/welcome.tsx
+
+## [2026-04-19] commit | fix: AI 일기가 오늘 날짜 기준으로 계산하는 버그 수정
+
+- 커밋: `1620b52` by jy.choi
+- 변경 파일 수: 1
+  - apps/server/src/services/claudeService.ts
+
+## [2026-04-19] commit | perf: 이미지 압축 1280→1024px, 80→70% (Claude Vision 최적화)
+
+- 커밋: `36c4685` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/upload.tsx
+
+## [2026-04-19] commit | perf: expo-image로 전환 — 디스크 캐시 + 로딩 속도 개선
+
+- 커밋: `3d6f924` by jy.choi
+- 변경 파일 수: 5
+  - apps/mobile/.env
+  - apps/mobile/app/diary/[id].tsx
+  - apps/mobile/package.json
+  - apps/mobile/src/components/DiaryCard.tsx
+  - apps/mobile/src/components/MemoryCard.tsx
+
+## [2026-04-19] commit | fix: EXIF 날짜 없는 사진에서 AI가 오늘 기준으로 계산하는 버그 수정
+
+- 커밋: `1889be7` by jy.choi
+- 변경 파일 수: 4
+  - apps/server/.env
+  - apps/server/src/routes/photos.ts
+  - apps/server/src/services/claudeService.ts
+  - apps/server/src/workers/diaryWorker.ts
+
+## [2026-04-19] commit | feat: 일기 상세 화면 수평 스와이프 네비게이션
+
+- 커밋: `6f78d71` by jy.choi
+- 변경 파일 수: 3
+  - apps/mobile/app/(tabs)/timeline.tsx
+  - apps/mobile/app/diary/[id].tsx
+  - apps/mobile/src/components/DiaryCard.tsx
+
+## [2026-04-19] commit | feat: 하단 탭바 구현 — 타임라인/마일스톤/프로필 이동
+
+- 커밋: `a4e8fcd` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/(tabs)/_layout.tsx
+
+## [2026-04-19] commit | feat: Profile 통계 카드 + Milestone 탭 전면 개선
+
+- 커밋: `4702400` by jy.choi
+- 변경 파일 수: 6
+  - apps/mobile/app/(tabs)/milestones.tsx
+  - apps/mobile/app/(tabs)/profile.tsx
+  - apps/mobile/src/__tests__/groupByMonth.test.ts
+  - apps/mobile/src/lib/api.ts
+  - apps/mobile/src/utils/groupByMonth.ts
+
+## [2026-04-19] commit | feat: 업로드 완료 후 일기 바로 보기 버튼 추가
+
+- 커밋: `f99f647` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/upload.tsx
