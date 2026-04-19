@@ -110,7 +110,9 @@ export default function SignupScreen() {
             </TouchableOpacity>
 
             <Text style={styles.terms}>
-              가입하면 <Text style={styles.termsLink}>개인정보처리방침</Text>에 동의하는 것으로 간주합니다
+              가입하면{' '}
+              <Text style={styles.termsLink} onPress={() => router.push('/privacy')}>개인정보처리방침</Text>
+              에 동의하는 것으로 간주합니다
             </Text>
           </View>
 

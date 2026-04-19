@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
   Alert, ActivityIndicator, Modal, Animated, Dimensions, Pressable,
@@ -44,6 +44,11 @@ export default function UploadScreen() {
   const [diaryResult, setDiaryResult] = useState<DiaryResult | null>(null);
   const slideAnim = useRef(new Animated.Value(SCREEN_H)).current;
 
+  // Auto-launch picker on mount for zero-friction entry
+  useEffect(() => {
+    pickPhotos();
+  }, []);
+
   async function pickPhotos() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -56,8 +61,11 @@ export default function UploadScreen() {
       quality: 0.85,
       exif: true,
     });
-    if (!result.canceled) {
-      const selected = await Promise.all(result.assets.map(async (a) => {
+    if (result.canceled) {
+      if (photos.length === 0) router.back();
+      return;
+    }
+    const selected = await Promise.all(result.assets.map(async (a) => {
         const compressed = await ImageManipulator.manipulateAsync(
           a.uri,
           [{ resize: { width: 1024 } }],
@@ -87,7 +95,6 @@ export default function UploadScreen() {
         };
       }));
       setPhotos(selected);
-    }
   }
 
   function pollDiary(photoId: string): Promise<DiaryResult> {
@@ -186,9 +193,9 @@ export default function UploadScreen() {
       {photos.length === 0 ? (
         <View style={styles.empty}>
           <Text style={styles.emptyIcon}>📷</Text>
-          <Text style={styles.emptyText}>사진을 선택하세요</Text>
+          <Text style={styles.emptyText}>기록할 사진을 선택해주세요</Text>
           <TouchableOpacity style={styles.pickBtn} onPress={pickPhotos}>
-            <Text style={styles.pickBtnText}>사진 라이브러리 열기</Text>
+            <Text style={styles.pickBtnText}>사진 선택하기</Text>
           </TouchableOpacity>
         </View>
       ) : (
