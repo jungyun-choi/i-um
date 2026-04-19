@@ -13,7 +13,7 @@ interface DiaryJob {
   photoId: string;
   childId: string;
   s3Key: string;
-  takenAt: string;
+  takenAt: string | null;
   gpsLat: number | null;
   gpsLng: number | null;
   diaryStyle: 'emotional' | 'factual';
@@ -62,10 +62,11 @@ diaryQueue.process(async (job) => {
     .single();
 
   if (milestone && diary) {
+    const milestoneDate = (takenAt ?? effectiveDate).split('T')[0];
     await supabase.from('milestones').upsert({
       child_id: childId,
       type: milestone,
-      date: takenAt.split('T')[0],
+      date: milestoneDate,
       photo_id: photoId,
       diary_id: diary.id,
     }, { onConflict: 'child_id,type' });
