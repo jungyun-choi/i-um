@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
   Alert, ActivityIndicator, Modal, Animated, Dimensions, Pressable,
 } from 'react-native';
+import { PaywallModal } from '../src/components/PaywallModal';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as Notifications from 'expo-notifications';
@@ -45,6 +46,7 @@ export default function UploadScreen() {
   const [style, setStyle] = useState<DiaryStyle>('emotional');
   const [generatingText, setGeneratingText] = useState('');
   const [diaryResult, setDiaryResult] = useState<DiaryResult | null>(null);
+  const [showPaywall, setShowPaywall] = useState(false);
   const slideAnim = useRef(new Animated.Value(SCREEN_H)).current;
 
   // Auto-launch picker on mount for zero-friction entry
@@ -186,7 +188,11 @@ export default function UploadScreen() {
         }
       }
     } catch (e: unknown) {
-      showToast(e instanceof Error ? e.message : '다시 시도해주세요.');
+      if (e instanceof Error && e.message.includes('monthly_limit_reached')) {
+        setShowPaywall(true);
+      } else {
+        showToast(e instanceof Error ? e.message : '다시 시도해주세요.');
+      }
     } finally {
       setUploading(false);
       setGeneratingText('');
@@ -306,6 +312,8 @@ export default function UploadScreen() {
           </Animated.View>
         </Modal>
       )}
+
+      <PaywallModal visible={showPaywall} onClose={() => { setShowPaywall(false); router.back(); }} />
     </SafeAreaView>
   );
 }

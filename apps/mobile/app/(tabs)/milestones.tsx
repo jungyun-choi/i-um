@@ -208,7 +208,9 @@ export default function MilestonesScreen() {
   if (!activeChild) {
     return (
       <SafeAreaView style={styles.empty}>
-        <Text style={styles.emptyText}>아이 프로필이 없어요</Text>
+        <Text style={styles.emptyIcon}>🌱</Text>
+        <Text style={styles.emptyTitle}>아직 아이 프로필이 없어요</Text>
+        <Text style={styles.emptySubtext}>프로필 탭에서 아이를 등록하면{'\n'}특별한 순간들을 기록할 수 있어요</Text>
       </SafeAreaView>
     );
   }
@@ -277,8 +279,10 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFDF8' },
   title: { fontSize: 22, fontWeight: '700', color: '#1A1A1A', padding: 20, paddingBottom: 12 },
   list: { paddingHorizontal: 16, paddingBottom: 40 },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFDF8' },
-  emptyText: { fontSize: 16, color: '#888' },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFDF8', paddingHorizontal: 40 },
+  emptyIcon: { fontSize: 56, marginBottom: 16 },
+  emptyTitle: { fontSize: 20, fontWeight: '700', color: '#1A1A1A', marginBottom: 10, textAlign: 'center' },
+  emptySubtext: { fontSize: 14, color: '#999', textAlign: 'center', lineHeight: 22 },
 
   sectionHeader: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
