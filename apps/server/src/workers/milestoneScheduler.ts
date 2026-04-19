@@ -28,18 +28,33 @@ async function checkMilestoneAlerts() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  // 모든 아이 + 부모 push_token 조회
   const { data: children, error } = await supabase
     .from('children')
     .select('id, name, birth_date, user_id');
 
   if (error || !children?.length) return;
 
-  const userIds = [...new Set(children.map((c) => c.user_id))];
+  // Collect owner IDs + family member IDs for all children
+  const { data: familyMembers } = await supabase
+    .from('family_members')
+    .select('child_id, user_id');
+
+  const familyByChild = new Map<string, string[]>();
+  for (const fm of familyMembers ?? []) {
+    const arr = familyByChild.get(fm.child_id) ?? [];
+    arr.push(fm.user_id);
+    familyByChild.set(fm.child_id, arr);
+  }
+
+  const allUserIds = [...new Set([
+    ...children.map((c) => c.user_id),
+    ...(familyMembers ?? []).map((fm) => fm.user_id),
+  ])];
+
   const { data: profiles } = await supabase
     .from('profiles')
     .select('id, push_token')
-    .in('id', userIds)
+    .in('id', allUserIds)
     .not('push_token', 'is', null);
 
   if (!profiles?.length) return;
@@ -47,15 +62,11 @@ async function checkMilestoneAlerts() {
   const tokenByUser = Object.fromEntries(profiles.map((p) => [p.id, p.push_token]));
 
   for (const child of children) {
-    const token = tokenByUser[child.user_id];
-    if (!token) continue;
-
     const days = differenceInDays(today, new Date(child.birth_date));
 
     for (const milestone of MILESTONE_ALERTS) {
       if (days !== milestone.days) continue;
 
-      // 이미 해당 마일스톤이 기록됐으면 알림 스킵
       const { data: existing } = await supabase
         .from('milestones')
         .select('id')
@@ -65,13 +76,21 @@ async function checkMilestoneAlerts() {
 
       if (existing) continue;
 
-      await sendPushNotification(token, {
-        title: milestone.title,
-        body: milestone.body(child.name),
-        data: { type: 'milestone', childId: child.id, milestoneType: milestone.type },
-      });
+      // Notify owner + all family members
+      const recipients = [child.user_id, ...(familyByChild.get(child.id) ?? [])];
+      const uniqueRecipients = [...new Set(recipients)];
 
-      console.log(`Milestone alert sent: ${child.name} - ${milestone.type}`);
+      for (const userId of uniqueRecipients) {
+        const token = tokenByUser[userId];
+        if (!token) continue;
+        await sendPushNotification(token, {
+          title: milestone.title,
+          body: milestone.body(child.name),
+          data: { type: 'milestone', childId: child.id, milestoneType: milestone.type },
+        });
+      }
+
+      console.log(`Milestone alert sent: ${child.name} - ${milestone.type} (${uniqueRecipients.length} recipients)`);
     }
   }
 }

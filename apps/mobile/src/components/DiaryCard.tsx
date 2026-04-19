@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { toKSTDateStr } from '../lib/utils/date';
 
-const CARD_IMAGE_H = Dimensions.get('window').width * 0.62;
+const CARD_IMAGE_H = Dimensions.get('window').width * 0.78;
 
 interface Props {
   entry: {

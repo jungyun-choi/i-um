@@ -83,8 +83,15 @@ export default function TimelineScreen() {
   const [fabOpen, setFabOpen] = useState(false);
   const fabAnim = useRef(new Animated.Value(0)).current;
 
+  const [refreshing, setRefreshing] = useState(false);
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } =
     useTimeline(activeChild?.id);
+
+  async function handleRefresh() {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }
 
   const { data: latestLetter } = useQuery<MonthlyLetter | null>({
     queryKey: ['monthly-letter', activeChild?.id],
@@ -225,7 +232,9 @@ export default function TimelineScreen() {
               <Text style={styles.childName}>{activeChild?.name} ▼</Text>
             </TouchableOpacity>
           ) : activeChild ? (
-            <Text style={styles.childName}>{activeChild.name}</Text>
+            <TouchableOpacity onPress={() => router.push(`/child/${activeChild.id}/edit`)}>
+              <Text style={styles.childName}>{activeChild.name}</Text>
+            </TouchableOpacity>
           ) : null}
         </View>
       </View>
@@ -246,7 +255,7 @@ export default function TimelineScreen() {
           ref={scrollRef}
           style={styles.scrollView}
           contentContainerStyle={styles.list}
-          refreshControl={<RefreshControl refreshing={false} onRefresh={refetch} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#E8735A" />}
           onScroll={handleScroll}
           scrollEventThrottle={200}
         >

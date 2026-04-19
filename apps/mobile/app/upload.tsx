@@ -142,7 +142,8 @@ export default function UploadScreen() {
   }
 
   async function handleUpload() {
-    if (!activeChild || photos.length === 0) return;
+    if (!activeChild) { showToast('기록할 아이를 먼저 선택해주세요'); return; }
+    if (photos.length === 0) { showToast('사진을 선택해주세요'); return; }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setUploading(true);
     setGeneratingText('사진 업로드 중...');

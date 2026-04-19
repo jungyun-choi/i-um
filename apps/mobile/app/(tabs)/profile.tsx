@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import Constants from 'expo-constants';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../src/lib/supabase';
 import { useChildStore } from '../../src/stores/childStore';
@@ -293,7 +294,7 @@ export default function ProfileScreen() {
         <TouchableOpacity onPress={() => router.push('/privacy')}>
           <Text style={styles.privacyLink}>개인정보처리방침</Text>
         </TouchableOpacity>
-        <Text style={styles.version}>이음 v1.0.0</Text>
+        <Text style={styles.version}>이음 v{Constants.expoConfig?.version ?? '1.0.0'}</Text>
       </ScrollView>
 
       <JoinModal

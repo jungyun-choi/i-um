@@ -4,14 +4,19 @@ const BASE_URL = process.env.EXPO_PUBLIC_API_URL!;
 
 async function authFetch(path: string, init?: RequestInit) {
   const { data: { session } } = await supabase.auth.getSession();
-  const res = await fetch(`${BASE_URL}${path}`, {
-    ...init,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${session?.access_token ?? ''}`,
-      ...init?.headers,
-    },
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session?.access_token ?? ''}`,
+        ...init?.headers,
+      },
+    });
+  } catch {
+    throw new Error('인터넷 연결을 확인해주세요');
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error ?? 'Request failed');
