@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
+import { useRouter } from 'expo-router';
 import { api } from '../lib/api';
 
 try {
@@ -19,9 +20,21 @@ try {
 }
 
 export function usePushNotification() {
+  const router = useRouter();
+
   useEffect(() => {
     registerForPushNotifications();
   }, []);
+
+  // 알림 탭 → 해당 일기 화면으로 이동
+  const lastResponse = Notifications.useLastNotificationResponse();
+  useEffect(() => {
+    if (!lastResponse) return;
+    const diaryId = lastResponse.notification.request.content.data?.diaryId as string | undefined;
+    if (diaryId) {
+      router.push(`/diary/${diaryId}`);
+    }
+  }, [lastResponse, router]);
 }
 
 async function registerForPushNotifications() {
