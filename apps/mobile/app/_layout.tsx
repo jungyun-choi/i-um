@@ -4,9 +4,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { supabase } from '../src/lib/supabase';
 import { useRouter, useSegments } from 'expo-router';
 import { Session } from '@supabase/supabase-js';
+import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
 import { usePushNotification } from '../src/hooks/usePushNotification';
 import { ToastProvider } from '../src/components/Toast';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
+
+SplashScreen.preventAutoHideAsync();
 
 function makeQueryClient() {
   return new QueryClient({
@@ -47,6 +51,17 @@ export default function RootLayout() {
   const [isRecovery, setIsRecovery] = useState(false);
   usePushNotification();
 
+  const [fontsLoaded] = useFonts({
+    'Pretendard-Regular': require('../assets/fonts/Pretendard-Regular.otf'),
+    'Pretendard-Medium': require('../assets/fonts/Pretendard-Medium.otf'),
+    'Pretendard-SemiBold': require('../assets/fonts/Pretendard-SemiBold.otf'),
+    'Pretendard-Bold': require('../assets/fonts/Pretendard-Bold.otf'),
+  });
+
+  useEffect(() => {
+    if (fontsLoaded && ready) SplashScreen.hideAsync();
+  }, [fontsLoaded, ready]);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -63,7 +78,7 @@ export default function RootLayout() {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (!ready) return null;
+  if (!ready || !fontsLoaded) return null;
 
   return (
     <ErrorBoundary>

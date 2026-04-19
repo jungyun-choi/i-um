@@ -38,7 +38,7 @@ export default function TabsLayout() {
         },
         tabBarActiveTintColor: '#E8735A',
         tabBarInactiveTintColor: '#C0BAB0',
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '500' },
+        tabBarLabelStyle: { fontSize: 11, fontFamily: 'Pretendard-Medium' },
       }}
     >
       <Tabs.Screen
