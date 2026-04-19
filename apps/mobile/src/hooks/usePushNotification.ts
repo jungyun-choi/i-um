@@ -4,15 +4,19 @@ import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import { api } from '../lib/api';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+try {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+} catch {
+  // Expo Go에서 지원 안 될 수 있음
+}
 
 export function usePushNotification() {
   useEffect(() => {
