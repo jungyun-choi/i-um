@@ -1,8 +1,7 @@
 import { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  Alert, ActivityIndicator, Modal, Animated,
-  Dimensions, Pressable,
+  Alert, ActivityIndicator, Modal, Animated, Dimensions, Pressable,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
@@ -12,6 +11,7 @@ import { api, uploadToS3 } from '../src/lib/api';
 import { useChildStore } from '../src/stores/childStore';
 import { useQueryClient } from '@tanstack/react-query';
 import { PhotoGrid } from '../src/components/PhotoGrid';
+import { useToast } from '../src/components/Toast';
 
 const { height: SCREEN_H } = Dimensions.get('window');
 
@@ -35,6 +35,7 @@ export default function UploadScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const activeChild = useChildStore((s) => s.activeChild);
+  const { showToast } = useToast();
   const [photos, setPhotos] = useState<SelectedPhoto[]>([]);
   const [uploading, setUploading] = useState(false);
   const [style, setStyle] = useState<DiaryStyle>('emotional');
@@ -158,7 +159,7 @@ export default function UploadScreen() {
       const result = await pollDiary(lastPhotoId);
       showDiaryModal(result);
     } catch (e: unknown) {
-      Alert.alert('오류', e instanceof Error ? e.message : '다시 시도해주세요.');
+      showToast(e instanceof Error ? e.message : '다시 시도해주세요.');
     } finally {
       setUploading(false);
       setGeneratingText('');

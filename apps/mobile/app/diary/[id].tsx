@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../../src/lib/api';
 import { useDiaryGeneration } from '../../src/hooks/useDiaryGeneration';
 import { DiaryGenerating } from '../../src/components/DiaryGenerating';
+import { useToast } from '../../src/components/Toast';
 
 const SCREEN_W = Dimensions.get('window').width;
 const S3_BASE = process.env.EXPO_PUBLIC_S3_BASE_URL ?? '';
@@ -34,6 +35,7 @@ function DiaryPage({
 }) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { showToast } = useToast();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const [imgRatio, setImgRatio] = useState(1);
@@ -63,7 +65,7 @@ function DiaryPage({
       setEditing(false);
       onEditingChange(false);
     },
-    onError: () => Alert.alert('저장 실패', '다시 시도해주세요.'),
+    onError: () => showToast('저장에 실패했어요. 다시 시도해주세요.'),
   });
 
   const deleteMutation = useMutation({
@@ -72,7 +74,7 @@ function DiaryPage({
       queryClient.invalidateQueries({ queryKey: ['timeline'] });
       router.back();
     },
-    onError: () => Alert.alert('삭제 실패', '다시 시도해주세요.'),
+    onError: () => showToast('삭제에 실패했어요. 다시 시도해주세요.'),
   });
 
   function startEdit() {
@@ -96,7 +98,7 @@ function DiaryPage({
       await api.photos.process(photoId);
     } catch {
       setRetrying(false);
-      Alert.alert('재시도 실패', '잠시 후 다시 시도해주세요.');
+      showToast('재시도에 실패했어요. 잠시 후 다시 시도해주세요.');
     }
   }
 

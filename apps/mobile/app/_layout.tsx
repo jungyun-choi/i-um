@@ -5,8 +5,19 @@ import { supabase } from '../src/lib/supabase';
 import { useRouter, useSegments } from 'expo-router';
 import { Session } from '@supabase/supabase-js';
 import { usePushNotification } from '../src/hooks/usePushNotification';
+import { ToastProvider, useToast } from '../src/components/Toast';
 
-const queryClient = new QueryClient();
+function makeQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      mutations: {
+        onError: () => {},
+      },
+    },
+  });
+}
+
+const queryClient = makeQueryClient();
 
 function AuthGate({ session }: { session: Session | null }) {
   const router = useRouter();
@@ -44,8 +55,10 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthGate session={session} />
-      <Slot />
+      <ToastProvider>
+        <AuthGate session={session} />
+        <Slot />
+      </ToastProvider>
     </QueryClientProvider>
   );
 }
