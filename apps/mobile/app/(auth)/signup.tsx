@@ -56,6 +56,13 @@ export default function SignupScreen() {
             <Text style={styles.backText}>←</Text>
           </TouchableOpacity>
 
+          {/* 온보딩 진행률 */}
+          <View style={styles.progressRow}>
+            <View style={[styles.progressDot, styles.progressDotActive]} />
+            <View style={styles.progressLine} />
+            <View style={styles.progressDot} />
+          </View>
+
           <View style={styles.hero}>
             <Text style={styles.appName}>이음</Text>
             <Text style={styles.title}>함께 기억해요</Text>
@@ -131,6 +138,15 @@ const styles = StyleSheet.create({
   scroll: { flexGrow: 1, paddingHorizontal: 24, paddingBottom: 40 },
   back: { paddingTop: 8, paddingBottom: 16, alignSelf: 'flex-start' },
   backText: { fontSize: 24, color: '#1A1A1A' },
+
+  progressRow: {
+    flexDirection: 'row', alignItems: 'center', paddingTop: 20, paddingBottom: 4,
+  },
+  progressDot: {
+    width: 8, height: 8, borderRadius: 4, backgroundColor: '#E0DDD5',
+  },
+  progressDotActive: { backgroundColor: '#E8735A', width: 24, borderRadius: 4 },
+  progressLine: { flex: 1, height: 2, backgroundColor: '#E0DDD5', marginHorizontal: 6 },
 
   hero: { paddingTop: 16, paddingBottom: 36 },
   appName: { fontSize: 15, fontWeight: '700', color: '#E8735A', letterSpacing: 2, marginBottom: 10 },

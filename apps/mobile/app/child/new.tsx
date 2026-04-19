@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
-  Platform, KeyboardAvoidingView, Keyboard, ScrollView,
+  Platform, KeyboardAvoidingView, Keyboard, ScrollView, Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -64,6 +64,13 @@ export default function NewChildScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* 온보딩 진행률 */}
+      {isOnboarding && (
+        <View style={styles.progressBar}>
+          <View style={styles.progressFill} />
+        </View>
+      )}
+
       {/* 헤더 */}
       <View style={styles.header}>
         {!isOnboarding ? (
@@ -73,7 +80,10 @@ export default function NewChildScreen() {
         ) : (
           <View style={{ width: 40 }} />
         )}
-        <Text style={styles.title}>{isOnboarding ? '아이 소개' : '아이 추가'}</Text>
+        <View style={styles.headerCenter}>
+          <Text style={styles.title}>{isOnboarding ? '아이 소개' : '아이 추가'}</Text>
+          {isOnboarding && <Text style={styles.stepLabel}>2 / 2단계</Text>}
+        </View>
         <View style={{ width: 40 }} />
       </View>
 
@@ -154,12 +164,17 @@ export default function NewChildScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFDF8' },
+  progressBar: { height: 3, backgroundColor: '#F0EDE6' },
+  progressFill: { height: 3, width: '100%', backgroundColor: '#E8735A' },
+
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     padding: 16, borderBottomWidth: 1, borderBottomColor: '#F0EDE6',
   },
+  headerCenter: { alignItems: 'center', gap: 2 },
   cancel: { fontSize: 16, color: '#888' },
   title: { fontSize: 17, fontWeight: '600', color: '#1A1A1A' },
+  stepLabel: { fontSize: 11, color: '#BBB', fontWeight: '500' },
 
   form: { padding: 24, flexGrow: 1 },
   onboardingHint: { alignItems: 'center', paddingVertical: 24, marginBottom: 8 },
