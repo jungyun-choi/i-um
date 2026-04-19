@@ -7,7 +7,18 @@ router.use(requireAuth);
 
 const EVENT_MILESTONE_TYPES = ['first_word', 'first_step'];
 
+async function assertChildAccess(childId: string, userId: string): Promise<boolean> {
+  const [owned, shared] = await Promise.all([
+    supabase.from('children').select('id').eq('id', childId).eq('user_id', userId).maybeSingle(),
+    supabase.from('family_members').select('id').eq('child_id', childId).eq('user_id', userId).maybeSingle(),
+  ]);
+  return !!(owned.data || shared.data);
+}
+
 router.get('/:childId', async (req: AuthRequest, res) => {
+  const ok = await assertChildAccess(req.params.childId, req.userId!);
+  if (!ok) { res.status(403).json({ error: 'Not authorized' }); return; }
+
   const { data, error } = await supabase
     .from('milestones')
     .select('*, photos(id, s3_key), diary_entries(id, content)')
@@ -27,6 +38,9 @@ router.post('/', async (req: AuthRequest, res) => {
     res.status(400).json({ error: 'Only event-based milestones (first_word, first_step) can be manually recorded' });
     return;
   }
+
+  const ok = await assertChildAccess(child_id, req.userId!);
+  if (!ok) { res.status(403).json({ error: 'Not authorized' }); return; }
 
   const { data: existing } = await supabase
     .from('milestones')

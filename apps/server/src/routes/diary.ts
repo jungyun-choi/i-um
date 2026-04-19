@@ -12,6 +12,10 @@ router.post('/', async (req: AuthRequest, res) => {
     res.status(400).json({ error: 'child_id and content required' });
     return;
   }
+  if (content.trim().length > 10000) {
+    res.status(400).json({ error: '내용은 10,000자를 초과할 수 없어요' });
+    return;
+  }
 
   // 소유권 확인 (직접 소유 또는 family_member)
   const [ownedRes, memberRes] = await Promise.all([
@@ -65,6 +69,8 @@ router.patch('/:id', async (req: AuthRequest, res) => {
   const entry = await assertDiaryAccess(req.params.id, req.userId!);
   if (!entry) { res.status(403).json({ error: 'Not authorized' }); return; }
   const { content } = req.body;
+  if (!content?.trim()) { res.status(400).json({ error: 'content required' }); return; }
+  if (content.trim().length > 10000) { res.status(400).json({ error: '내용은 10,000자를 초과할 수 없어요' }); return; }
   const { data, error } = await supabase
     .from('diary_entries')
     .update({ content, is_edited: true, updated_at: new Date().toISOString() })
