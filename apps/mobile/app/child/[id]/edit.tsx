@@ -97,7 +97,7 @@ export default function EditChildScreen() {
   function handleDelete() {
     Alert.alert(
       `${child?.name} 삭제`,
-      '아이의 모든 일기, 사진, 마일스톤이 삭제됩니다. 되돌릴 수 없어요.',
+      '아이의 모든 일기, 사진, 발자국이 삭제됩니다. 되돌릴 수 없어요.',
       [
         { text: '취소', style: 'cancel' },
         {

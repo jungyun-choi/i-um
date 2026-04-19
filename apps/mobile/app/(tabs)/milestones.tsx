@@ -157,7 +157,7 @@ function RecordModal({ visible, type, childId, onClose, onSaved }: RecordModalPr
       onClose();
     } catch (e: any) {
       const msg = e?.message ?? '저장에 실패했어요';
-      Alert.alert('오류', msg === 'Milestone already recorded' ? '이미 기록된 마일스톤이에요.' : msg);
+      Alert.alert('오류', msg === 'Milestone already recorded' ? '이미 기록된 발자국이에요.' : msg);
     } finally {
       setSaving(false);
     }
@@ -261,7 +261,7 @@ export default function MilestonesScreen() {
           {(achieved as MilestoneData[]).length > 0 && (
             <>
               <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>달성한 마일스톤</Text>
+                <Text style={styles.sectionTitle}>남긴 발자국</Text>
                 <Text style={styles.sectionCount}>{(achieved as MilestoneData[]).length}개</Text>
               </View>
               {(achieved as MilestoneData[]).map((m) => (
@@ -273,7 +273,7 @@ export default function MilestonesScreen() {
           {pending.length > 0 && (
             <>
               <View style={[styles.sectionHeader, { marginTop: 24 }]}>
-                <Text style={styles.sectionTitle}>앞으로의 마일스톤</Text>
+                <Text style={styles.sectionTitle}>앞으로의 발자국</Text>
               </View>
               {pending.map((m) => (
                 <PendingCard
@@ -288,7 +288,7 @@ export default function MilestonesScreen() {
           {(achieved as MilestoneData[]).length === 0 && (
             <View style={styles.emptySection}>
               <Text style={styles.emptySectionIcon}>🌱</Text>
-              <Text style={styles.emptySectionText}>아직 달성한 마일스톤이 없어요</Text>
+              <Text style={styles.emptySectionText}>아직 남긴 발자국이 없어요</Text>
               <Text style={styles.emptySectionSub}>사진을 올리면 자동으로 기록돼요</Text>
             </View>
           )}

@@ -21,7 +21,7 @@ export function PaywallModal({ visible, onClose }: Props) {
             {[
               '📸 무제한 AI 일기 — Pro 출시 예정',
               '💌 월간 하이라이트 레터',
-              '🎉 마일스톤 자동 알림',
+              '🎉 발자국 자동 알림',
               '👨‍👩‍👧 가족 공유',
             ].map((f) => (
               <View key={f} style={styles.featureRow}>

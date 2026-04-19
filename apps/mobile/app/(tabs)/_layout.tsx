@@ -54,7 +54,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="milestones"
         options={{
-          title: '마일스톤',
+          title: '발자국',
           tabBarIcon: ({ focused, color }) => (
             <Ionicons name={focused ? TAB_ICONS.milestones.active : TAB_ICONS.milestones.inactive} size={24} color={color} />
           ),

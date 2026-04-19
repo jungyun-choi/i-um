@@ -146,7 +146,7 @@ export default function ProfileScreen() {
   function handleDeleteAccount() {
     Alert.alert(
       '계정 삭제',
-      '정말요? 모든 일기, 사진, 마일스톤이 영구적으로 삭제됩니다.\n되돌릴 수 없어요.',
+      '정말요? 모든 일기, 사진, 발자국이 영구적으로 삭제됩니다.\n되돌릴 수 없어요.',
       [
         { text: '취소', style: 'cancel' },
         {
@@ -235,7 +235,7 @@ export default function ProfileScreen() {
               <View style={styles.statsRow}>
                 <StatBox value={stats.diary_count} label="일기" />
                 <View style={styles.statDivider} />
-                <StatBox value={stats.milestone_count} label="마일스톤" />
+                <StatBox value={stats.milestone_count} label="발자국" />
                 <View style={styles.statDivider} />
                 <StatBox value={formatRecordPeriod(stats.first_entry_date)} label="기록 중" />
               </View>

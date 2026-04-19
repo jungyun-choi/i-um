@@ -874,3 +874,13 @@
 - 변경 파일 수: 2
   - apps/mobile/app/(tabs)/timeline.tsx
   - apps/mobile/app/upload.tsx
+
+## [2026-04-20] commit | fix: monorepo Metro dedup + tabBar style restore
+
+- 커밋: `7abcb21` by jy.choi
+- 변경 파일 수: 6
+  - apps/mobile/app.json
+  - apps/mobile/app/(tabs)/_layout.tsx
+  - apps/mobile/metro.config.js
+  - apps/mobile/package.json
+  - package-lock.json
