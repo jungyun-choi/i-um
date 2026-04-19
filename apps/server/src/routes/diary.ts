@@ -34,7 +34,24 @@ router.post('/', async (req: AuthRequest, res) => {
   res.status(201).json(data);
 });
 
+async function assertDiaryAccess(entryId: string, userId: string) {
+  const { data } = await supabase
+    .from('diary_entries')
+    .select('photo_id, child_id, children!inner(user_id), family_members!left(user_id)')
+    .eq('id', entryId)
+    .single();
+  if (!data) return null;
+  const owned = (data.children as any)?.user_id === userId;
+  const shared = Array.isArray(data.family_members)
+    ? data.family_members.some((m: any) => m.user_id === userId)
+    : (data.family_members as any)?.user_id === userId;
+  if (!owned && !shared) return null;
+  return data as { photo_id: string | null; child_id: string };
+}
+
 router.get('/:id', async (req: AuthRequest, res) => {
+  const entry = await assertDiaryAccess(req.params.id, req.userId!);
+  if (!entry) { res.status(403).json({ error: 'Not authorized' }); return; }
   const { data, error } = await supabase
     .from('diary_entries')
     .select('*, photos(*)')
@@ -45,6 +62,8 @@ router.get('/:id', async (req: AuthRequest, res) => {
 });
 
 router.patch('/:id', async (req: AuthRequest, res) => {
+  const entry = await assertDiaryAccess(req.params.id, req.userId!);
+  if (!entry) { res.status(403).json({ error: 'Not authorized' }); return; }
   const { content } = req.body;
   const { data, error } = await supabase
     .from('diary_entries')
@@ -57,16 +76,9 @@ router.patch('/:id', async (req: AuthRequest, res) => {
 });
 
 router.delete('/:id', async (req: AuthRequest, res) => {
-  // 일기와 연결된 photo_id 먼저 조회
-  const { data: entry, error: fetchErr } = await supabase
-    .from('diary_entries')
-    .select('photo_id')
-    .eq('id', req.params.id)
-    .single();
+  const entry = await assertDiaryAccess(req.params.id, req.userId!);
+  if (!entry) { res.status(403).json({ error: 'Not authorized' }); return; }
 
-  if (fetchErr || !entry) { res.status(404).json({ error: 'Not found' }); return; }
-
-  // diary_entries 삭제 (photos는 cascade)
   const { error } = await supabase
     .from('diary_entries')
     .delete()
@@ -74,8 +86,9 @@ router.delete('/:id', async (req: AuthRequest, res) => {
 
   if (error) { res.status(400).json({ error: error.message }); return; }
 
-  // 연결된 photo 레코드도 삭제
-  await supabase.from('photos').delete().eq('id', entry.photo_id);
+  if (entry.photo_id) {
+    await supabase.from('photos').delete().eq('id', entry.photo_id);
+  }
 
   res.json({ ok: true });
 });
