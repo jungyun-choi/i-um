@@ -724,3 +724,12 @@
   - apps/mobile/assets/icon.png
   - apps/mobile/assets/splash-icon.png
   - apps/mobile/scripts/generate-icon.sh
+
+## [2026-04-20] commit | feat: Sprint #21 — 오프라인 배너 (OfflineBanner)
+
+- 커밋: `e0d0009` by jy.choi
+- 변경 파일 수: 4
+  - apps/mobile/app/_layout.tsx
+  - apps/mobile/package.json
+  - apps/mobile/src/components/OfflineBanner.tsx
+  - package-lock.json
