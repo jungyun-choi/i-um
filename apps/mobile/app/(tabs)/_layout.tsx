@@ -2,16 +2,15 @@ import { Tabs } from 'expo-router';
 import { useEffect } from 'react';
 import { api } from '../../src/lib/api';
 import { useChildStore } from '../../src/stores/childStore';
-import { Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-function Icon({ label, focused }: { label: string; focused: boolean }) {
-  const icons: Record<string, string> = {
-    timeline: focused ? '📖' : '📄',
-    milestones: focused ? '⭐' : '☆',
-    profile: focused ? '👤' : '○',
-  };
-  return <Text style={{ fontSize: 22 }}>{icons[label] ?? label}</Text>;
-}
+type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
+
+const TAB_ICONS: Record<string, { active: IoniconsName; inactive: IoniconsName }> = {
+  timeline: { active: 'book', inactive: 'book-outline' },
+  milestones: { active: 'star', inactive: 'star-outline' },
+  profile: { active: 'person', inactive: 'person-outline' },
+};
 
 export default function TabsLayout() {
   const setChildren = useChildStore((s) => s.setChildren);
@@ -40,21 +39,39 @@ export default function TabsLayout() {
         name="timeline"
         options={{
           title: '타임라인',
-          tabBarIcon: ({ focused }) => <Icon label="timeline" focused={focused} />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? TAB_ICONS.timeline.active : TAB_ICONS.timeline.inactive}
+              size={24}
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="milestones"
         options={{
           title: '마일스톤',
-          tabBarIcon: ({ focused }) => <Icon label="milestones" focused={focused} />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? TAB_ICONS.milestones.active : TAB_ICONS.milestones.inactive}
+              size={24}
+              color={color}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: '프로필',
-          tabBarIcon: ({ focused }) => <Icon label="profile" focused={focused} />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? TAB_ICONS.profile.active : TAB_ICONS.profile.inactive}
+              size={24}
+              color={color}
+            />
+          ),
         }}
       />
     </Tabs>

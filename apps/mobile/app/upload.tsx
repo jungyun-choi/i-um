@@ -12,6 +12,7 @@ import { useChildStore } from '../src/stores/childStore';
 import { useQueryClient } from '@tanstack/react-query';
 import { PhotoGrid } from '../src/components/PhotoGrid';
 import { useToast } from '../src/components/Toast';
+import * as Haptics from 'expo-haptics';
 
 const { height: SCREEN_H } = Dimensions.get('window');
 
@@ -135,6 +136,7 @@ export default function UploadScreen() {
 
   async function handleUpload() {
     if (!activeChild || photos.length === 0) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setUploading(true);
     setGeneratingText('사진 업로드 중...');
     try {
@@ -157,6 +159,7 @@ export default function UploadScreen() {
       // Poll last photo's diary (most recent one for UX)
       const lastPhotoId = photoIds[photoIds.length - 1];
       const result = await pollDiary(lastPhotoId);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       showDiaryModal(result);
     } catch (e: unknown) {
       showToast(e instanceof Error ? e.message : '다시 시도해주세요.');

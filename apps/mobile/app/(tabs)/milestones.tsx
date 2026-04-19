@@ -3,6 +3,7 @@ import {
   ActivityIndicator, TouchableOpacity, Dimensions, Modal,
   TextInput, KeyboardAvoidingView, Platform, Pressable, Alert,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -142,6 +143,7 @@ function RecordModal({ visible, type, childId, onClose, onSaved }: RecordModalPr
     setSaving(true);
     try {
       await api.milestones.create({ child_id: childId, type, date });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       onSaved();
       onClose();
     } catch (e: any) {
