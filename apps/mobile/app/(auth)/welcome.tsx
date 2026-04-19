@@ -1,47 +1,93 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useRef, useState } from 'react';
+import {
+  View, Text, StyleSheet, TouchableOpacity,
+  Dimensions, ScrollView, type NativeScrollEvent, type NativeSyntheticEvent,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
-const FEATURES = [
-  { icon: '📸', title: '사진 한 장으로 충분해요', desc: '직접 쓸 필요 없어요. 사진만 찍으면 AI가 일기를 써드려요.' },
-  { icon: '✨', title: 'AI가 감동적으로 담아요', desc: '아이의 표정, 배경, 분위기를 읽어 따뜻한 문장으로 남겨요.' },
-  { icon: '🎉', title: '특별한 순간을 잊지 않아요', desc: '첫걸음마, 첫말 — 평생 기억할 마일스톤을 자동으로 기록해요.' },
+const SCREEN_W = Dimensions.get('window').width;
+
+const SLIDES = [
+  {
+    emoji: '📸',
+    bg: '#FEF4EE',
+    title: '사진 한 장으로\n충분해요',
+    desc: '직접 쓸 필요 없어요\nAI가 감동적인 일기를 써드려요',
+  },
+  {
+    emoji: '🎉',
+    bg: '#F0F7FF',
+    title: '특별한 순간을\n절대 잊지 않아요',
+    desc: '백일, 첫걸음, 첫말\n자동으로 알려드려요',
+  },
+  {
+    emoji: '💌',
+    bg: '#F3FBEF',
+    title: '매달 AI가\n편지를 써드려요',
+    desc: '아이가 크면 함께 읽을\n소중한 타임캡슐이 돼요',
+  },
 ];
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const scrollRef = useRef<ScrollView>(null);
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  function handleScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
+    const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_W);
+    setActiveSlide(idx);
+  }
+
+  function goNext() {
+    if (activeSlide < SLIDES.length - 1) {
+      scrollRef.current?.scrollTo({ x: (activeSlide + 1) * SCREEN_W, animated: true });
+    } else {
+      router.push('/(auth)/signup');
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.hero}>
+      {/* 로고 */}
+      <View style={styles.logoRow}>
         <Text style={styles.logo}>이음</Text>
-        <Text style={styles.tagline}>사진만 찍으면{'\n'}AI가 일기를 써드려요</Text>
+        <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
+          <Text style={styles.loginLink}>로그인</Text>
+        </TouchableOpacity>
       </View>
 
-      <View style={styles.features}>
-        {FEATURES.map((f) => (
-          <View key={f.title} style={styles.featureRow}>
-            <Text style={styles.featureIcon}>{f.icon}</Text>
-            <View style={styles.featureText}>
-              <Text style={styles.featureTitle}>{f.title}</Text>
-              <Text style={styles.featureDesc}>{f.desc}</Text>
-            </View>
+      {/* 슬라이드 */}
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleScroll}
+        style={styles.slider}
+      >
+        {SLIDES.map((slide, i) => (
+          <View key={i} style={[styles.slide, { backgroundColor: slide.bg }]}>
+            <Text style={styles.slideEmoji}>{slide.emoji}</Text>
+            <Text style={styles.slideTitle}>{slide.title}</Text>
+            <Text style={styles.slideDesc}>{slide.desc}</Text>
           </View>
+        ))}
+      </ScrollView>
+
+      {/* 도트 인디케이터 */}
+      <View style={styles.dots}>
+        {SLIDES.map((_, i) => (
+          <View key={i} style={[styles.dot, activeSlide === i ? styles.dotActive : null]} />
         ))}
       </View>
 
-      <View style={styles.buttons}>
-        <TouchableOpacity
-          style={styles.primaryBtn}
-          onPress={() => router.push('/(auth)/signup')}
-        >
-          <Text style={styles.primaryBtnText}>무료로 시작하기</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.secondaryBtn}
-          onPress={() => router.push('/(auth)/login')}
-        >
-          <Text style={styles.secondaryBtnText}>이미 계정이 있어요</Text>
+      {/* CTA */}
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.ctaBtn} onPress={goNext} activeOpacity={0.85}>
+          <Text style={styles.ctaBtnText}>
+            {activeSlide < SLIDES.length - 1 ? '다음' : '무료로 시작하기'}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -50,21 +96,39 @@ export default function WelcomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFDF8' },
-  hero: { alignItems: 'center', paddingTop: 56, paddingHorizontal: 32, paddingBottom: 32 },
-  logo: { fontSize: 40, fontWeight: '700', color: '#E8735A', marginBottom: 18 },
-  tagline: { fontSize: 26, fontWeight: '700', color: '#1A1A1A', textAlign: 'center', lineHeight: 38 },
-  features: { flex: 1, paddingHorizontal: 28, justifyContent: 'center', gap: 20 },
-  featureRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 16 },
-  featureIcon: { fontSize: 28, marginTop: 2 },
-  featureText: { flex: 1 },
-  featureTitle: { fontSize: 15, fontWeight: '700', color: '#1A1A1A', marginBottom: 3 },
-  featureDesc: { fontSize: 13, color: '#888', lineHeight: 19 },
-  buttons: { padding: 24, gap: 12 },
-  primaryBtn: {
-    backgroundColor: '#E8735A', borderRadius: 16,
-    paddingVertical: 17, alignItems: 'center',
+
+  logoRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 24, paddingTop: 8, paddingBottom: 4,
   },
-  primaryBtnText: { color: '#fff', fontSize: 17, fontWeight: '700' },
-  secondaryBtn: { paddingVertical: 14, alignItems: 'center' },
-  secondaryBtnText: { color: '#E8735A', fontSize: 16, fontWeight: '500' },
+  logo: { fontSize: 26, fontWeight: '700', color: '#E8735A' },
+  loginLink: { fontSize: 15, color: '#888', fontWeight: '500' },
+
+  slider: { flex: 1 },
+  slide: {
+    width: SCREEN_W, flex: 1,
+    alignItems: 'center', justifyContent: 'center',
+    paddingHorizontal: 40,
+  },
+  slideEmoji: { fontSize: 80, marginBottom: 28 },
+  slideTitle: {
+    fontSize: 28, fontWeight: '700', color: '#1A1A1A',
+    textAlign: 'center', lineHeight: 40, marginBottom: 16,
+  },
+  slideDesc: {
+    fontSize: 16, color: '#666', textAlign: 'center', lineHeight: 26,
+  },
+
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: 8, paddingVertical: 16 },
+  dot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: '#E0DDD5' },
+  dotActive: { backgroundColor: '#E8735A', width: 20 },
+
+  footer: { paddingHorizontal: 24, paddingBottom: 20 },
+  ctaBtn: {
+    backgroundColor: '#E8735A', borderRadius: 16,
+    paddingVertical: 18, alignItems: 'center',
+    shadowColor: '#E8735A', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25, shadowRadius: 12, elevation: 4,
+  },
+  ctaBtnText: { color: '#fff', fontSize: 17, fontWeight: '700' },
 });
