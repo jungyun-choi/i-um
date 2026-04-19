@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { toKSTDateStr } from '../lib/utils/date';
 
 const CARD_IMAGE_H = Dimensions.get('window').width * 0.62;
 
@@ -23,7 +24,8 @@ const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 export function DiaryCard({ entry, allIds }: Props) {
   const router = useRouter();
   const photo = entry.photos;
-  const date = new Date(photo?.taken_at ?? entry.created_at);
+  const kstStr = toKSTDateStr(photo?.taken_at ?? entry.created_at);
+  const date = new Date(kstStr + 'T00:00:00');
   const month = date.getMonth() + 1;
   const day = date.getDate();
   const weekday = WEEKDAYS[date.getDay()];
