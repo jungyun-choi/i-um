@@ -442,10 +442,10 @@ export default function TimelineScreen() {
             {children.map((child) => (
               <TouchableOpacity
                 key={child.id}
-                style={[styles.childItem, activeChild?.id === child.id && styles.childItemActive]}
+                style={[styles.childItem, activeChild?.id === child.id ? styles.childItemActive : null]}
                 onPress={() => { setActiveChild(child); setShowChildPicker(false); }}
               >
-                <Text style={[styles.childItemText, activeChild?.id === child.id && styles.childItemTextActive]}>
+                <Text style={[styles.childItemText, activeChild?.id === child.id ? styles.childItemTextActive : null]}>
                   {child.name}
                 </Text>
                 {activeChild?.id === child.id && <Text style={styles.check}>✓</Text>}
