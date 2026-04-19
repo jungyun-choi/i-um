@@ -1,7 +1,7 @@
 export interface DiaryEntry {
   id: string;
   created_at: string;
-  photos: { taken_at: string | null; s3_key: string; location_name: string | null } | null;
+  photos: { id: string; taken_at: string | null; s3_key: string; location_name: string | null } | null;
   content: string;
   status: string;
   milestone: string | null;

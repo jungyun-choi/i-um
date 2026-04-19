@@ -51,6 +51,35 @@ router.delete('/:id', async (req: AuthRequest, res) => {
   res.json({ ok: true });
 });
 
+router.get('/stats/:childId', async (req: AuthRequest, res) => {
+  const childId = req.params.childId;
+
+  const [countResult, firstResult, milestoneResult] = await Promise.all([
+    supabase
+      .from('diary_entries')
+      .select('id', { count: 'exact', head: true })
+      .eq('child_id', childId)
+      .eq('status', 'done'),
+    supabase
+      .from('diary_entries')
+      .select('created_at')
+      .eq('child_id', childId)
+      .eq('status', 'done')
+      .order('created_at', { ascending: true })
+      .limit(1),
+    supabase
+      .from('milestones')
+      .select('id', { count: 'exact', head: true })
+      .eq('child_id', childId),
+  ]);
+
+  res.json({
+    diary_count: countResult.count ?? 0,
+    first_entry_date: firstResult.data?.[0]?.created_at ?? null,
+    milestone_count: milestoneResult.count ?? 0,
+  });
+});
+
 router.get('/timeline/:childId', async (req: AuthRequest, res) => {
   const { cursor, limit = '20' } = req.query;
   let query = supabase
