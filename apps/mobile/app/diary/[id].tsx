@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as FileSystem from 'expo-file-system/legacy';
 import { api } from '../../src/lib/api';
 import { formatDisplayDate } from '../../src/lib/utils/date';
+import { getMilestoneDisplayLabel } from '../../src/lib/utils/milestone';
 import { useDiaryGeneration } from '../../src/hooks/useDiaryGeneration';
 import { DiaryGenerating } from '../../src/components/DiaryGenerating';
 import { useToast } from '../../src/components/Toast';
@@ -163,7 +164,7 @@ function DiaryPage({
 
       <View style={styles.body}>
         {current.milestone && (
-          <Text style={styles.milestoneBadge}>🎉 {current.milestone}</Text>
+          <Text style={styles.milestoneBadge}>🎉 {getMilestoneDisplayLabel(current.milestone!)}</Text>
         )}
         {photo?.location_name && (
           <Text style={styles.location}>📍 {photo.location_name}</Text>
