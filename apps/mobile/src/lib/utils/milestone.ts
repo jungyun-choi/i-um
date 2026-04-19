@@ -28,7 +28,7 @@ export const MILESTONE_META: Record<string, { emoji: string; label: string }> = 
   month_18: { emoji: '🚀', label: '생후 18개월' },
   year_2:   { emoji: '🎈', label: '두 돌' },
   year_3:   { emoji: '🌟', label: '세 돌' },
-  first_word: { emoji: '💬', label: '첫말' },
+  first_word: { emoji: '💬', label: '첫 대화' },
   first_step: { emoji: '👣', label: '첫걸음' },
   // legacy
   baekil:   { emoji: '🎂', label: '백일' },

@@ -102,7 +102,7 @@ function PendingCard({ milestone, onRecord }: PendingCardProps) {
           {milestone.expectedDate ? (
             <Text style={styles.pendingDate}>{formatMilestoneDate(milestone.expectedDate)}</Text>
           ) : (
-            <Text style={styles.pendingDate}>언제 일어날지 몰라요</Text>
+            <Text style={styles.pendingDate}>그 특별한 날을 남겨보세요</Text>
           )}
         </View>
       </View>

@@ -900,3 +900,11 @@
 - 커밋: `84bf58b` by jy.choi
 - 변경 파일 수: 1
   - apps/mobile/app/diary/[id].tsx
+
+## [2026-04-20] commit | fix: 일기 상세 Not authorized 에러 수정
+
+- 커밋: `fd36141` by jy.choi
+- 변경 파일 수: 3
+  - .claude/scheduled_tasks.lock
+  - apps/mobile/app/diary/[id].tsx
+  - apps/server/src/routes/diary.ts
