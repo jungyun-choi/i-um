@@ -186,19 +186,19 @@ export default function TimelineScreen() {
             {/* 연도 스위처 */}
             <View style={styles.yearRow}>
               <TouchableOpacity
-                onPress={() => yearIndex > 0 && setPickerYear(yearsAvailable[yearIndex - 1])}
+                onPress={() => { if (yearIndex > 0) setPickerYear(yearsAvailable[yearIndex - 1]); }}
                 style={styles.yearArrow}
                 disabled={yearIndex <= 0}
               >
-                <Text style={[styles.yearArrowText, yearIndex <= 0 && styles.yearArrowDisabled]}>‹</Text>
+                <Text style={[styles.yearArrowText, yearIndex <= 0 ? styles.yearArrowDisabled : null]}>‹</Text>
               </TouchableOpacity>
               <Text style={styles.yearLabel}>{pickerYear}년</Text>
               <TouchableOpacity
-                onPress={() => yearIndex < yearsAvailable.length - 1 && setPickerYear(yearsAvailable[yearIndex + 1])}
+                onPress={() => { if (yearIndex < yearsAvailable.length - 1) setPickerYear(yearsAvailable[yearIndex + 1]); }}
                 style={styles.yearArrow}
                 disabled={yearIndex >= yearsAvailable.length - 1}
               >
-                <Text style={[styles.yearArrowText, yearIndex >= yearsAvailable.length - 1 && styles.yearArrowDisabled]}>›</Text>
+                <Text style={[styles.yearArrowText, yearIndex >= yearsAvailable.length - 1 ? styles.yearArrowDisabled : null]}>›</Text>
               </TouchableOpacity>
             </View>
 
@@ -213,15 +213,15 @@ export default function TimelineScreen() {
                   <TouchableOpacity
                     key={monthKey}
                     style={styles.monthCell}
-                    onPress={() => hasData && jumpToMonth(monthKey)}
+                    onPress={() => { if (hasData) jumpToMonth(monthKey); }}
                     disabled={!hasData}
                     activeOpacity={hasData ? 0.7 : 1}
                   >
-                    <View style={[styles.monthCellInner, isActive && styles.monthCellActive]}>
+                    <View style={[styles.monthCellInner, isActive ? styles.monthCellActive : null]}>
                       <Text style={[
                         styles.monthCellText,
-                        isActive && styles.monthCellTextActive,
-                        !hasData && styles.monthCellTextDisabled,
+                        isActive ? styles.monthCellTextActive : null,
+                        !hasData ? styles.monthCellTextDisabled : null,
                       ]}>
                         {i + 1}월
                       </Text>
