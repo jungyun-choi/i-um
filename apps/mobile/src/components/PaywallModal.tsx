@@ -11,18 +11,18 @@ export function PaywallModal({ visible, onClose }: Props) {
       <View style={styles.backdrop}>
         <View style={styles.sheet}>
           <Text style={styles.emoji}>🌟</Text>
-          <Text style={styles.title}>이번 달 무료 기록을{'\n'}모두 사용했어요</Text>
+          <Text style={styles.title}>이번 달 기록 한도에{'\n'}도달했어요</Text>
           <Text style={styles.desc}>
-            무료 플랜은 매달 10개의 AI 일기를 제공해요.{'\n'}
-            Pro 플랜으로 업그레이드하면 무제한으로 기록할 수 있어요.
+            베타 기간 동안 매달 30개의 AI 일기를 무료로 제공해요.{'\n'}
+            더 많은 기록이 필요하시면 다음 달에 다시 이용해주세요.
           </Text>
 
           <View style={styles.featureList}>
             {[
-              '📸 무제한 AI 일기 생성',
+              '📸 무제한 AI 일기 — Pro 출시 예정',
               '💌 월간 하이라이트 레터',
               '🎉 마일스톤 자동 알림',
-              '🔒 프리미엄 프라이버시 보호',
+              '👨‍👩‍👧 가족 공유',
             ].map((f) => (
               <View key={f} style={styles.featureRow}>
                 <Text style={styles.featureText}>{f}</Text>
@@ -30,12 +30,12 @@ export function PaywallModal({ visible, onClose }: Props) {
             ))}
           </View>
 
-          <View style={styles.comingSoon}>
-            <Text style={styles.comingSoonText}>🚀 Pro 플랜 — 곧 출시 예정</Text>
+          <View style={styles.betaBadge}>
+            <Text style={styles.betaText}>베타 서비스 — 소중한 피드백을 기다려요 💛</Text>
           </View>
 
           <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.8}>
-            <Text style={styles.closeBtnText}>다음 달에 다시 시도할게요</Text>
+            <Text style={styles.closeBtnText}>확인</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -69,14 +69,14 @@ const styles = StyleSheet.create({
   },
   featureRow: { flexDirection: 'row', alignItems: 'center' },
   featureText: { fontSize: 14, color: '#444' },
-  comingSoon: {
-    backgroundColor: '#FFF0ED', borderRadius: 12,
+  betaBadge: {
+    backgroundColor: '#FFF8E6', borderRadius: 12,
     paddingVertical: 10, paddingHorizontal: 20, marginBottom: 20,
   },
-  comingSoonText: { fontSize: 13, color: '#E8735A', fontWeight: '600' },
+  betaText: { fontSize: 13, color: '#C9922A', fontWeight: '600', textAlign: 'center' },
   closeBtn: {
     width: '100%', paddingVertical: 16, borderRadius: 16,
-    backgroundColor: '#F5F2EC', alignItems: 'center',
+    backgroundColor: '#E8735A', alignItems: 'center',
   },
-  closeBtnText: { fontSize: 15, color: '#888', fontWeight: '500' },
+  closeBtnText: { fontSize: 15, color: '#fff', fontWeight: '600' },
 });
