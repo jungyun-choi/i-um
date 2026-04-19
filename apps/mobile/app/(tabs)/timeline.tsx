@@ -2,7 +2,8 @@ import { useState, useRef } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   ActivityIndicator, RefreshControl, Modal,
-  Pressable, ScrollView, type NativeScrollEvent, type NativeSyntheticEvent,
+  Pressable, ScrollView, Animated,
+  type NativeScrollEvent, type NativeSyntheticEvent,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -79,6 +80,8 @@ export default function TimelineScreen() {
   const sectionViewRefs = useRef<Record<string, View | null>>({});
 
   const [showLetter, setShowLetter] = useState(false);
+  const [fabOpen, setFabOpen] = useState(false);
+  const fabAnim = useRef(new Animated.Value(0)).current;
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } =
     useTimeline(activeChild?.id);
@@ -117,6 +120,17 @@ export default function TimelineScreen() {
 
   const currentMonth = activeMonth ?? sections[0]?.monthKey ?? '';
   const currentYear = currentMonth.slice(0, 4);
+
+  function toggleFab() {
+    const toValue = fabOpen ? 0 : 1;
+    Animated.spring(fabAnim, { toValue, useNativeDriver: true, friction: 6, tension: 80 }).start();
+    setFabOpen(!fabOpen);
+  }
+
+  function closeFab() {
+    Animated.spring(fabAnim, { toValue: 0, useNativeDriver: true, friction: 6, tension: 80 }).start();
+    setFabOpen(false);
+  }
 
   function openDatePicker() {
     setPickerYear(currentYear || new Date().getFullYear().toString());
@@ -213,11 +227,6 @@ export default function TimelineScreen() {
           ) : activeChild ? (
             <Text style={styles.childName}>{activeChild.name}</Text>
           ) : null}
-          {activeChild && (
-            <TouchableOpacity style={styles.uploadBtn} onPress={() => router.push('/upload')}>
-              <Text style={styles.uploadBtnText}>+</Text>
-            </TouchableOpacity>
-          )}
         </View>
       </View>
 
@@ -327,6 +336,56 @@ export default function TimelineScreen() {
         </Pressable>
       </Modal>
 
+      {/* FAB — 콘텐츠 추가 (사진 일기 / 텍스트 일기) */}
+      {activeChild && (
+        <View style={styles.fabContainer} pointerEvents="box-none">
+          {fabOpen && (
+            <Pressable style={styles.fabBackdrop} onPress={closeFab} />
+          )}
+          {/* 서브 버튼: 텍스트 일기 */}
+          <Animated.View style={[
+            styles.fabSub,
+            {
+              opacity: fabAnim,
+              transform: [{ translateY: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -72] }) }],
+            },
+          ]} pointerEvents={fabOpen ? 'auto' : 'none'}>
+            <TouchableOpacity
+              style={styles.fabSubBtn}
+              onPress={() => { closeFab(); router.push('/write'); }}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.fabSubIcon}>✏️</Text>
+            </TouchableOpacity>
+            <Text style={styles.fabSubLabel}>글로 쓰기</Text>
+          </Animated.View>
+          {/* 서브 버튼: 사진 일기 */}
+          <Animated.View style={[
+            styles.fabSub,
+            {
+              opacity: fabAnim,
+              transform: [{ translateY: fabAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -136] }) }],
+            },
+          ]} pointerEvents={fabOpen ? 'auto' : 'none'}>
+            <TouchableOpacity
+              style={styles.fabSubBtn}
+              onPress={() => { closeFab(); router.push('/upload'); }}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.fabSubIcon}>📸</Text>
+            </TouchableOpacity>
+            <Text style={styles.fabSubLabel}>사진으로</Text>
+          </Animated.View>
+          {/* 메인 FAB */}
+          <TouchableOpacity style={styles.fab} onPress={toggleFab} activeOpacity={0.85}>
+            <Animated.Text style={[
+              styles.fabIcon,
+              { transform: [{ rotate: fabAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '45deg'] }) }] },
+            ]}>+</Animated.Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* 아이 선택 시트 */}
       <Modal visible={showChildPicker} transparent animationType="fade">
         <Pressable style={styles.overlay} onPress={() => setShowChildPicker(false)}>
@@ -369,11 +428,37 @@ const styles = StyleSheet.create({
   datePillPlaceholder: { width: 80 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1, justifyContent: 'flex-end' },
   childName: { fontSize: 15, color: '#555', fontWeight: '500' },
-  uploadBtn: {
-    backgroundColor: '#E8735A', width: 36, height: 36,
-    borderRadius: 18, alignItems: 'center', justifyContent: 'center',
+
+  // FAB
+  fabContainer: {
+    position: 'absolute', bottom: 24, right: 20,
+    alignItems: 'center',
   },
-  uploadBtnText: { color: '#fff', fontSize: 22, fontWeight: '400', lineHeight: 28 },
+  fabBackdrop: {
+    position: 'absolute',
+    top: -800, left: -400, right: -400, bottom: -80,
+  },
+  fab: {
+    width: 56, height: 56, borderRadius: 28,
+    backgroundColor: '#E8735A',
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#E8735A', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35, shadowRadius: 12, elevation: 6,
+  },
+  fabIcon: { color: '#fff', fontSize: 28, fontWeight: '300', lineHeight: 32 },
+  fabSub: {
+    position: 'absolute', bottom: 0, right: 0,
+    alignItems: 'center', gap: 4,
+  },
+  fabSubBtn: {
+    width: 48, height: 48, borderRadius: 24,
+    backgroundColor: '#fff',
+    alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#1A1A1A', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12, shadowRadius: 8, elevation: 4,
+  },
+  fabSubIcon: { fontSize: 22 },
+  fabSubLabel: { fontSize: 10, fontWeight: '600', color: '#888' },
 
   sectionHeader: {
     backgroundColor: '#FFFDF8',
