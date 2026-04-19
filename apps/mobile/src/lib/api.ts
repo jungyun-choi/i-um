@@ -26,6 +26,8 @@ export const api = {
       authFetch('/children', { method: 'POST', body: JSON.stringify(body) }),
     update: (id: string, body: Partial<{ name: string; birth_date: string; gender: string; avatar_url: string }>) =>
       authFetch(`/children/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+    getAvatarUploadUrl: (id: string) =>
+      authFetch(`/children/${id}/avatar-url`, { method: 'POST' }),
   },
   photos: {
     getUploadUrl: (body: { child_id: string; filename: string; taken_at?: string; gps_lat?: number; gps_lng?: number }) =>
