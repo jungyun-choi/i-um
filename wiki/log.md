@@ -714,3 +714,13 @@
 - 커밋: `2d4c98e` by jy.choi
 - 변경 파일 수: 1
   - apps/mobile/app/child/[id]/edit.tsx
+
+## [2026-04-20] commit | feat: Sprint #20 — 앱 아이콘 생성 (이음 브랜드 디자인)
+
+- 커밋: `aadfab8` by jy.choi
+- 변경 파일 수: 5
+  - apps/mobile/assets/adaptive-icon.png
+  - apps/mobile/assets/favicon.png
+  - apps/mobile/assets/icon.png
+  - apps/mobile/assets/splash-icon.png
+  - apps/mobile/scripts/generate-icon.sh

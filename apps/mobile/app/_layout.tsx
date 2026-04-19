@@ -11,6 +11,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { usePushNotification } from '../src/hooks/usePushNotification';
 import { ToastProvider } from '../src/components/Toast';
 import { ErrorBoundary } from '../src/components/ErrorBoundary';
+import { OfflineBanner } from '../src/components/OfflineBanner';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -107,6 +108,7 @@ export default function RootLayout() {
       <QueryClientProvider client={queryClient}>
         <ToastProvider>
           <AuthGate session={session} isRecovery={isRecovery} />
+          <OfflineBanner />
           <Slot />
         </ToastProvider>
       </QueryClientProvider>
