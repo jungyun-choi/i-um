@@ -63,14 +63,15 @@
 | [competitor-comparison.md](analysis/competitor-comparison.md) | 비교 분석 | 2026-04-19 |
 | [decision-2026-04-19-tech-setup.md](analysis/decision-2026-04-19-tech-setup.md) | 기술 결정 4건 | 2026-04-19 |
 | [decision-2026-04-19-production-roadmap.md](analysis/decision-2026-04-19-production-roadmap.md) | 프로덕션 로드맵 — 아이디어 회의 결과 |
-| [decision-2026-04-20-beta-paywall.md](analysis/decision-2026-04-20-beta-paywall.md) | 베타 Paywall 전략 — 무료 한도 30개, UX 메시지 개선 | 2026-04-19 |
+| [decision-2026-04-20-beta-paywall.md](analysis/decision-2026-04-20-beta-paywall.md) | 베타 Paywall 전략 — 무료 한도 30개, UX 메시지 개선 |
+| [sprint-history-1-29.md](analysis/sprint-history-1-29.md) | Sprint #1~29 전체 작업 이력 회고 — Phase별 요약 | 2026-04-19 |
 
 ---
 
 ## 통계
 
 - 총 소스: 0 (웹 리서치)
-- 총 wiki 페이지: 20
+- 총 wiki 페이지: 21
 - 마지막 ingest: 2026-04-19 (시장조사)
 - 마지막 decision: 2026-04-20 (베타 Paywall 전략)
 - 마지막 feat: 2026-04-20 (Sprint #30~33)

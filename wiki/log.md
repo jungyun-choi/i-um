@@ -5,6 +5,14 @@
 
 ---
 
+## [2026-04-20] query | Sprint #1~29 회고 문서 작성
+
+- git log + 커밋 메시지 기반으로 Sprint #1~29 전체 작업 이력 재구성
+- Phase 0~5로 분류: MVP 구축 → Auth/보안 → 안정성 → 브랜드/온보딩 → 고급기능 → 마일스톤
+- 관련 문서: [[wiki/analysis/sprint-history-1-29.md]]
+
+---
+
 ## [2026-04-20] fix | Sprint #33 — Hermes Fabric condition && style 크래시 패턴 수정
 
 - 대상 파일: `timeline.tsx` 2건, `upload.tsx` 5건 (총 7건)
