@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, SafeAreaView,
-  TouchableOpacity, Image, Alert, TextInput, Dimensions,
+  TouchableOpacity, Image, Alert, TextInput, Dimensions, ActivityIndicator,
 } from 'react-native';
 
 const SCREEN_W = Dimensions.get('window').width;
@@ -26,11 +26,27 @@ export default function DiaryDetailScreen() {
     enabled: !!id,
   });
 
+  const [retrying, setRetrying] = useState(false);
+
   const { diary: polledDiary } = useDiaryGeneration(
-    diary?.status !== 'done' && diary?.status !== 'failed' ? diary?.photos?.id ?? '' : ''
+    (diary?.status !== 'done' && diary?.status !== 'failed') || retrying
+      ? diary?.photos?.id ?? ''
+      : ''
   );
 
   const current = polledDiary?.status === 'done' ? polledDiary : diary;
+
+  async function retryGeneration() {
+    const photoId = current?.photos?.id;
+    if (!photoId) return;
+    try {
+      setRetrying(true);
+      await api.photos.process(photoId);
+    } catch {
+      setRetrying(false);
+      Alert.alert('재시도 실패', '잠시 후 다시 시도해주세요.');
+    }
+  }
 
   const updateMutation = useMutation({
     mutationFn: (content: string) => api.diary.update(id, content),
@@ -70,7 +86,7 @@ export default function DiaryDetailScreen() {
     return <DiaryGenerating />;
   }
 
-  if (current.status === 'generating' || current.status === 'pending') {
+  if (current.status === 'generating' || current.status === 'pending' || retrying) {
     return <DiaryGenerating />;
   }
 
@@ -137,7 +153,20 @@ export default function DiaryDetailScreen() {
               placeholder="일기 내용을 입력하세요"
             />
           ) : current.status === 'failed' ? (
-            <Text style={styles.failed}>일기 생성에 실패했습니다.</Text>
+            <View style={styles.failedBox}>
+              <Text style={styles.failedIcon}>😔</Text>
+              <Text style={styles.failedTitle}>일기 생성에 실패했어요</Text>
+              <Text style={styles.failedDesc}>AI가 사진을 분석하는 중 문제가 생겼어요.{'\n'}다시 시도해볼까요?</Text>
+              <TouchableOpacity
+                style={styles.retryBtn}
+                onPress={retryGeneration}
+                disabled={retrying}
+              >
+                {retrying
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={styles.retryBtnText}>다시 생성하기</Text>}
+              </TouchableOpacity>
+            </View>
           ) : (
             <Text style={styles.content}>{current.content}</Text>
           )}
@@ -171,5 +200,13 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#E5E5E5', borderRadius: 12,
     padding: 14, minHeight: 200, textAlignVertical: 'top',
   },
-  failed: { fontSize: 16, color: '#999', fontStyle: 'italic' },
+  failedBox: { alignItems: 'center', paddingVertical: 32 },
+  failedIcon: { fontSize: 40, marginBottom: 12 },
+  failedTitle: { fontSize: 18, fontWeight: '600', color: '#333', marginBottom: 8 },
+  failedDesc: { fontSize: 15, color: '#888', textAlign: 'center', lineHeight: 22, marginBottom: 24 },
+  retryBtn: {
+    backgroundColor: '#E8735A', borderRadius: 14,
+    paddingVertical: 14, paddingHorizontal: 32, minWidth: 160, alignItems: 'center',
+  },
+  retryBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });
