@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-nati
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { toKSTDateStr } from '../lib/utils/date';
+import { getMilestoneDisplayLabel } from '../lib/utils/milestone';
 
 const CARD_IMAGE_H = Dimensions.get('window').width * 0.78;
 
@@ -55,7 +56,7 @@ export function DiaryCard({ entry, allIds }: Props) {
             <Text style={styles.textCardDate}>{dateStr}</Text>
             {entry.milestone && (
               <View style={styles.milestoneBadge}>
-                <Text style={styles.milestoneText}>🎉 {entry.milestone}</Text>
+                <Text style={styles.milestoneText}>🎉 {getMilestoneDisplayLabel(entry.milestone!)}</Text>
               </View>
             )}
           </View>
@@ -83,7 +84,7 @@ export function DiaryCard({ entry, allIds }: Props) {
           <Text style={styles.date}>{dateStr}</Text>
           {entry.milestone && (
             <View style={styles.milestoneBadge}>
-              <Text style={styles.milestoneText}>🎉 {entry.milestone}</Text>
+              <Text style={styles.milestoneText}>🎉 {getMilestoneDisplayLabel(entry.milestone!)}</Text>
             </View>
           )}
         </View>

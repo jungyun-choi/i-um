@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { api, uploadToS3 } from '../src/lib/api';
 import { useChildStore } from '../src/stores/childStore';
 import { getAgeText } from '../src/lib/utils/age';
+import { getMilestoneDisplayLabel } from '../src/lib/utils/milestone';
 import { useQueryClient } from '@tanstack/react-query';
 import { PhotoGrid } from '../src/components/PhotoGrid';
 import { DiaryGenerating } from '../src/components/DiaryGenerating';
@@ -312,7 +313,7 @@ export default function UploadScreen() {
               )}
               {diaryResult.milestone && (
                 <View style={styles.milestoneBadge}>
-                  <Text style={styles.milestoneText}>🎉 {diaryResult.milestone}</Text>
+                  <Text style={styles.milestoneText}>🎉 {getMilestoneDisplayLabel(diaryResult.milestone!)}</Text>
                 </View>
               )}
             </View>
