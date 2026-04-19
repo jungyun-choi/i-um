@@ -24,6 +24,10 @@ export default function SignupScreen() {
       showToast('이메일과 비밀번호를 입력해주세요');
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      showToast('올바른 이메일 주소를 입력해주세요');
+      return;
+    }
     if (password.length < 6) {
       showToast('비밀번호는 6자 이상이어야 해요');
       return;
