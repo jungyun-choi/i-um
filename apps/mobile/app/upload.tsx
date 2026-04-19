@@ -6,8 +6,8 @@ import {
 import { PaywallModal } from '../src/components/PaywallModal';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
-import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { requestPushPermission } from '../src/hooks/usePushNotification';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api, uploadToS3 } from '../src/lib/api';
@@ -182,14 +182,11 @@ export default function UploadScreen() {
       const result = await pollDiary(lastPhotoId);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       showDiaryModal({ ...result, totalCount: photoIds.length });
-      // First-diary push prompt — ask once, at the highest-motivation moment
+      // 첫 일기 완성 직후 — 감동 순간에 알림 권한 요청 (한 번만)
       const asked = await AsyncStorage.getItem('push_prompt_shown');
       if (!asked) {
         await AsyncStorage.setItem('push_prompt_shown', '1');
-        const { status } = await Notifications.getPermissionsAsync();
-        if (status === 'undetermined') {
-          await Notifications.requestPermissionsAsync();
-        }
+        await requestPushPermission();
       }
     } catch (e: unknown) {
       if (e instanceof Error && e.message.includes('monthly_limit_reached')) {
