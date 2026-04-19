@@ -130,9 +130,32 @@ curl http://localhost:4242/health
 | `REPLICATE_API_TOKEN` | `/Users/jungyun.choi/Dev/planeat-new/backend/.env` |
 | `KAKAO_REST_API_KEY` | 미발급 (Kakao Developers에서 신규 발급 필요) |
 | `REDIS_URL` | 미설정 (`brew install redis` 후 `redis://localhost:6379`) |
+| `SUPABASE_DB_PASSWORD` | `apps/server/.env` — Supabase DB 직접 접속용 비밀번호 (IPv6 환경에선 DNS 불가) |
+| `SUPABASE_DB_HOST` | `apps/server/.env` — `db.dqlqaleukqswrkzzqkng.supabase.co` |
+| `SUPABASE_PAT` | `apps/server/.env` — Management API Personal Access Token (마이그레이션 실행용) |
 
 > **주의**: `.env` 파일은 `.gitignore`에 포함되어 있어 git에 커밋되지 않음.
 > 서버 재시작 전 항상 `apps/server/.env` 확인 필요.
+
+### DB 마이그레이션 실행 방법
+
+이 개발 환경은 IPv6 이슈로 `db.*.supabase.co` 직접 접속이 안 됨.
+마이그레이션은 아래 방법 중 하나로 실행:
+
+1. **Supabase 대시보드** → SQL Editor → SQL 붙여넣기
+2. **Management API (PAT) 사용** ← 검증된 방법, Claude가 직접 실행 가능
+
+```bash
+curl -s -X POST "https://api.supabase.com/v1/projects/dqlqaleukqswrkzzqkng/database/query" \
+  -H "Authorization: Bearer {SUPABASE_PAT}" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "여기에 SQL 입력"}'
+```
+
+- 응답 `[]` = 성공 (DDL은 빈 배열 반환)
+- 응답 `[{...}]` = SELECT 결과
+- PAT 위치: `apps/server/.env` → `SUPABASE_PAT`
+- PAT 발급: [app.supabase.com/account/tokens](https://app.supabase.com/account/tokens)
 
 ---
 

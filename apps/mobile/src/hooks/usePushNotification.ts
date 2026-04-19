@@ -41,12 +41,14 @@ async function registerForPushNotifications() {
 
   if (finalStatus !== 'granted') return;
 
-  const tokenData = await Notifications.getExpoPushTokenAsync();
-  const token = tokenData.data;
-
+  // Expo Go에서는 SDK 53+ 이후 원격 푸시 미지원 — Development Build 필요
+  // projectId 없으면 조용히 skip (앱 크래시 방지)
   try {
-    await api.users.savePushToken(token);
+    const tokenData = await Notifications.getExpoPushTokenAsync({
+      projectId: process.env.EXPO_PUBLIC_EAS_PROJECT_ID,
+    });
+    await api.users.savePushToken(tokenData.data);
   } catch {
-    // 토큰 저장 실패는 앱 동작에 영향 없음
+    // Expo Go 환경이거나 projectId 미설정 시 정상 skip
   }
 }

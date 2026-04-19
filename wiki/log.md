@@ -157,3 +157,13 @@
 - 커밋: `31eb9bf` by jy.choi
 - 변경 파일 수: 1
   - CLAUDE.md
+
+## [2026-04-19] commit | feat: TDD 셋업 + 푸시 알림 구현
+
+- 커밋: `8a9664a` by jy.choi
+- 변경 파일 수: 18
+  - CLAUDE.md
+  - apps/mobile/app/_layout.tsx
+  - apps/mobile/jest.config.js
+  - apps/mobile/package.json
+  - apps/mobile/src/__tests__/dateUtils.test.ts

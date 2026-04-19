@@ -75,7 +75,11 @@ create policy "Users can manage own profile"
 | (서버 전체) | 14 | ✅ |
 | `dateUtils.test.ts` (모바일) | 9 | ✅ |
 
-## 알려진 한계
+## 알려진 한계 & TODO
 
-- 실기기에서 푸시 토큰 발급 테스트는 수동 필요 (시뮬레이터 미지원)
-- Expo Go에서는 알림 제한 있음 — 프로덕션 빌드에서 정상 동작
+- **Expo Go SDK 53+에서 원격 푸시 제거됨** → Development Build 필요
+- Development Build 만들 때:
+  1. `eas build --profile development --platform ios` 실행
+  2. EAS 프로젝트 생성 → `app.json`에 `extra.eas.projectId` 추가
+  3. `apps/mobile/.env`에 `EXPO_PUBLIC_EAS_PROJECT_ID={id}` 추가
+  4. 그러면 `usePushNotification` 훅이 자동으로 동작

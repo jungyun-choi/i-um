@@ -43,6 +43,7 @@
 | [dev-environment.md](topics/dev-environment.md) | 개발 환경 설정, 기술 스택 확정, 남은 TODO |
 | [product-feature-ideas.md](topics/product-feature-ideas.md) | 프로덕션 기능 아이디어 전체 목록 (우선순위·복잡도 포함) |
 | [feat-push-notification.md](topics/feat-push-notification.md) | 푸시 알림 구현 — 일기 완성 시 Expo Push 발송 |
+| [feat-calendar-navigation.md](topics/feat-calendar-navigation.md) | 월별 달력 탐색 — 타임라인 SectionList + 퀵점프 바 |
 
 ---
 
