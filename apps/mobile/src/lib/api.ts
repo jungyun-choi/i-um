@@ -35,6 +35,8 @@ export const api = {
     getDiary: (id: string) => authFetch(`/photos/${id}/diary`),
   },
   diary: {
+    create: (body: { child_id: string; content: string; date?: string }) =>
+      authFetch('/diary', { method: 'POST', body: JSON.stringify(body) }),
     get: (id: string) => authFetch(`/diary/${id}`),
     update: (id: string, content: string) =>
       authFetch(`/diary/${id}`, { method: 'PATCH', body: JSON.stringify({ content }) }),
