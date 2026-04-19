@@ -6,7 +6,9 @@ import photosRoutes from './routes/photos';
 import diaryRoutes from './routes/diary';
 import milestonesRoutes from './routes/milestones';
 import usersRoutes from './routes/users';
+import monthlyLettersRoutes from './routes/monthlyLetters';
 import { startMilestoneScheduler } from './workers/milestoneScheduler';
+import { startMonthlyLetterScheduler } from './workers/monthlyLetterScheduler';
 
 const app = express();
 
@@ -18,6 +20,7 @@ app.use('/photos', photosRoutes);
 app.use('/diary', diaryRoutes);
 app.use('/milestones', milestonesRoutes);
 app.use('/users', usersRoutes);
+app.use('/monthly-letters', monthlyLettersRoutes);
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
@@ -25,4 +28,5 @@ const PORT = process.env.PORT ?? 3000;
 app.listen(PORT, () => {
   console.log(`Server running on :${PORT}`);
   startMilestoneScheduler();
+  startMonthlyLetterScheduler();
 });

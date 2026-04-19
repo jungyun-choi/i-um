@@ -52,6 +52,10 @@ export const api = {
     create: (body: { child_id: string; type: string; date: string }) =>
       authFetch('/milestones', { method: 'POST', body: JSON.stringify(body) }),
   },
+  monthlyLetters: {
+    latest: (childId: string) => authFetch(`/monthly-letters/latest/${childId}`),
+    list: (childId: string) => authFetch(`/monthly-letters/${childId}`),
+  },
   users: {
     savePushToken: (token: string) =>
       authFetch('/users/push-token', { method: 'PATCH', body: JSON.stringify({ token }) }),

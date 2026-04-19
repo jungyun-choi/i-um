@@ -5,11 +5,64 @@ import {
   Pressable, ScrollView, type NativeScrollEvent, type NativeSyntheticEvent,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useQuery } from '@tanstack/react-query';
 import { useTimeline } from '../../src/hooks/useTimeline';
 import { useChildStore } from '../../src/stores/childStore';
 import { DiaryCard } from '../../src/components/DiaryCard';
 import { MemoryCard } from '../../src/components/MemoryCard';
 import { groupEntriesByMonth, formatMonthLabel } from '../../src/utils/groupByMonth';
+import { api } from '../../src/lib/api';
+
+interface MonthlyLetter {
+  id: string;
+  year_month: string;
+  content: string;
+  created_at: string;
+}
+
+function LetterCard({ letter, onPress }: { letter: MonthlyLetter; onPress: () => void }) {
+  const [y, m] = letter.year_month.split('-');
+  const label = `${y}년 ${parseInt(m, 10)}월 월간 레터`;
+  const preview = letter.content.length > 60
+    ? letter.content.slice(0, 60) + '…'
+    : letter.content;
+
+  return (
+    <TouchableOpacity style={styles.letterCard} onPress={onPress} activeOpacity={0.85}>
+      <View style={styles.letterAccent} />
+      <View style={styles.letterBody}>
+        <View style={styles.letterTop}>
+          <Text style={styles.letterIcon}>💌</Text>
+          <Text style={styles.letterLabel}>{label}</Text>
+        </View>
+        <Text style={styles.letterPreview}>{preview}</Text>
+        <Text style={styles.letterReadMore}>전체 읽기 →</Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+function LetterModal({ letter, onClose }: { letter: MonthlyLetter; onClose: () => void }) {
+  const [y, m] = letter.year_month.split('-');
+  const label = `${y}년 ${parseInt(m, 10)}월 월간 레터`;
+
+  return (
+    <Modal visible animationType="slide" onRequestClose={onClose}>
+      <SafeAreaView style={styles.letterModalContainer}>
+        <View style={styles.letterModalHeader}>
+          <Text style={styles.letterModalTitle}>{label}</Text>
+          <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Text style={styles.letterModalClose}>✕</Text>
+          </TouchableOpacity>
+        </View>
+        <ScrollView contentContainerStyle={styles.letterModalContent}>
+          <Text style={styles.letterModalIcon}>💌</Text>
+          <Text style={styles.letterModalText}>{letter.content}</Text>
+        </ScrollView>
+      </SafeAreaView>
+    </Modal>
+  );
+}
 
 export default function TimelineScreen() {
   const router = useRouter();
@@ -23,8 +76,17 @@ export default function TimelineScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const sectionViewRefs = useRef<Record<string, View | null>>({});
 
+  const [showLetter, setShowLetter] = useState(false);
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, refetch } =
     useTimeline(activeChild?.id);
+
+  const { data: latestLetter } = useQuery<MonthlyLetter | null>({
+    queryKey: ['monthly-letter', activeChild?.id],
+    queryFn: () => api.monthlyLetters.latest(activeChild!.id),
+    enabled: !!activeChild,
+    staleTime: 1000 * 60 * 60,
+  });
 
   const entries = data?.pages.flatMap((p) => p.entries) ?? [];
   const sections = groupEntriesByMonth(entries);
@@ -156,6 +218,9 @@ export default function TimelineScreen() {
           onScroll={handleScroll}
           scrollEventThrottle={200}
         >
+          {latestLetter && (
+            <LetterCard letter={latestLetter} onPress={() => setShowLetter(true)} />
+          )}
           {memoryEntry && (
             <MemoryCard entry={memoryEntry.entry} yearsAgo={memoryEntry.yearsAgo} />
           )}
@@ -177,6 +242,10 @@ export default function TimelineScreen() {
             <ActivityIndicator color="#E8735A" style={{ marginVertical: 16 }} />
           )}
         </ScrollView>
+      )}
+
+      {showLetter && latestLetter && (
+        <LetterModal letter={latestLetter} onClose={() => setShowLetter(false)} />
       )}
 
       {/* 연/월 피커 시트 */}
@@ -325,6 +394,38 @@ const styles = StyleSheet.create({
   monthCellTextActive: { color: '#fff' },
   monthCellTextDisabled: { color: '#D0CFC9' },
   monthDot: { width: 4, height: 4, borderRadius: 2, backgroundColor: '#E8735A', marginTop: 2 },
+
+  // 월간 레터 카드
+  letterCard: {
+    backgroundColor: '#FEF3EC',
+    borderRadius: 16, marginBottom: 16,
+    flexDirection: 'row', overflow: 'hidden',
+    shadowColor: '#E8735A', shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1, shadowRadius: 8, elevation: 2,
+  },
+  letterAccent: { width: 4, backgroundColor: '#E8735A' },
+  letterBody: { flex: 1, padding: 16 },
+  letterTop: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
+  letterIcon: { fontSize: 18 },
+  letterLabel: { fontSize: 13, fontWeight: '700', color: '#C05A42', letterSpacing: 0.3 },
+  letterPreview: { fontSize: 14, color: '#5A4A3A', lineHeight: 20, marginBottom: 8 },
+  letterReadMore: { fontSize: 13, color: '#E8735A', fontWeight: '600' },
+
+  // 월간 레터 모달
+  letterModalContainer: { flex: 1, backgroundColor: '#FFFDF8' },
+  letterModalHeader: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingHorizontal: 20, paddingVertical: 16,
+    borderBottomWidth: 1, borderBottomColor: '#F0EDE6',
+  },
+  letterModalTitle: { fontSize: 17, fontWeight: '700', color: '#1A1A1A' },
+  letterModalClose: { fontSize: 18, color: '#AAA', fontWeight: '400' },
+  letterModalContent: { padding: 24, alignItems: 'center' },
+  letterModalIcon: { fontSize: 48, marginBottom: 20 },
+  letterModalText: {
+    fontSize: 16, color: '#3A2E28', lineHeight: 28,
+    width: '100%',
+  },
 
   // 아이 선택
   childSheet: {

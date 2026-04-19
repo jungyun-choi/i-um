@@ -47,6 +47,7 @@
 | [feat-retry-ux.md](topics/feat-retry-ux.md) | 일기 생성 실패 재시도 UX |
 | [feat-memory-card.md](topics/feat-memory-card.md) | "1년 전 오늘" 메모리 카드 — Retention 기능 |
 | [feat-profile-milestone.md](topics/feat-profile-milestone.md) | 프로필 통계 카드 + 마일스톤 탭 전면 개선 |
+| [feat-milestone-manual-record.md](topics/feat-milestone-manual-record.md) | first_word / first_step 수동 기록 기능 |
 
 ---
 
