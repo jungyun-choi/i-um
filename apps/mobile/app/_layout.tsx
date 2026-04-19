@@ -5,7 +5,8 @@ import { supabase } from '../src/lib/supabase';
 import { useRouter, useSegments } from 'expo-router';
 import { Session } from '@supabase/supabase-js';
 import { usePushNotification } from '../src/hooks/usePushNotification';
-import { ToastProvider, useToast } from '../src/components/Toast';
+import { ToastProvider } from '../src/components/Toast';
+import { ErrorBoundary } from '../src/components/ErrorBoundary';
 
 function makeQueryClient() {
   return new QueryClient({
@@ -54,11 +55,13 @@ export default function RootLayout() {
   if (!ready) return null;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <AuthGate session={session} />
-        <Slot />
-      </ToastProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ToastProvider>
+          <AuthGate session={session} />
+          <Slot />
+        </ToastProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
