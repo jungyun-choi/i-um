@@ -48,6 +48,8 @@
 | [feat-memory-card.md](topics/feat-memory-card.md) | "1년 전 오늘" 메모리 카드 — Retention 기능 |
 | [feat-profile-milestone.md](topics/feat-profile-milestone.md) | 프로필 통계 카드 + 마일스톤 탭 전면 개선 |
 | [feat-milestone-manual-record.md](topics/feat-milestone-manual-record.md) | first_word / first_step 수동 기록 기능 |
+| [feat-text-diary.md](topics/feat-text-diary.md) | 텍스트 일기 작성 + 확장형 FAB + draft 자동저장 |
+| [feat-notification-settings.md](topics/feat-notification-settings.md) | 알림 설정 화면 — 준비 중 → 실제 기능 |
 
 ---
 
@@ -64,7 +66,7 @@
 ## 통계
 
 - 총 소스: 0 (웹 리서치)
-- 총 wiki 페이지: 13
+- 총 wiki 페이지: 15
 - 마지막 ingest: 2026-04-19 (시장조사)
 - 마지막 decision: 2026-04-19 (프로덕션 로드맵)
 - 마지막 lint: —

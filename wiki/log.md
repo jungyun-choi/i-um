@@ -5,6 +5,18 @@
 
 ---
 
+## [2026-04-20] feat | 스프린트 — 텍스트 일기 + 알림 설정 + app.json 브랜딩
+
+- `feat/text-diary-ui`: write.tsx 텍스트 일기 작성 화면 + AsyncStorage draft 자동저장
+- `feat/write-ux-polish`: placeholder 정리, FAB 레이블 개선
+- `feat/milestone-notifications`: notification-settings.tsx 알림 권한 관리 화면 구현
+- `chore`: app.json — name: 이음, slug: i-um, bundleId: com.ium.app, 알림 플러그인
+- `feat/upload-progress`: 다중 사진 업로드 시 1/N 진행 표시
+- 타임라인 확장형 FAB (사진/직접쓰기 분기)
+- wiki: feat-text-diary.md, feat-notification-settings.md 추가
+
+---
+
 ## [2026-04-20] feat | 프로덕션 품질 스프린트 — 초대 UI + 토스트 + ErrorBoundary
 
 - `feat/invite-ui`: 프로필 탭 가족 공유 섹션 — 초대 코드 생성(Share.share) + JoinModal 6자리 입력
@@ -390,3 +402,91 @@
 - 변경 파일 수: 2
   - apps/mobile/app/_layout.tsx
   - apps/mobile/src/components/ErrorBoundary.tsx
+
+## [2026-04-20] commit | feat: 계정 삭제 + DiaryGenerating UX 개선
+
+- 커밋: `13c573f` by jy.choi
+- 변경 파일 수: 4
+  - apps/mobile/app/(tabs)/profile.tsx
+  - apps/mobile/src/components/DiaryGenerating.tsx
+  - apps/mobile/src/lib/api.ts
+  - apps/server/src/routes/users.ts
+
+## [2026-04-20] commit | feat: 탭바 Ionicons 벡터 아이콘 + 햅틱 피드백
+
+- 커밋: `6172f3d` by jy.choi
+- 변경 파일 수: 3
+  - apps/mobile/app/(tabs)/_layout.tsx
+  - apps/mobile/app/(tabs)/milestones.tsx
+  - apps/mobile/app/upload.tsx
+
+## [2026-04-20] commit | fix: child edit 화면 품질 개선
+
+- 커밋: `b068caa` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/child/[id]/edit.tsx
+
+## [2026-04-20] commit | feat: KST 날짜 버그 수정 + 개인정보처리방침 인앱 페이지
+
+- 커밋: `a25a3af` by jy.choi
+- 변경 파일 수: 5
+  - apps/mobile/app/(tabs)/profile.tsx
+  - apps/mobile/app/diary/[id].tsx
+  - apps/mobile/app/privacy.tsx
+  - apps/mobile/src/lib/utils/date.ts
+  - apps/mobile/src/utils/groupByMonth.ts
+
+## [2026-04-20] commit | feat: 로그인/회원가입 UX 전면 개선 + DiaryCard KST 날짜 수정
+
+- 커밋: `d3dc9db` by jy.choi
+- 변경 파일 수: 3
+  - apps/mobile/app/(auth)/login.tsx
+  - apps/mobile/app/(auth)/signup.tsx
+  - apps/mobile/src/components/DiaryCard.tsx
+
+## [2026-04-20] commit | feat: 텍스트 전용 일기 API — POST /diary (사진 없이 기록 가능)
+
+- 커밋: `8a62cb5` by jy.choi
+- 변경 파일 수: 1
+  - apps/server/src/routes/diary.ts
+
+## [2026-04-20] commit | feat: add diary.create() API method for text-only diary
+
+- 커밋: `9a5bd28` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/src/lib/api.ts
+
+## [2026-04-20] commit | feat: text diary compose screen + expandable FAB on timeline
+
+- 커밋: `d9f35d8` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/app/(tabs)/timeline.tsx
+  - apps/mobile/app/write.tsx
+
+## [2026-04-20] commit | feat: draft autosave + UX polish on write screen
+
+- 커밋: `862f2f6` by jy.choi
+- 변경 파일 수: 4
+  - apps/mobile/app/(tabs)/timeline.tsx
+  - apps/mobile/app/write.tsx
+  - apps/mobile/package.json
+  - package-lock.json
+
+## [2026-04-20] commit | feat: notification settings screen — replaces 준비 중 badge
+
+- 커밋: `7e25a84` by jy.choi
+- 변경 파일 수: 2
+  - apps/mobile/app/(tabs)/profile.tsx
+  - apps/mobile/app/notification-settings.tsx
+
+## [2026-04-20] commit | chore: app.json — 이음 브랜드 설정 + 번들 ID + 알림 플러그인
+
+- 커밋: `bc520ad` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app.json
+
+## [2026-04-20] commit | fix: show per-photo upload progress for multi-photo uploads
+
+- 커밋: `0acaaf2` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/upload.tsx
