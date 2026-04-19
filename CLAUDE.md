@@ -1,7 +1,76 @@
-# 이음 (i-um) — LLM Wiki Schema
+# 이음 (i-um) — 프로젝트 규칙 & LLM Wiki Schema
 
-이 파일은 이음 프로젝트의 지식 베이스(LLM Wiki)를 관리하기 위한 규칙과 워크플로우를 정의합니다.
-Claude Code는 이 파일을 읽고 wiki를 일관되게 유지합니다.
+이 파일은 이음 프로젝트의 **개발 규칙**, **인프라 정보**, **지식 베이스(LLM Wiki) 운영 방식**을 정의합니다.
+Claude Code는 세션 시작 시 이 파일을 읽고 모든 규칙을 준수합니다.
+
+---
+
+## 개발 규칙 (Claude가 반드시 따라야 할 규칙)
+
+### 1. 브랜치 전략
+- **모든 기능 구현은 반드시 feature 브랜치에서 진행**한다
+- 브랜치 네이밍: `feat/{기능명}` / `fix/{버그명}` / `refactor/{대상}`
+- 구현 완료 후 main에 머지. 머지 전 반드시 코드 확인
+- 예시: `git checkout -b feat/highlight-video`
+
+### 2. 기능 문서화 (구현 완료 시 필수)
+- 새 기능 구현이 완료되면 **반드시** `wiki/topics/feat-{기능명}.md` 생성
+- 포함 내용: 기능 개요, 구현 파일 목록, 핵심 로직, 알려진 한계
+- `wiki/index.md`에 등록, `wiki/log.md`에 `feat` 항목 추가
+
+### 3. 리서치 문서화 (조사 시 필수)
+- 기술 선택·라이브러리·API 등 자료 조사 내용은 **반드시** wiki에 정리
+- 소스 원문 → `raw/` 저장 후 ingest 워크플로우 따름
+- 간단한 조사 결과는 `wiki/analysis/research-YYYY-MM-DD-{주제}.md`에 직접 작성
+
+### 4. 기능 구현 체크리스트
+기능 하나가 완성됐다고 판단하려면 아래를 모두 충족해야 한다:
+- [ ] 브랜치에서 구현 완료
+- [ ] 서버 재시작 후 실제 동작 확인
+- [ ] `wiki/topics/feat-{기능명}.md` 생성
+- [ ] `wiki/index.md` 업데이트
+- [ ] main 머지 & 커밋
+
+---
+
+## 인프라 & 서버 정보
+
+### 서버 실행
+```bash
+# Redis 시작 (Bull Queue 필수)
+brew services start redis
+
+# 서버 실행 (포트 4242)
+cd apps/server && npm run dev
+
+# 모바일 앱 실행
+cd apps/mobile && npx expo start
+
+# 헬스체크
+curl http://localhost:4242/health
+```
+
+### 주요 엔드포인트
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| POST | `/children` | 아이 생성 |
+| GET | `/children` | 아이 목록 |
+| POST | `/photos/upload-url` | S3 presigned URL 발급 |
+| POST | `/photos/:id/process` | AI 일기 생성 큐 등록 |
+| GET | `/photos/:id/diary` | 일기 생성 상태 폴링 |
+| GET | `/diary/timeline/:childId` | 타임라인 조회 |
+| PATCH | `/diary/:id` | 일기 편집 |
+| DELETE | `/diary/:id` | 일기 + 사진 삭제 |
+| GET | `/milestones/:childId` | 마일스톤 목록 |
+
+### 스택 & 서비스
+| 서비스 | 용도 | 비고 |
+|--------|------|------|
+| Supabase | DB + Auth | `apps/server/.env` |
+| Cloudflare R2 | 이미지 스토리지 | cookly-meal 버킷, `i-um/` prefix |
+| Redis (local) | Bull Queue | `redis://localhost:6379` |
+| Anthropic Claude | AI 일기 생성 | Haiku 4.5 모델 |
+| OpenStreetMap Nominatim | 역지오코딩 | 무료, 키 불필요 |
 
 ---
 
