@@ -20,7 +20,7 @@ router.post('/upload-url', async (req: AuthRequest, res) => {
     child_id,
     user_id: req.userId,
     s3_key: s3Key,
-    taken_at: taken_at ?? new Date().toISOString(),
+    taken_at: taken_at ?? null,
     gps_lat: gps_lat ?? null,
     gps_lng: gps_lng ?? null,
   });

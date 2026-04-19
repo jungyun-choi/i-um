@@ -40,13 +40,14 @@ diaryQueue.process(async (job) => {
     gpsLat && gpsLng ? reverseGeocode(gpsLat, gpsLng) : Promise.resolve(null),
   ]);
 
-  const milestone = detectMilestone(child.birth_date, takenAt);
+  const effectiveDate = takenAt ?? new Date().toISOString();
+  const milestone = detectMilestone(child.birth_date, effectiveDate);
   const imageBase64 = imageBuffer.toString('base64');
 
   const content = await generateDiary({
     childName: child.name,
     birthDate: child.birth_date,
-    photoDate: takenAt,
+    photoDate: takenAt ?? null,
     locationName,
     milestone,
     imageBase64,
