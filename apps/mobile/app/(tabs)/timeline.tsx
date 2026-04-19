@@ -158,11 +158,31 @@ export default function TimelineScreen() {
 
   if (!activeChild && children.length === 0) {
     return (
-      <SafeAreaView style={styles.empty}>
-        <Text style={styles.emptyTitle}>아직 아이가 없어요</Text>
-        <TouchableOpacity style={styles.addBtn} onPress={() => router.push('/child/new')}>
-          <Text style={styles.addBtnText}>아이 프로필 만들기</Text>
-        </TouchableOpacity>
+      <SafeAreaView style={styles.onboarding}>
+        <View style={styles.onboardingHero}>
+          <Text style={styles.onboardingLogo}>이음</Text>
+          <Text style={styles.onboardingEmoji}>👶</Text>
+          <Text style={styles.onboardingHeadline}>아이의 특별한 순간을{'\n'}기록할 준비가 됐어요</Text>
+          <Text style={styles.onboardingSubtitle}>사진 한 장만 있으면 충분해요{'\n'}AI가 감동적인 일기로 남겨드려요</Text>
+        </View>
+        <View style={styles.onboardingFeatures}>
+          {[
+            { icon: '📸', text: '사진만 찍으면 일기가 완성돼요' },
+            { icon: '🎉', text: '백일·돌·첫걸음 자동 알림' },
+            { icon: '💌', text: '매달 AI가 편지를 써드려요' },
+          ].map((f) => (
+            <View key={f.text} style={styles.onboardingFeatureRow}>
+              <Text style={styles.onboardingFeatureIcon}>{f.icon}</Text>
+              <Text style={styles.onboardingFeatureText}>{f.text}</Text>
+            </View>
+          ))}
+        </View>
+        <View style={styles.onboardingFooter}>
+          <TouchableOpacity style={styles.onboardingCTA} onPress={() => router.push('/child/new?from=onboarding')} activeOpacity={0.85}>
+            <Text style={styles.onboardingCTAText}>시작하기</Text>
+          </TouchableOpacity>
+          <Text style={styles.onboardingHint}>1분이면 충분해요</Text>
+        </View>
       </SafeAreaView>
     );
   }
@@ -204,10 +224,11 @@ export default function TimelineScreen() {
         <ActivityIndicator style={styles.loader} color="#E8735A" />
       ) : entries.length === 0 ? (
         <View style={styles.emptyFeed}>
-          <Text style={styles.emptyTitle}>아직 기록이 없어요</Text>
-          <Text style={styles.emptyText}>첫 사진을 업로드해보세요</Text>
-          <TouchableOpacity style={styles.addBtn} onPress={() => router.push('/upload')}>
-            <Text style={styles.addBtnText}>사진 추가하기</Text>
+          <Text style={styles.emptyFeedEmoji}>📷</Text>
+          <Text style={styles.emptyTitle}>{activeChild?.name}의 첫 기록을{'\n'}남겨볼까요?</Text>
+          <Text style={styles.emptyText}>사진 한 장이면 AI가{'\n'}멋진 일기를 써드려요</Text>
+          <TouchableOpacity style={styles.addBtn} onPress={() => router.push('/upload')} activeOpacity={0.85}>
+            <Text style={styles.addBtnText}>첫 사진 추가하기</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -362,15 +383,44 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1 },
   list: { paddingBottom: 32, paddingHorizontal: 16, paddingTop: 8 },
   loader: { marginTop: 60 },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFDF8', padding: 32 },
-  emptyFeed: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
-  emptyTitle: { fontSize: 20, fontWeight: '600', color: '#333', marginBottom: 8 },
-  emptyText: { fontSize: 15, color: '#888', marginBottom: 24 },
-  addBtn: {
-    backgroundColor: '#E8735A', borderRadius: 14,
-    paddingVertical: 14, paddingHorizontal: 28, alignItems: 'center',
+  // 온보딩 (아이 없을 때)
+  onboarding: { flex: 1, backgroundColor: '#FFFDF8' },
+  onboardingHero: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32 },
+  onboardingLogo: { fontSize: 28, fontWeight: '700', color: '#E8735A', marginBottom: 16 },
+  onboardingEmoji: { fontSize: 72, marginBottom: 20 },
+  onboardingHeadline: {
+    fontSize: 24, fontWeight: '700', color: '#1A1A1A',
+    textAlign: 'center', lineHeight: 34, marginBottom: 12,
   },
-  addBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  onboardingSubtitle: { fontSize: 15, color: '#888', textAlign: 'center', lineHeight: 22 },
+  onboardingFeatures: {
+    paddingHorizontal: 32, paddingVertical: 20, gap: 12,
+    borderTopWidth: 1, borderTopColor: '#F0EDE6',
+  },
+  onboardingFeatureRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  onboardingFeatureIcon: { fontSize: 22, width: 32, textAlign: 'center' },
+  onboardingFeatureText: { fontSize: 14, color: '#555', flex: 1 },
+  onboardingFooter: { padding: 24, gap: 10, alignItems: 'center' },
+  onboardingCTA: {
+    backgroundColor: '#E8735A', borderRadius: 16, width: '100%',
+    paddingVertical: 18, alignItems: 'center',
+    shadowColor: '#E8735A', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25, shadowRadius: 12, elevation: 4,
+  },
+  onboardingCTAText: { color: '#fff', fontSize: 17, fontWeight: '700' },
+  onboardingHint: { fontSize: 13, color: '#BBB' },
+
+  emptyFeed: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32 },
+  emptyFeedEmoji: { fontSize: 56, marginBottom: 16 },
+  emptyTitle: { fontSize: 22, fontWeight: '700', color: '#1A1A1A', textAlign: 'center', lineHeight: 32, marginBottom: 10 },
+  emptyText: { fontSize: 15, color: '#888', textAlign: 'center', lineHeight: 22, marginBottom: 28 },
+  addBtn: {
+    backgroundColor: '#E8735A', borderRadius: 16,
+    paddingVertical: 16, paddingHorizontal: 32, alignItems: 'center',
+    shadowColor: '#E8735A', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25, shadowRadius: 12, elevation: 4,
+  },
+  addBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
 

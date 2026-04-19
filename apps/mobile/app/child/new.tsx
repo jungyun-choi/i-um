@@ -1,23 +1,23 @@
 import { useState } from 'react';
 import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
-  Alert, Platform, KeyboardAvoidingView, Keyboard, ScrollView,
+  Platform, KeyboardAvoidingView, Keyboard, ScrollView, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { api } from '../../src/lib/api';
-import { useQueryClient } from '@tanstack/react-query';
 import { useChildStore } from '../../src/stores/childStore';
 
 const GENDERS = [
-  { value: 'M', label: '남자아이' },
-  { value: 'F', label: '여자아이' },
-  { value: 'N', label: '선택 안함' },
+  { value: 'M', label: '남자아이', emoji: '👦' },
+  { value: 'F', label: '여자아이', emoji: '👧' },
+  { value: 'N', label: '선택 안함', emoji: '🧒' },
 ];
 
 export default function NewChildScreen() {
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const params = useLocalSearchParams<{ from?: string }>();
+  const isOnboarding = params.from === 'onboarding';
   const setChildren = useChildStore((s) => s.setChildren);
   const [name, setName] = useState('');
   const [birthDate, setBirthDate] = useState('');
@@ -45,7 +45,19 @@ export default function NewChildScreen() {
       await api.children.create({ name: name.trim(), birth_date: birthDate, gender });
       const children = await api.children.list();
       setChildren(children);
-      router.replace('/(tabs)/timeline');
+
+      if (isOnboarding) {
+        Alert.alert(
+          `${name.trim()}의 프로필이 만들어졌어요! 🎉`,
+          '첫 번째 사진을 올려서 AI 일기를 시작해볼까요?',
+          [
+            { text: '나중에', style: 'cancel', onPress: () => router.replace('/(tabs)/timeline') },
+            { text: '지금 찍기', onPress: () => router.replace('/upload') },
+          ],
+        );
+      } else {
+        router.back();
+      }
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       Alert.alert('실패', msg || '다시 시도해주세요.');
@@ -56,11 +68,16 @@ export default function NewChildScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* 헤더 */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.cancel}>취소</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>아이 프로필</Text>
+        {!isOnboarding ? (
+          <TouchableOpacity onPress={() => router.back()}>
+            <Text style={styles.cancel}>취소</Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 40 }} />
+        )}
+        <Text style={styles.title}>{isOnboarding ? '아이 소개' : '아이 추가'}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -71,7 +88,15 @@ export default function NewChildScreen() {
         <ScrollView
           contentContainerStyle={styles.form}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
+          {isOnboarding && (
+            <View style={styles.onboardingHint}>
+              <Text style={styles.hintEmoji}>✨</Text>
+              <Text style={styles.hintText}>소중한 아이를 소개해주세요{'\n'}이음이 함께 기억할게요</Text>
+            </View>
+          )}
+
           <Text style={styles.label}>이름</Text>
           <TextInput
             style={styles.input}
@@ -80,6 +105,7 @@ export default function NewChildScreen() {
             placeholder="아이 이름"
             placeholderTextColor="#CCC"
             returnKeyType="next"
+            autoFocus={isOnboarding}
           />
 
           <Text style={styles.label}>생일</Text>
@@ -100,10 +126,12 @@ export default function NewChildScreen() {
             {GENDERS.map((g) => (
               <TouchableOpacity
                 key={g.value}
-                style={[styles.genderBtn, gender === g.value && styles.genderBtnActive]}
+                style={[styles.genderBtn, gender === g.value ? styles.genderBtnActive : null]}
                 onPress={() => { Keyboard.dismiss(); setGender(g.value); }}
+                activeOpacity={0.75}
               >
-                <Text style={[styles.genderText, gender === g.value && styles.genderTextActive]}>
+                <Text style={styles.genderEmoji}>{g.emoji}</Text>
+                <Text style={[styles.genderText, gender === g.value ? styles.genderTextActive : null]}>
                   {g.label}
                 </Text>
               </TouchableOpacity>
@@ -112,11 +140,14 @@ export default function NewChildScreen() {
 
           <View style={styles.footer}>
             <TouchableOpacity
-              style={[styles.createBtn, loading && styles.btnDisabled]}
+              style={[styles.createBtn, loading ? styles.btnDisabled : null]}
               onPress={handleCreate}
               disabled={loading}
+              activeOpacity={0.85}
             >
-              <Text style={styles.createBtnText}>{loading ? '생성 중...' : '시작하기'}</Text>
+              <Text style={styles.createBtnText}>
+                {loading ? '저장 중...' : isOnboarding ? '다음 →' : '추가하기'}
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -133,25 +164,35 @@ const styles = StyleSheet.create({
   },
   cancel: { fontSize: 16, color: '#888' },
   title: { fontSize: 17, fontWeight: '600', color: '#1A1A1A' },
-  form: { padding: 24, gap: 8, flexGrow: 1 },
-  label: { fontSize: 14, fontWeight: '500', color: '#555', marginTop: 16 },
+
+  form: { padding: 24, flexGrow: 1 },
+  onboardingHint: { alignItems: 'center', paddingVertical: 24, marginBottom: 8 },
+  hintEmoji: { fontSize: 40, marginBottom: 10 },
+  hintText: { fontSize: 16, color: '#555', textAlign: 'center', lineHeight: 24 },
+
+  label: { fontSize: 14, fontWeight: '600', color: '#555', marginTop: 20, marginBottom: 8 },
   input: {
-    borderWidth: 1, borderColor: '#E5E5E5', borderRadius: 12,
-    padding: 14, fontSize: 16, backgroundColor: '#fff',
+    borderWidth: 1.5, borderColor: '#E8E4DC', borderRadius: 14,
+    padding: 15, fontSize: 16, backgroundColor: '#fff', color: '#1A1A1A',
   },
+
   genderRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
   genderBtn: {
-    flex: 1, borderWidth: 1, borderColor: '#E5E5E5', borderRadius: 10,
-    paddingVertical: 12, alignItems: 'center', backgroundColor: '#fff',
+    flex: 1, borderWidth: 1.5, borderColor: '#E8E4DC', borderRadius: 14,
+    paddingVertical: 14, alignItems: 'center', backgroundColor: '#fff', gap: 4,
   },
   genderBtnActive: { borderColor: '#E8735A', backgroundColor: '#FFF0ED' },
-  genderText: { fontSize: 14, color: '#888' },
-  genderTextActive: { color: '#E8735A', fontWeight: '600' },
-  footer: { paddingTop: 32, paddingBottom: 8 },
+  genderEmoji: { fontSize: 22 },
+  genderText: { fontSize: 12, color: '#888', fontWeight: '500' },
+  genderTextActive: { color: '#E8735A', fontWeight: '700' },
+
+  footer: { paddingTop: 36, paddingBottom: 8 },
   createBtn: {
-    backgroundColor: '#E8735A', borderRadius: 14,
-    paddingVertical: 16, alignItems: 'center',
+    backgroundColor: '#E8735A', borderRadius: 16,
+    paddingVertical: 18, alignItems: 'center',
+    shadowColor: '#E8735A', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25, shadowRadius: 12, elevation: 4,
   },
   btnDisabled: { opacity: 0.6 },
-  createBtnText: { color: '#fff', fontSize: 17, fontWeight: '600' },
+  createBtnText: { color: '#fff', fontSize: 17, fontWeight: '700' },
 });
