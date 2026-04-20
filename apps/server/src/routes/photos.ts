@@ -16,18 +16,24 @@ function monthStartISO(): string {
   return new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
 }
 
-async function countThisMonth(userId: string): Promise<number> {
+// 한도는 child 단위로 집계 — 가족 플랜(P1.5)에서 공동 양육자 합산 그대로 동작
+async function countThisMonth(childId: string): Promise<number> {
   const { count } = await supabase
     .from('photos')
     .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId)
+    .eq('child_id', childId)
     .gte('created_at', monthStartISO());
   return count ?? 0;
 }
 
 // 이번 달 업로드 사용량 조회 (프론트 게이지용)
 router.get('/usage', async (req: AuthRequest, res) => {
-  const used = await countThisMonth(req.userId!);
+  const childId = req.query.child_id;
+  if (typeof childId !== 'string' || !childId) {
+    res.status(400).json({ error: 'child_id required' });
+    return;
+  }
+  const used = await countThisMonth(childId);
   res.json({ used, limit: FREE_MONTHLY_LIMIT });
 });
 
@@ -35,7 +41,7 @@ router.get('/usage', async (req: AuthRequest, res) => {
 router.post('/upload-url', async (req: AuthRequest, res) => {
   const { child_id, filename, taken_at, gps_lat, gps_lng } = req.body;
 
-  const count = await countThisMonth(req.userId!);
+  const count = await countThisMonth(child_id);
 
   if (count >= FREE_MONTHLY_LIMIT) {
     res.status(402).json({ error: 'monthly_limit_reached', limit: FREE_MONTHLY_LIMIT });

@@ -46,7 +46,7 @@ describe('GET /photos/usage', () => {
   it('이번 달 사용량과 한도를 반환한다', async () => {
     mockGte.mockResolvedValue({ count: 7, error: null });
 
-    const res = await request(app).get('/photos/usage');
+    const res = await request(app).get('/photos/usage?child_id=child-abc');
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ used: 7, limit: 30 });
@@ -55,26 +55,32 @@ describe('GET /photos/usage', () => {
   it('count가 null이면 used=0 반환', async () => {
     mockGte.mockResolvedValue({ count: null, error: null });
 
-    const res = await request(app).get('/photos/usage');
+    const res = await request(app).get('/photos/usage?child_id=child-abc');
 
     expect(res.status).toBe(200);
     expect(res.body.used).toBe(0);
     expect(res.body.limit).toBe(30);
   });
 
-  it('현재 userId 기준으로 photos를 조회한다', async () => {
+  it('child_id 기준으로 photos를 조회한다', async () => {
     mockGte.mockResolvedValue({ count: 3, error: null });
 
-    await request(app).get('/photos/usage');
+    await request(app).get('/photos/usage?child_id=child-abc');
 
     expect(mockFrom).toHaveBeenCalledWith('photos');
-    expect(mockEq).toHaveBeenCalledWith('user_id', 'user-test-001');
+    expect(mockEq).toHaveBeenCalledWith('child_id', 'child-abc');
+  });
+
+  it('child_id 없이 호출하면 400 반환', async () => {
+    const res = await request(app).get('/photos/usage');
+
+    expect(res.status).toBe(400);
   });
 
   it('이번 달 1일 00:00(로컬) 이후만 집계한다', async () => {
     mockGte.mockResolvedValue({ count: 3, error: null });
 
-    await request(app).get('/photos/usage');
+    await request(app).get('/photos/usage?child_id=child-abc');
 
     const gteArgs = mockGte.mock.calls[0];
     expect(gteArgs[0]).toBe('created_at');

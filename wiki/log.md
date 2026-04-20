@@ -5,6 +5,14 @@
 
 ---
 
+## [2026-04-20] refactor | 한도 계산 기준 user_id → child_id (P1 가족 플랜 준비)
+
+- 수익화 전략 문서 P1 준비 액션 2번
+- 서버: `countThisMonth(childId)` 시그니처 변경 + `/photos/usage`에 `?child_id=` 필수 쿼리 파라미터
+- 모바일: `api.photos.usage(childId)` 필수 인자, `upload.tsx` useEffect에서 `activeChild.id` 전달
+- 테스트: `photosUsage.test.ts` 5 케이스 (기존 4 + 400 가드 1), 전체 33/33 그린
+- wiki: `topics/feat-quota-child-id-refactor.md`
+
 ## [2026-04-20] feat | Paywall 전환 의향 수집 (POST /users/paywall-intent)
 
 - 수익화 전략 문서 P0 액션 2번 — 한도 도달 유저 전환 의향 1탭 수집
