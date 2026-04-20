@@ -5,6 +5,18 @@
 
 ---
 
+## [2026-04-20] feat | 일기 "간결하게" 모드 추가
+
+- 기존 `감성적` / `사실 위주` → 3번째 스타일 `brief` 추가
+- 서버: `claudeService` 시스템/유저 프롬프트 3-way 분기, `diaryWorker`·`photos` 라우트 타입 확장 + 허용값 가드
+- 모바일: `upload.tsx`에 3번째 pill 버튼 추가, padding/gap 축소로 한 줄 배치
+- 프롬프트 목표: 2~3문장, 100자 이내, 핵심만
+- 테스트: `tsc --noEmit` 서버/모바일 통과, Jest 25+38개 통과
+- 브랜치: `feat/diary-brief-style`
+- 관련 문서: [[wiki/topics/feat-diary-brief-style.md]]
+
+---
+
 ## [2026-04-20] query | Sprint #1~29 회고 문서 작성
 
 - git log + 커밋 메시지 기반으로 Sprint #1~29 전체 작업 이력 재구성
@@ -916,3 +928,43 @@
   - apps/mobile/app/(auth)/welcome.tsx
   - apps/mobile/app/(tabs)/milestones.tsx
   - apps/mobile/src/lib/utils/milestone.ts
+
+## [2026-04-20] commit | fix: 프로필 '기록 중' NaN 버그 — ISO 날짜 형식 파싱
+
+- 커밋: `dc0215c` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/(tabs)/profile.tsx
+
+## [2026-04-20] feat | 발자국 앨범 — 범위 기반 그룹 재설계
+
+- 단일 날짜 마일스톤(day_100, dol 등)을 범위 기반으로 재설계
+- `FOOTSTEP_RANGES` 12개 구간 정의 (prenatal ~ beyond)
+- 일기 사진들을 런타임 그룹핑하여 앨범 카드로 표시
+- 카드 탭 → `/diary/[id]?ids=...` 가로 스와이프 (기존 FlatList 재활용)
+- DB 스키마 변경 없음 (클라이언트 사이드 계산)
+- 테스트 14개 추가 (footstepRange.test.ts) — 38개 전체 통과
+- 파일: `apps/mobile/src/lib/utils/milestone.ts`, `apps/mobile/app/(tabs)/milestones.tsx`, `apps/mobile/src/__tests__/footstepRange.test.ts`, `wiki/topics/feat-footstep-album.md`
+
+## [2026-04-20] commit | feat: 발자국 앨범 — 단일 날짜 → 범위 기반 그룹 앨범 재설계
+
+- 커밋: `444955a` by jy.choi
+- 변경 파일 수: 3
+  - apps/mobile/app/(tabs)/milestones.tsx
+  - apps/mobile/src/__tests__/footstepRange.test.ts
+  - apps/mobile/src/lib/utils/milestone.ts
+
+## [2026-04-20] commit | feat: 프로필 공유 문구 '파트너' → '남편(또는 아내)'로 변경
+
+- 커밋: `fa41d11` by jy.choi
+- 변경 파일 수: 1
+  - apps/mobile/app/(tabs)/profile.tsx
+
+## [2026-04-20] commit | feat: 일기 '간결하게' 스타일 모드 추가
+
+- 커밋: `91ed848` by jy.choi
+- 변경 파일 수: 5
+  - apps/mobile/app/upload.tsx
+  - apps/mobile/src/lib/api.ts
+  - apps/server/src/routes/photos.ts
+  - apps/server/src/services/claudeService.ts
+  - apps/server/src/workers/diaryWorker.ts

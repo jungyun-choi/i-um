@@ -39,7 +39,7 @@ export const api = {
   photos: {
     getUploadUrl: (body: { child_id: string; filename: string; taken_at?: string; gps_lat?: number; gps_lng?: number }) =>
       authFetch('/photos/upload-url', { method: 'POST', body: JSON.stringify(body) }),
-    process: (id: string, body?: { diary_style?: 'emotional' | 'factual' }) =>
+    process: (id: string, body?: { diary_style?: 'emotional' | 'factual' | 'brief' }) =>
       authFetch(`/photos/${id}/process`, { method: 'POST', body: JSON.stringify(body ?? {}) }),
     getDiary: (id: string) => authFetch(`/photos/${id}/diary`),
   },

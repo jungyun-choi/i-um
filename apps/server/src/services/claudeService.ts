@@ -17,7 +17,7 @@ interface DiaryContext {
   locationName: string | null;
   milestone: string | null;
   imageBase64: string;
-  style?: 'emotional' | 'factual';
+  style?: 'emotional' | 'factual' | 'brief';
 }
 
 export async function generateDiary(ctx: DiaryContext): Promise<string> {
@@ -29,10 +29,13 @@ export async function generateDiary(ctx: DiaryContext): Promise<string> {
     : null;
   const milestoneText = ctx.milestone ? MILESTONES[ctx.milestone] : null;
 
-  const isEmotional = (ctx.style ?? 'emotional') === 'emotional';
-  const systemPrompt = isEmotional
-    ? `당신은 부모가 아이에게 남기는 육아 일기를 써주는 AI입니다. 훗날 아이가 읽었을 때 감동받을 수 있도록, 부모의 따뜻한 마음과 그날의 감정을 담아 한국어로 작성하세요. "너는", "${ctx.childName}은" 같이 아이에게 말을 건네는 문체로 쓰고, 마크다운 기호(**,##,- 등)는 절대 사용하지 마세요.`
-    : `당신은 부모가 아이에게 남기는 육아 일지를 써주는 AI입니다. 훗날 아이가 읽었을 때 그날을 생생히 알 수 있도록, 있었던 일을 간결하고 명확하게 기록하세요. "너는", "${ctx.childName}은" 같이 아이에게 말을 건네는 문체로 쓰되 감정보다 사실에 집중하고, 마크다운 기호(**,##,- 등)는 절대 사용하지 마세요.`;
+  const style = ctx.style ?? 'emotional';
+  const systemPrompt =
+    style === 'emotional'
+      ? `당신은 부모가 아이에게 남기는 육아 일기를 써주는 AI입니다. 훗날 아이가 읽었을 때 감동받을 수 있도록, 부모의 따뜻한 마음과 그날의 감정을 담아 한국어로 작성하세요. "너는", "${ctx.childName}은" 같이 아이에게 말을 건네는 문체로 쓰고, 마크다운 기호(**,##,- 등)는 절대 사용하지 마세요.`
+      : style === 'factual'
+        ? `당신은 부모가 아이에게 남기는 육아 일지를 써주는 AI입니다. 훗날 아이가 읽었을 때 그날을 생생히 알 수 있도록, 있었던 일을 간결하고 명확하게 기록하세요. "너는", "${ctx.childName}은" 같이 아이에게 말을 건네는 문체로 쓰되 감정보다 사실에 집중하고, 마크다운 기호(**,##,- 등)는 절대 사용하지 마세요.`
+        : `당신은 부모가 아이에게 남기는 짧은 육아 메모를 써주는 AI입니다. 2~3문장, 100자 이내로 그날의 순간을 한국어로 기록하세요. "너는", "${ctx.childName}은" 같이 아이에게 말을 건네는 문체로 쓰되 불필요한 수식 없이 핵심만 담고, 마크다운 기호(**,##,- 등)는 절대 사용하지 마세요.`;
 
   const ageDescription = days == null
     ? '임신 중 (정확한 촬영일 미상)'
@@ -44,6 +47,18 @@ export async function generateDiary(ctx: DiaryContext): Promise<string> {
     ? `- 날짜: ${dateText}\n`
     : `- 날짜: 정확한 날짜 미상 (⚠️ 현재 날짜를 기준으로 계산하지 마세요)\n`;
 
+  const lengthInstruction =
+    style === 'brief'
+      ? `첨부 사진을 보고 육아 메모를 짧게 써주세요.
+- 2~3문장, 100자 이내로 핵심만 담으세요
+- 사진 속 순간의 가장 인상적인 포인트 하나에 집중하세요
+- 남은 날수나 현재 날짜를 언급하지 마세요 — 사진 속 순간 자체에 집중하세요`
+      : `첨부 사진을 보고 육아 일기를 2~3문단으로 써주세요.
+- 사진 속 상황을 구체적으로 묘사하세요
+- ${ctx.childName}의 표정과 행동에서 느껴지는 감정을 담아주세요
+- 남은 날수나 현재 날짜를 언급하지 마세요 — 사진 속 순간 자체에 집중하세요
+- 150~250자 내외로 작성해주세요`;
+
   const userPrompt = `[아이 정보]
 - 이름: ${ctx.childName}
 - 나이: ${ageDescription}${milestoneText ? `\n- 특별한 날: ${milestoneText}` : ''}
@@ -51,11 +66,7 @@ export async function generateDiary(ctx: DiaryContext): Promise<string> {
 [사진 촬영 정보]
 ${dateSection}- 장소: ${ctx.locationName ?? '알 수 없음'}
 
-첨부 사진을 보고 육아 일기를 2~3문단으로 써주세요.
-- 사진 속 상황을 구체적으로 묘사하세요
-- ${ctx.childName}의 표정과 행동에서 느껴지는 감정을 담아주세요
-- 남은 날수나 현재 날짜를 언급하지 마세요 — 사진 속 순간 자체에 집중하세요
-- 150~250자 내외로 작성해주세요`;
+${lengthInstruction}`;
 
   const response = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',

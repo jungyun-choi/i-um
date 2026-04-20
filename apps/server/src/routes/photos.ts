@@ -65,6 +65,9 @@ router.post('/:id/process', async (req: AuthRequest, res) => {
 
   if (error || !photo) { res.status(404).json({ error: 'Photo not found' }); return; }
 
+  const rawStyle = req.body.diary_style;
+  const diaryStyle = rawStyle === 'factual' || rawStyle === 'brief' ? rawStyle : 'emotional';
+
   await diaryQueue.add({
     photoId: photo.id,
     childId: photo.child_id,
@@ -72,7 +75,7 @@ router.post('/:id/process', async (req: AuthRequest, res) => {
     takenAt: photo.taken_at,
     gpsLat: photo.gps_lat,
     gpsLng: photo.gps_lng,
-    diaryStyle: req.body.diary_style ?? 'emotional',
+    diaryStyle,
   }, { attempts: 3, backoff: { type: 'exponential', delay: 5000 } });
 
   res.json({ status: 'queued' });

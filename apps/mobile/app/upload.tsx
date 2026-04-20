@@ -30,7 +30,7 @@ interface SelectedPhoto {
   gpsLng?: number;
 }
 
-type DiaryStyle = 'emotional' | 'factual';
+type DiaryStyle = 'emotional' | 'factual' | 'brief';
 
 interface DiaryResultBase {
   id: string;
@@ -259,6 +259,14 @@ export default function UploadScreen() {
                     사실 위주
                   </Text>
                 </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.pill, style === 'brief' ? styles.pillActive : null]}
+                  onPress={() => setStyle('brief')}
+                >
+                  <Text style={[styles.pillText, style === 'brief' ? styles.pillTextActive : null]}>
+                    간결하게
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -386,9 +394,9 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   styleLabel: { fontSize: 14, color: '#555', fontWeight: '500' },
-  stylePills: { flexDirection: 'row', gap: 8 },
+  stylePills: { flexDirection: 'row', gap: 6 },
   pill: {
-    paddingVertical: 6, paddingHorizontal: 16, borderRadius: 20,
+    paddingVertical: 6, paddingHorizontal: 12, borderRadius: 20,
     backgroundColor: '#F0EDE6', borderWidth: 1, borderColor: 'transparent',
   },
   pillActive: { backgroundColor: '#FFF0EC', borderColor: '#E8735A' },
