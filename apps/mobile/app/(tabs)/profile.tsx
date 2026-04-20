@@ -75,7 +75,7 @@ function JoinModal({ visible, onClose, onJoined }: JoinModalProps) {
         <View style={styles.modalSheet}>
           <View style={styles.modalHandle} />
           <Text style={styles.modalTitle}>초대 코드 입력</Text>
-          <Text style={styles.modalSub}>파트너에게 받은 6자리 코드를 입력하세요</Text>
+          <Text style={styles.modalSub}>남편(또는 아내)에게 받은 6자리 코드를 입력하세요</Text>
           <TextInput
             style={styles.codeInput}
             value={code}
@@ -194,7 +194,7 @@ export default function ProfileScreen() {
               <View style={styles.shareSectionTop}>
                 <View>
                   <Text style={styles.shareSectionTitle}>함께 보면 더 특별해요</Text>
-                  <Text style={styles.shareSectionDesc}>파트너·조부모님도{'\n'}같이 볼 수 있어요 💑</Text>
+                  <Text style={styles.shareSectionDesc}>남편(또는 아내)과{'\n'}함께 볼 수 있어요 💑</Text>
                 </View>
                 <Text style={styles.shareSectionEmoji}>👨‍👩‍👧</Text>
               </View>
