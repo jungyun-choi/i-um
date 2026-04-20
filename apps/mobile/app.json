@@ -16,6 +16,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.ium.app",
       "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
         "NSPhotoLibraryUsageDescription": "아이 사진을 선택하고 AI 일기를 생성하기 위해 사진 라이브러리 접근이 필요합니다.",
         "NSUserNotificationsUsageDescription": "일기 생성 완료와 마일스톤 달성 시 알림을 받기 위해 권한이 필요합니다."
       }
