@@ -55,6 +55,7 @@
 | [feat-hermes-style-fix.md](topics/feat-hermes-style-fix.md) | Hermes Fabric condition && style 크래시 패턴 7건 수정 |
 | [feat-footstep-album.md](topics/feat-footstep-album.md) | 발자국 앨범 — 단일 날짜 → 범위 기반 그룹 앨범 재설계 |
 | [feat-diary-brief-style.md](topics/feat-diary-brief-style.md) | 일기 "간결하게" 모드 추가 — 2~3문장/100자 이내 짧은 메모 옵션 |
+| [feat-diary-dramatic-style.md](topics/feat-diary-dramatic-style.md) | 일기 "드라마틱" 모드 추가 — 영화 내레이션 톤 4번째 스타일 |
 
 ---
 
@@ -73,8 +74,8 @@
 ## 통계
 
 - 총 소스: 0 (웹 리서치)
-- 총 wiki 페이지: 22
+- 총 wiki 페이지: 23
 - 마지막 ingest: 2026-04-19 (시장조사)
 - 마지막 decision: 2026-04-20 (베타 Paywall 전략)
-- 마지막 feat: 2026-04-20 (일기 간결하게 모드)
+- 마지막 feat: 2026-04-20 (일기 드라마틱 모드)
 - 마지막 lint: —

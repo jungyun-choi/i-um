@@ -5,6 +5,14 @@
 
 ---
 
+## [2026-04-20] feat | 일기 "드라마틱" 모드 추가
+
+- 기존 3개 스타일(`감성적`/`사실 위주`/`간결하게`) → 4번째 스타일 `dramatic` 추가
+- 영화 내레이션 톤, 극적 클라이맥스, MZ 자극 콘텐츠 수요 대응
+- 변경 파일: `claudeService.ts` / `diaryWorker.ts` / `photos.ts` / `api.ts` / `upload.tsx`
+- UI: pill 4개가 한 줄에 안 들어가서 `styleContainer` column 레이아웃 + `flexWrap: 'wrap'`
+- wiki: `topics/feat-diary-dramatic-style.md`
+
 ## [2026-04-20] feat | 일기 "간결하게" 모드 추가
 
 - 기존 `감성적` / `사실 위주` → 3번째 스타일 `brief` 추가

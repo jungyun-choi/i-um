@@ -16,7 +16,7 @@ interface DiaryJob {
   takenAt: string | null;
   gpsLat: number | null;
   gpsLng: number | null;
-  diaryStyle: 'emotional' | 'factual' | 'brief';
+  diaryStyle: 'emotional' | 'factual' | 'brief' | 'dramatic';
 }
 
 diaryQueue.process(async (job) => {
