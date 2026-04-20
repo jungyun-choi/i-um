@@ -1052,3 +1052,12 @@
   - apps/server/src/__tests__/usersRoute.test.ts
   - apps/server/src/routes/users.ts
   - apps/server/supabase/schema.sql
+
+## [2026-04-20] commit | refactor: switch monthly quota from user_id to child_id basis (P1 prep)
+
+- 커밋: `5940384` by jy.choi
+- 변경 파일 수: 4
+  - apps/mobile/app/upload.tsx
+  - apps/mobile/src/lib/api.ts
+  - apps/server/src/__tests__/photosUsage.test.ts
+  - apps/server/src/routes/photos.ts
