@@ -77,6 +77,8 @@ export const api = {
   users: {
     savePushToken: (token: string) =>
       authFetch('/users/push-token', { method: 'PATCH', body: JSON.stringify({ token }) }),
+    paywallIntent: () =>
+      authFetch('/users/paywall-intent', { method: 'POST' }),
     deleteAccount: () =>
       authFetch('/users/me', { method: 'DELETE' }),
   },

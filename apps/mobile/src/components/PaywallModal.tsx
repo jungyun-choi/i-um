@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { api } from '../lib/api';
 
 interface Props {
   visible: boolean;
@@ -6,8 +8,29 @@ interface Props {
 }
 
 export function PaywallModal({ visible, onClose }: Props) {
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  async function handleIntent() {
+    if (sending || sent) return;
+    setSending(true);
+    try {
+      await api.users.paywallIntent();
+      setSent(true);
+    } catch {
+      // 조용히 실패 허용 — UX 우선, 데이터는 best-effort
+    } finally {
+      setSending(false);
+    }
+  }
+
+  function handleClose() {
+    setSent(false);
+    onClose();
+  }
+
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={handleClose}>
       <View style={styles.backdrop}>
         <View style={styles.sheet}>
           <Text style={styles.emoji}>🌟</Text>
@@ -30,13 +53,31 @@ export function PaywallModal({ visible, onClose }: Props) {
             ))}
           </View>
 
-          <View style={styles.betaBadge}>
-            <Text style={styles.betaText}>베타 서비스 — 소중한 피드백을 기다려요 💛</Text>
-          </View>
+          {sent ? (
+            <View style={styles.thanksBadge}>
+              <Text style={styles.thanksText}>고마워요 💛{'\n'}정식 출시 소식 빠르게 알려드릴게요</Text>
+            </View>
+          ) : (
+            <View style={styles.betaBadge}>
+              <Text style={styles.betaText}>베타 서비스 — 소중한 피드백을 기다려요 💛</Text>
+            </View>
+          )}
 
-          <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.8}>
-            <Text style={styles.closeBtnText}>확인</Text>
+          <TouchableOpacity
+            style={[styles.primaryBtn, sent ? styles.primaryBtnDisabled : null]}
+            onPress={sent ? handleClose : handleIntent}
+            activeOpacity={0.8}
+            disabled={sending}
+          >
+            <Text style={styles.primaryBtnText}>
+              {sent ? '확인' : sending ? '보내는 중...' : 'Pro 출시 소식 받기 💛'}
+            </Text>
           </TouchableOpacity>
+          {!sent && (
+            <TouchableOpacity style={styles.secondaryBtn} onPress={handleClose} activeOpacity={0.6}>
+              <Text style={styles.secondaryBtnText}>다음에</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>
@@ -71,12 +112,25 @@ const styles = StyleSheet.create({
   featureText: { fontSize: 14, color: '#444' },
   betaBadge: {
     backgroundColor: '#FFF8E6', borderRadius: 12,
-    paddingVertical: 10, paddingHorizontal: 20, marginBottom: 20,
+    paddingVertical: 10, paddingHorizontal: 20, marginBottom: 16,
   },
   betaText: { fontSize: 13, color: '#C9922A', fontWeight: '600', textAlign: 'center' },
-  closeBtn: {
+  thanksBadge: {
+    backgroundColor: '#FFF0EC', borderRadius: 12,
+    paddingVertical: 12, paddingHorizontal: 20, marginBottom: 16,
+  },
+  thanksText: {
+    fontSize: 13, color: '#E8735A', fontWeight: '600',
+    textAlign: 'center', lineHeight: 20,
+  },
+  primaryBtn: {
     width: '100%', paddingVertical: 16, borderRadius: 16,
     backgroundColor: '#E8735A', alignItems: 'center',
   },
-  closeBtnText: { fontSize: 15, color: '#fff', fontWeight: '600' },
+  primaryBtnDisabled: { backgroundColor: '#B8A898' },
+  primaryBtnText: { fontSize: 15, color: '#fff', fontWeight: '600' },
+  secondaryBtn: {
+    width: '100%', paddingVertical: 12, alignItems: 'center', marginTop: 4,
+  },
+  secondaryBtnText: { fontSize: 14, color: '#888', fontWeight: '500' },
 });

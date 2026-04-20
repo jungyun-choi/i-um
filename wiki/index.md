@@ -57,6 +57,7 @@
 | [feat-diary-brief-style.md](topics/feat-diary-brief-style.md) | 일기 "간결하게" 모드 추가 — 2~3문장/100자 이내 짧은 메모 옵션 |
 | [feat-diary-dramatic-style.md](topics/feat-diary-dramatic-style.md) | 일기 "드라마틱" 모드 추가 — 영화 내레이션 톤 4번째 스타일 |
 | [feat-usage-meter.md](topics/feat-usage-meter.md) | 업로드 화면 "이번 달 N/30" 사용량 뱃지 — P0 paywall 전환 UX |
+| [feat-paywall-intent.md](topics/feat-paywall-intent.md) | Paywall "Pro 출시 소식 받기" 의향 수집 — P0 paywall 데이터 기반 |
 
 ---
 
@@ -76,8 +77,8 @@
 ## 통계
 
 - 총 소스: 0 (웹 리서치)
-- 총 wiki 페이지: 25
+- 총 wiki 페이지: 26
 - 마지막 ingest: 2026-04-19 (시장조사)
 - 마지막 decision: 2026-04-20 (수익화 전략 Phase 로드맵)
-- 마지막 feat: 2026-04-20 (사용량 미터)
+- 마지막 feat: 2026-04-20 (Paywall 의향 수집)
 - 마지막 lint: —
