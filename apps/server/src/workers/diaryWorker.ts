@@ -77,21 +77,38 @@ diaryQueue.process(async (job) => {
     .update({ location_name: locationName })
     .eq('id', photoId);
 
-  // 푸시 알림 발송
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('push_token')
-    .eq('id', child.user_id ?? '')
-    .single();
+  // 푸시 알림 발송 (owner + 초대받은 가족 모두에게)
+  const { data: familyMembers } = await supabase
+    .from('family_members')
+    .select('user_id')
+    .eq('child_id', childId);
 
-  if (profile?.push_token) {
-    const title = milestone
-      ? `🎉 ${child.name}의 특별한 기억이 기록됐어요!`
-      : `✨ ${child.name}의 일기가 완성됐어요`;
-    const body = milestone
-      ? `${getMilestoneLabel(milestone)} 마일스톤을 달성했어요`
-      : '지금 확인해보세요';
-    await sendPushNotification(profile.push_token, { title, body, data: { diaryId: diary?.id } });
+  const recipientIds = [...new Set([
+    child.user_id,
+    ...(familyMembers ?? []).map((fm) => fm.user_id),
+  ].filter((id): id is string => Boolean(id)))];
+
+  if (recipientIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('push_token')
+      .in('id', recipientIds)
+      .not('push_token', 'is', null);
+
+    if (profiles?.length) {
+      const title = milestone
+        ? `🎉 ${child.name}의 특별한 기억이 기록됐어요!`
+        : `✨ ${child.name}의 일기가 완성됐어요`;
+      const body = milestone
+        ? `${getMilestoneLabel(milestone)} 마일스톤을 달성했어요`
+        : '지금 확인해보세요';
+
+      for (const p of profiles) {
+        if (p.push_token) {
+          await sendPushNotification(p.push_token, { title, body, data: { diaryId: diary?.id } });
+        }
+      }
+    }
   }
 });
 
