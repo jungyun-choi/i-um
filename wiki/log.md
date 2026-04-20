@@ -5,6 +5,14 @@
 
 ---
 
+## [2026-04-20] feat | 업로드 사용량 미터 (GET /photos/usage + 헤더 뱃지)
+
+- 수익화 전략 문서 P0 액션 1번 — 한도 도달 전 전환 의향 유도
+- 서버: `photos.ts`에 `GET /photos/usage` 추가 + `countThisMonth` 헬퍼 추출 (4/4 TDD)
+- 모바일: `api.photos.usage()` 메서드, `upload.tsx` 헤더에 `N/30` 뱃지 (70% 경고, 100% 한도)
+- 테스트: `__tests__/photosUsage.test.ts` 4 케이스 통과, 전체 29/29 그린
+- wiki: `topics/feat-usage-meter.md`
+
 ## [2026-04-20] feat | 일기 "드라마틱" 모드 추가
 
 - 기존 3개 스타일(`감성적`/`사실 위주`/`간결하게`) → 4번째 스타일 `dramatic` 추가
@@ -1008,3 +1016,12 @@
 - 커밋: `6f79186` by jy.choi
 - 변경 파일 수: 1
   - apps/server/src/workers/diaryWorker.ts
+
+## [2026-04-20] commit | feat: add monthly upload usage meter (P0 paywall UX)
+
+- 커밋: `9e54655` by jy.choi
+- 변경 파일 수: 4
+  - apps/mobile/app/upload.tsx
+  - apps/mobile/src/lib/api.ts
+  - apps/server/src/__tests__/photosUsage.test.ts
+  - apps/server/src/routes/photos.ts

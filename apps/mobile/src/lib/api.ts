@@ -42,6 +42,7 @@ export const api = {
     process: (id: string, body?: { diary_style?: 'emotional' | 'factual' | 'brief' | 'dramatic' }) =>
       authFetch(`/photos/${id}/process`, { method: 'POST', body: JSON.stringify(body ?? {}) }),
     getDiary: (id: string) => authFetch(`/photos/${id}/diary`),
+    usage: (): Promise<{ used: number; limit: number }> => authFetch('/photos/usage'),
   },
   diary: {
     create: (body: { child_id: string; content: string; date?: string }) =>

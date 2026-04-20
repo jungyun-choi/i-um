@@ -53,11 +53,13 @@ export default function UploadScreen() {
   const [generatingText, setGeneratingText] = useState('');
   const [diaryResult, setDiaryResult] = useState<DiaryResult | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [usage, setUsage] = useState<{ used: number; limit: number } | null>(null);
   const slideAnim = useRef(new Animated.Value(SCREEN_H)).current;
 
   // Auto-launch picker on mount for zero-friction entry
   useEffect(() => {
     pickPhotos();
+    api.photos.usage().then(setUsage).catch(() => {});
   }, []);
 
   async function pickPhotos() {
@@ -213,7 +215,15 @@ export default function UploadScreen() {
           <Text style={styles.cancel}>취소</Text>
         </TouchableOpacity>
         <Text style={styles.title}>사진 추가</Text>
-        <View style={{ width: 40 }} />
+        {usage ? (
+          <View style={[styles.usageBadge, usage.used / usage.limit >= 0.7 ? styles.usageBadgeWarn : null, usage.used >= usage.limit ? styles.usageBadgeDanger : null]}>
+            <Text style={[styles.usageText, usage.used / usage.limit >= 0.7 ? styles.usageTextWarn : null, usage.used >= usage.limit ? styles.usageTextDanger : null]}>
+              {usage.used}/{usage.limit}
+            </Text>
+          </View>
+        ) : (
+          <View style={{ width: 44 }} />
+        )}
       </View>
 
       {photos.length === 0 ? (
@@ -387,6 +397,15 @@ const styles = StyleSheet.create({
   },
   cancel: { fontSize: 16, color: '#888' },
   title: { fontSize: 17, fontWeight: '600', color: '#1A1A1A' },
+  usageBadge: {
+    paddingVertical: 4, paddingHorizontal: 10, borderRadius: 12,
+    backgroundColor: '#F0EDE6', minWidth: 44, alignItems: 'center',
+  },
+  usageBadgeWarn: { backgroundColor: '#FFF4DB' },
+  usageBadgeDanger: { backgroundColor: '#FFE5DE' },
+  usageText: { fontSize: 13, fontWeight: '600', color: '#888' },
+  usageTextWarn: { color: '#C9922A' },
+  usageTextDanger: { color: '#E8735A' },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 },
   emptyIcon: { fontSize: 64 },
   emptyText: { fontSize: 18, color: '#888' },

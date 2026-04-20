@@ -11,20 +11,33 @@ router.use(requireAuth);
 // Beta: generous limit; tighten when RevenueCat paywall launches
 const FREE_MONTHLY_LIMIT = 30;
 
+function monthStartISO(): string {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+}
+
+async function countThisMonth(userId: string): Promise<number> {
+  const { count } = await supabase
+    .from('photos')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .gte('created_at', monthStartISO());
+  return count ?? 0;
+}
+
+// 이번 달 업로드 사용량 조회 (프론트 게이지용)
+router.get('/usage', async (req: AuthRequest, res) => {
+  const used = await countThisMonth(req.userId!);
+  res.json({ used, limit: FREE_MONTHLY_LIMIT });
+});
+
 // S3 presigned URL 발급 + DB 레코드 생성
 router.post('/upload-url', async (req: AuthRequest, res) => {
   const { child_id, filename, taken_at, gps_lat, gps_lng } = req.body;
 
-  // 월간 무료 한도 체크 (photos 테이블 기준 — diary_entries에 user_id 없음)
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-  const { count } = await supabase
-    .from('photos')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', req.userId)
-    .gte('created_at', monthStart);
+  const count = await countThisMonth(req.userId!);
 
-  if ((count ?? 0) >= FREE_MONTHLY_LIMIT) {
+  if (count >= FREE_MONTHLY_LIMIT) {
     res.status(402).json({ error: 'monthly_limit_reached', limit: FREE_MONTHLY_LIMIT });
     return;
   }
