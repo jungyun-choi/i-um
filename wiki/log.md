@@ -1061,3 +1061,11 @@
   - apps/mobile/src/lib/api.ts
   - apps/server/src/__tests__/photosUsage.test.ts
   - apps/server/src/routes/photos.ts
+
+## [2026-04-20] commit | chore: TestFlight 배포 사전 준비 (eas 설정 + 개인정보처리방침)
+
+- 커밋: `a4a1414` by jy.choi
+- 변경 파일 수: 3
+  - apps/mobile/app.json
+  - apps/mobile/eas.json
+  - docs/legal/privacy-policy.md
