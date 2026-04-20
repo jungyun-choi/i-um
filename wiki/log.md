@@ -1034,3 +1034,13 @@
   - apps/mobile/src/lib/api.ts
   - apps/server/src/__tests__/photosUsage.test.ts
   - apps/server/src/routes/photos.ts
+
+## [2026-04-20] commit | feat: add paywall intent collection (P0 conversion signal)
+
+- 커밋: `f8c2c50` by jy.choi
+- 변경 파일 수: 5
+  - apps/mobile/src/components/PaywallModal.tsx
+  - apps/mobile/src/lib/api.ts
+  - apps/server/src/__tests__/usersRoute.test.ts
+  - apps/server/src/routes/users.ts
+  - apps/server/supabase/schema.sql
