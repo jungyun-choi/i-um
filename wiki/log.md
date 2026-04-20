@@ -978,3 +978,9 @@
   - apps/server/src/routes/photos.ts
   - apps/server/src/services/claudeService.ts
   - apps/server/src/workers/diaryWorker.ts
+
+## [2026-04-20] commit | chore: ignore .env files to prevent secret leaks
+
+- 커밋: `52e6554` by jy.choi
+- 변경 파일 수: 1
+  - .gitignore
