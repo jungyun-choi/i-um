@@ -66,7 +66,10 @@ router.post('/:id/process', async (req: AuthRequest, res) => {
   if (error || !photo) { res.status(404).json({ error: 'Photo not found' }); return; }
 
   const rawStyle = req.body.diary_style;
-  const diaryStyle = rawStyle === 'factual' || rawStyle === 'brief' ? rawStyle : 'emotional';
+  const diaryStyle =
+    rawStyle === 'factual' || rawStyle === 'brief' || rawStyle === 'dramatic'
+      ? rawStyle
+      : 'emotional';
 
   await diaryQueue.add({
     photoId: photo.id,
