@@ -1016,3 +1016,12 @@
 - 커밋: `6f79186` by jy.choi
 - 변경 파일 수: 1
   - apps/server/src/workers/diaryWorker.ts
+
+## [2026-04-20] commit | feat: add monthly upload usage meter (P0 paywall UX)
+
+- 커밋: `9e54655` by jy.choi
+- 변경 파일 수: 4
+  - apps/mobile/app/upload.tsx
+  - apps/mobile/src/lib/api.ts
+  - apps/server/src/__tests__/photosUsage.test.ts
+  - apps/server/src/routes/photos.ts
