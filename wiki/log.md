@@ -5,6 +5,15 @@
 
 ---
 
+## [2026-04-20] feat | Paywall 전환 의향 수집 (POST /users/paywall-intent)
+
+- 수익화 전략 문서 P0 액션 2번 — 한도 도달 유저 전환 의향 1탭 수집
+- DB: `paywall_intent` 테이블 생성 (Supabase Management API로 적용)
+- 서버: `POST /users/paywall-intent` 엔드포인트, 테스트 3 케이스 추가 (32/32 그린)
+- 모바일: `PaywallModal` 버튼 구조 개편 — Primary "Pro 출시 소식 받기 💛" + Secondary "다음에"
+- 클릭 시 "고마워요 💛 정식 출시 소식 빠르게 알려드릴게요" 뱃지 + 중복 방지
+- wiki: `topics/feat-paywall-intent.md`
+
 ## [2026-04-20] feat | 업로드 사용량 미터 (GET /photos/usage + 헤더 뱃지)
 
 - 수익화 전략 문서 P0 액션 1번 — 한도 도달 전 전환 의향 유도

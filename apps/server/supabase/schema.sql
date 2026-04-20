@@ -75,3 +75,11 @@ create policy "users_own_milestones" on milestones
   for all using (
     child_id in (select id from children where user_id = auth.uid())
   );
+
+-- paywall_intent: 한도 도달 시 "관심 있어요" 클릭 기록 (P1 paywall 설계용 데이터)
+create table if not exists paywall_intent (
+  id         uuid primary key default uuid_generate_v4(),
+  user_id    uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz default now()
+);
+create index if not exists paywall_intent_user_id_idx on paywall_intent(user_id);
