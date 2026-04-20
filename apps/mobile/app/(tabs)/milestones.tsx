@@ -1,6 +1,6 @@
 import {
   View, Text, StyleSheet, ScrollView,
-  ActivityIndicator, TouchableOpacity, Dimensions, Modal,
+  TouchableOpacity, Dimensions, Modal,
   Platform, Pressable, Alert,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -9,108 +9,114 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { api } from '../../src/lib/api';
 import { useChildStore } from '../../src/stores/childStore';
 import { MilestoneSkeletonList } from '../../src/components/Skeleton';
-import { getDday, getAgeText } from '../../src/lib/utils/age';
-import { getExpectedDate, MILESTONE_META, ORDERED_MILESTONE_TYPES, formatMilestoneDate, isDatePast } from '../../src/lib/utils/milestone';
+import { getDday } from '../../src/lib/utils/age';
+import {
+  FOOTSTEP_RANGES, getFootstepRange, getRangeEndDate,
+  MILESTONE_META, isDatePast, formatMilestoneDate,
+} from '../../src/lib/utils/milestone';
 
 const SCREEN_W = Dimensions.get('window').width;
 const S3_BASE = process.env.EXPO_PUBLIC_S3_BASE_URL ?? '';
-const EVENT_TYPES = new Set(['first_word', 'first_step']);
+const EVENT_TYPES = ['first_word', 'first_step'] as const;
 
-function todayString() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+interface TimelinePhoto {
+  id: string;
+  s3_key: string;
+  taken_at?: string | null;
 }
 
-interface MilestoneData {
+interface TimelineEntry {
+  id: string;
+  child_id: string;
+  content: string;
+  created_at: string;
+  photos?: TimelinePhoto | null;
+}
+
+interface TimelineResp {
+  entries: TimelineEntry[];
+  next_cursor: string | null;
+}
+
+interface RangeGroup {
+  key: string;
+  label: string;
+  emoji: string;
+  entries: TimelineEntry[];
+  coverKey?: string;
+}
+
+interface EventMilestone {
   id?: string;
   type: string;
   date?: string;
   diary_id?: string;
-  photos?: { s3_key: string };
-  expectedDate?: string;
 }
 
-function AchievedCard({ milestone }: { milestone: MilestoneData }) {
+// ─── 앨범 카드 (범위에 일기가 있는 경우) ────────────────────────────────
+function AlbumCard({ group }: { group: RangeGroup }) {
   const router = useRouter();
-  const meta = MILESTONE_META[milestone.type] ?? { emoji: '⭐', label: milestone.type };
-  const activeChild = useChildStore((s) => s.activeChild);
-  const ageAtMilestone = activeChild && milestone.date
-    ? getAgeText(activeChild.birth_date, milestone.date)
-    : null;
+  const count = group.entries.length;
+  const ids = group.entries.map((e) => e.id).join(',');
+  const firstId = group.entries[0].id;
 
   return (
     <TouchableOpacity
-      style={styles.achievedCard}
-      onPress={() => milestone.diary_id && router.push(`/diary/${milestone.diary_id}`)}
+      style={styles.albumCard}
       activeOpacity={0.85}
+      onPress={() => router.push(`/diary/${firstId}?ids=${ids}`)}
     >
-      {milestone.photos?.s3_key ? (
+      {group.coverKey ? (
         <Image
-          source={`${S3_BASE}/${milestone.photos.s3_key}`}
-          style={styles.achievedImage}
+          source={`${S3_BASE}/${group.coverKey}`}
+          style={styles.albumImage}
           contentFit="cover"
           cachePolicy="disk"
           transition={200}
         />
       ) : (
-        <View style={styles.achievedImagePlaceholder}>
-          <Text style={styles.achievedEmoji}>{meta.emoji}</Text>
+        <View style={styles.albumImagePlaceholder}>
+          <Text style={styles.albumEmoji}>{group.emoji}</Text>
         </View>
       )}
-      <View style={styles.achievedOverlay} />
-      <View style={styles.achievedBody}>
-        <View style={styles.achievedBadge}>
-          <Text style={styles.achievedBadgeText}>{meta.emoji} {meta.label}</Text>
+      <View style={styles.albumOverlay} />
+      <View style={styles.albumBody}>
+        <View style={styles.albumBadge}>
+          <Text style={styles.albumBadgeText}>{group.emoji} {group.label}</Text>
         </View>
-        {ageAtMilestone && (
-          <Text style={styles.achievedAge}>{ageAtMilestone}</Text>
-        )}
-        {milestone.date && (
-          <Text style={styles.achievedDate}>{formatMilestoneDate(milestone.date)}</Text>
-        )}
+        <Text style={styles.albumCount}>{count}장의 추억</Text>
       </View>
-      {milestone.diary_id && (
-        <View style={styles.readMoreBtn}>
-          <Text style={styles.readMoreText}>일기 보기 →</Text>
-        </View>
-      )}
+      <View style={styles.albumArrow}>
+        <Text style={styles.albumArrowText}>앨범 보기 →</Text>
+      </View>
     </TouchableOpacity>
   );
 }
 
-interface PendingCardProps {
-  milestone: MilestoneData;
-  onRecord?: (type: string) => void;
-}
-
-function PendingCard({ milestone, onRecord }: PendingCardProps) {
-  const meta = MILESTONE_META[milestone.type] ?? { emoji: '⭐', label: milestone.type };
-  const dday = milestone.expectedDate ? getDday(milestone.expectedDate) : null;
-  const isPast = milestone.expectedDate ? isDatePast(milestone.expectedDate) : false;
-  const isEvent = EVENT_TYPES.has(milestone.type);
+// ─── 예정 카드 (아직 사진이 없는 범위) ───────────────────────────────────
+function PendingRangeCard({ range, birthDate }: { range: typeof FOOTSTEP_RANGES[number]; birthDate: string }) {
+  const endDate = getRangeEndDate(birthDate, range.key);
+  const dday = endDate ? getDday(endDate) : null;
+  const isPast = endDate ? isDatePast(endDate) : false;
 
   return (
     <View style={styles.pendingCard}>
       <View style={styles.pendingLeft}>
-        <Text style={styles.pendingEmoji}>{meta.emoji}</Text>
-        <View>
-          <Text style={styles.pendingLabel}>{meta.label}</Text>
-          {milestone.expectedDate ? (
-            <Text style={styles.pendingDate}>{formatMilestoneDate(milestone.expectedDate)}</Text>
+        <Text style={styles.pendingEmoji}>{range.emoji}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.pendingLabel}>{range.label}</Text>
+          {endDate ? (
+            <Text style={styles.pendingDate}>~ {formatMilestoneDate(endDate)}</Text>
           ) : (
-            <Text style={styles.pendingDate}>그 특별한 날을 남겨보세요</Text>
+            <Text style={styles.pendingDate}>사진을 올려보세요</Text>
           )}
         </View>
       </View>
-      {isEvent && onRecord ? (
-        <TouchableOpacity style={styles.recordBtn} onPress={() => onRecord(milestone.type)} activeOpacity={0.75}>
-          <Text style={styles.recordBtnText}>기록하기</Text>
-        </TouchableOpacity>
-      ) : dday ? (
+      {dday ? (
         <View style={[styles.ddayBadge, isPast ? styles.ddayBadgePast : null]}>
           <Text style={[styles.ddayText, isPast ? styles.ddayTextPast : null]}>{dday}</Text>
         </View>
@@ -119,6 +125,56 @@ function PendingCard({ milestone, onRecord }: PendingCardProps) {
   );
 }
 
+// ─── 이벤트 카드 (first_word, first_step) ────────────────────────────────
+function EventCard({
+  type, milestone, onRecord,
+}: {
+  type: string;
+  milestone?: EventMilestone;
+  onRecord: (type: string) => void;
+}) {
+  const router = useRouter();
+  const meta = MILESTONE_META[type] ?? { emoji: '⭐', label: type };
+  const achieved = !!milestone;
+
+  return (
+    <TouchableOpacity
+      style={styles.pendingCard}
+      activeOpacity={achieved ? 0.85 : 1}
+      disabled={!achieved}
+      onPress={() => achieved && milestone?.diary_id && router.push(`/diary/${milestone.diary_id}`)}
+    >
+      <View style={styles.pendingLeft}>
+        <Text style={styles.pendingEmoji}>{meta.emoji}</Text>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.pendingLabel}>{meta.label}</Text>
+          {achieved && milestone?.date ? (
+            <Text style={[styles.pendingDate, styles.pendingDateDone]}>
+              {formatMilestoneDate(milestone.date)}
+            </Text>
+          ) : (
+            <Text style={styles.pendingDate}>그 특별한 순간을 기록하세요</Text>
+          )}
+        </View>
+      </View>
+      {achieved ? (
+        <View style={styles.doneBadge}>
+          <Text style={styles.doneBadgeText}>✓</Text>
+        </View>
+      ) : (
+        <TouchableOpacity
+          style={styles.recordBtn}
+          onPress={() => onRecord(type)}
+          activeOpacity={0.75}
+        >
+          <Text style={styles.recordBtnText}>기록하기</Text>
+        </TouchableOpacity>
+      )}
+    </TouchableOpacity>
+  );
+}
+
+// ─── 기록 모달 (first_word / first_step 전용) ─────────────────────────────
 interface RecordModalProps {
   visible: boolean;
   type: string | null;
@@ -225,16 +281,53 @@ function RecordModal({ visible, type, childId, onClose, onSaved }: RecordModalPr
   );
 }
 
+// ─── 메인 스크린 ─────────────────────────────────────────────────────────
 export default function MilestonesScreen() {
   const activeChild = useChildStore((s) => s.activeChild);
   const queryClient = useQueryClient();
   const [recordingType, setRecordingType] = useState<string | null>(null);
 
-  const { data: achieved = [], isLoading } = useQuery({
+  // 타임라인 (앨범용 — 한 번에 많이 가져와서 런타임 그룹핑)
+  const { data: timeline, isLoading: tLoading } = useQuery<TimelineResp>({
+    queryKey: ['timeline-album', activeChild?.id],
+    queryFn: () => api.diary.timeline(activeChild!.id, undefined, 1000),
+    enabled: !!activeChild,
+  });
+
+  // 이벤트 마일스톤 (first_word, first_step)
+  const { data: eventMilestones = [], isLoading: mLoading } = useQuery<EventMilestone[]>({
     queryKey: ['milestones', activeChild?.id],
     queryFn: () => api.milestones.list(activeChild!.id),
     enabled: !!activeChild,
   });
+
+  const isLoading = tLoading || mLoading;
+
+  // 일기를 범위별로 그룹핑 (최신순 유지, 커버는 가장 최근 사진)
+  const groups = useMemo<RangeGroup[]>(() => {
+    if (!activeChild || !timeline?.entries) return [];
+    const byKey = new Map<string, TimelineEntry[]>();
+    for (const entry of timeline.entries) {
+      if (!entry.photos?.s3_key) continue;
+      const dateStr = entry.photos.taken_at ?? entry.created_at;
+      const key = getFootstepRange(activeChild.birth_date, dateStr);
+      if (!key) continue;
+      const arr = byKey.get(key) ?? [];
+      arr.push(entry);
+      byKey.set(key, arr);
+    }
+    return FOOTSTEP_RANGES
+      .filter((r) => byKey.has(r.key))
+      .map((r) => {
+        const entries = byKey.get(r.key)!;
+        return { key: r.key, label: r.label, emoji: r.emoji, entries, coverKey: entries[0].photos?.s3_key };
+      });
+  }, [activeChild, timeline]);
+
+  const achievedKeys = new Set(groups.map((g) => g.key));
+  const pendingRanges = FOOTSTEP_RANGES.filter((r) => !achievedKeys.has(r.key));
+
+  const eventByType = new Map(eventMilestones.filter((m) => EVENT_TYPES.includes(m.type as any)).map((m) => [m.type, m]));
 
   if (!activeChild) {
     return (
@@ -246,52 +339,51 @@ export default function MilestonesScreen() {
     );
   }
 
-  const achievedTypes = new Set((achieved as MilestoneData[]).map((m) => m.type));
-  const pending: MilestoneData[] = ORDERED_MILESTONE_TYPES
-    .filter((type) => !achievedTypes.has(type))
-    .map((type) => ({ type, expectedDate: getExpectedDate(activeChild.birth_date, type) }));
-
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>{activeChild.name}의 특별한 순간</Text>
+      <Text style={styles.title}>{activeChild.name}의 발자국</Text>
       {isLoading ? (
         <MilestoneSkeletonList />
       ) : (
         <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-          {(achieved as MilestoneData[]).length > 0 && (
+          {groups.length > 0 ? (
             <>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>남긴 발자국</Text>
-                <Text style={styles.sectionCount}>{(achieved as MilestoneData[]).length}개</Text>
+                <Text style={styles.sectionCount}>{groups.length}개</Text>
               </View>
-              {(achieved as MilestoneData[]).map((m) => (
-                <AchievedCard key={m.id} milestone={m} />
-              ))}
+              {groups.map((g) => <AlbumCard key={g.key} group={g} />)}
             </>
-          )}
-
-          {pending.length > 0 && (
-            <>
-              <View style={[styles.sectionHeader, { marginTop: 24 }]}>
-                <Text style={styles.sectionTitle}>앞으로의 발자국</Text>
-              </View>
-              {pending.map((m) => (
-                <PendingCard
-                  key={m.type}
-                  milestone={m}
-                  onRecord={setRecordingType}
-                />
-              ))}
-            </>
-          )}
-
-          {(achieved as MilestoneData[]).length === 0 && (
+          ) : (
             <View style={styles.emptySection}>
               <Text style={styles.emptySectionIcon}>🌱</Text>
               <Text style={styles.emptySectionText}>아직 남긴 발자국이 없어요</Text>
               <Text style={styles.emptySectionSub}>사진을 올리면 자동으로 기록돼요</Text>
             </View>
           )}
+
+          {pendingRanges.length > 0 && (
+            <>
+              <View style={[styles.sectionHeader, { marginTop: 24 }]}>
+                <Text style={styles.sectionTitle}>앞으로의 발자국</Text>
+              </View>
+              {pendingRanges.map((r) => (
+                <PendingRangeCard key={r.key} range={r} birthDate={activeChild.birth_date} />
+              ))}
+            </>
+          )}
+
+          <View style={[styles.sectionHeader, { marginTop: 24 }]}>
+            <Text style={styles.sectionTitle}>특별한 순간</Text>
+          </View>
+          {EVENT_TYPES.map((type) => (
+            <EventCard
+              key={type}
+              type={type}
+              milestone={eventByType.get(type)}
+              onRecord={setRecordingType}
+            />
+          ))}
         </ScrollView>
       )}
 
@@ -300,7 +392,10 @@ export default function MilestonesScreen() {
         type={recordingType}
         childId={activeChild.id}
         onClose={() => setRecordingType(null)}
-        onSaved={() => queryClient.invalidateQueries({ queryKey: ['milestones', activeChild.id] })}
+        onSaved={() => {
+          queryClient.invalidateQueries({ queryKey: ['milestones', activeChild.id] });
+          queryClient.invalidateQueries({ queryKey: ['timeline-album', activeChild.id] });
+        }}
       />
     </SafeAreaView>
   );
@@ -325,39 +420,38 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF0ED', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3,
   },
 
-  // 달성 카드
-  achievedCard: {
+  // 앨범 카드
+  albumCard: {
     borderRadius: 20, overflow: 'hidden', marginBottom: 16,
     backgroundColor: '#1A1A1A',
     shadowColor: '#1A1A1A', shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15, shadowRadius: 12, elevation: 5,
   },
-  achievedImage: { width: '100%', height: SCREEN_W * 0.55 },
-  achievedImagePlaceholder: {
+  albumImage: { width: '100%', height: SCREEN_W * 0.55 },
+  albumImagePlaceholder: {
     width: '100%', height: SCREEN_W * 0.4,
     backgroundColor: '#FFF0ED', alignItems: 'center', justifyContent: 'center',
   },
-  achievedEmoji: { fontSize: 56 },
-  achievedOverlay: {
+  albumEmoji: { fontSize: 56 },
+  albumOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.3)',
   },
-  achievedBody: {
+  albumBody: {
     position: 'absolute', bottom: 52, left: 20, right: 20,
   },
-  achievedBadge: {
+  albumBadge: {
     backgroundColor: 'rgba(255,255,255,0.95)', borderRadius: 20,
     paddingVertical: 6, paddingHorizontal: 14, alignSelf: 'flex-start', marginBottom: 8,
   },
-  achievedBadgeText: { fontSize: 14, fontWeight: '700', color: '#1A1A1A' },
-  achievedAge: { fontSize: 16, fontWeight: '600', color: '#fff', marginBottom: 2 },
-  achievedDate: { fontSize: 13, color: 'rgba(255,255,255,0.75)' },
-  readMoreBtn: {
+  albumBadgeText: { fontSize: 14, fontWeight: '700', color: '#1A1A1A' },
+  albumCount: { fontSize: 15, fontWeight: '600', color: '#fff' },
+  albumArrow: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
     backgroundColor: 'rgba(0,0,0,0.45)',
     paddingVertical: 12, alignItems: 'center',
   },
-  readMoreText: { fontSize: 13, color: '#fff', fontWeight: '600' },
+  albumArrowText: { fontSize: 13, color: '#fff', fontWeight: '600' },
 
   // 예정 카드
   pendingCard: {
@@ -370,6 +464,7 @@ const styles = StyleSheet.create({
   pendingEmoji: { fontSize: 28 },
   pendingLabel: { fontSize: 16, fontWeight: '600', color: '#333' },
   pendingDate: { fontSize: 13, color: '#BBBBBB', marginTop: 2 },
+  pendingDateDone: { color: '#E8735A', fontWeight: '600' },
   ddayBadge: {
     backgroundColor: '#FFF0ED', borderRadius: 10,
     paddingHorizontal: 12, paddingVertical: 6,
@@ -384,12 +479,18 @@ const styles = StyleSheet.create({
   },
   recordBtnText: { fontSize: 13, fontWeight: '700', color: '#fff' },
 
+  doneBadge: {
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: '#E8735A', alignItems: 'center', justifyContent: 'center',
+  },
+  doneBadgeText: { fontSize: 16, color: '#fff', fontWeight: '700' },
+
   emptySection: { alignItems: 'center', paddingVertical: 40 },
   emptySectionIcon: { fontSize: 48, marginBottom: 12 },
   emptySectionText: { fontSize: 17, fontWeight: '600', color: '#555', marginBottom: 6 },
   emptySectionSub: { fontSize: 14, color: '#AAA' },
 
-  // 기록 모달
+  // 모달
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
   modalWrapper: { position: 'absolute', bottom: 0, left: 0, right: 0 },
   modalSheet: {
