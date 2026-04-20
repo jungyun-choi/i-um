@@ -59,8 +59,12 @@ export default function UploadScreen() {
   // Auto-launch picker on mount for zero-friction entry
   useEffect(() => {
     pickPhotos();
-    api.photos.usage().then(setUsage).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!activeChild?.id) return;
+    api.photos.usage(activeChild.id).then(setUsage).catch(() => {});
+  }, [activeChild?.id]);
 
   async function pickPhotos() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();

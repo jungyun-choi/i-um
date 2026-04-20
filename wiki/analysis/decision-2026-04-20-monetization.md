@@ -147,7 +147,7 @@ const { count } = await supabase
 
 ### P1 준비 (출시 전)
 - ⬜ RevenueCat SDK 통합
-- ⬜ 한도 계산 기준을 **child_id 합산**으로 리팩토링 (`photos.ts:21-25`)
+- ✅ 한도 계산 기준을 **child_id 합산**으로 리팩토링 (2026-04-20 완료, [[wiki/topics/feat-quota-child-id-refactor.md]])
 - ⬜ 개인 vs 가족 플랜 상품 등록
 
 ### P1.5 (3~6개월 후)

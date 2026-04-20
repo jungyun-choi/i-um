@@ -39,7 +39,7 @@ tags: [monetization, ux, paywall, beta]
 ## 한계
 
 - **업로드 직후 즉시 반영되지 않음**: 업로드 성공 후 refetch 미구현 (화면 이탈이 전제라 MVP 생략)
-- **user_id 기준**: 수익화 문서 P1에서 `child_id` 기준으로 리팩토링 예정 (가족 합산)
+- **~~user_id 기준~~ → child_id 기준**: 2026-04-20 리팩토링 완료 ([[wiki/topics/feat-quota-child-id-refactor.md]])
 - **캐싱 없음**: 화면 진입 시마다 호출 (캐시 무효화 복잡도보다 정확도 우선)
 
 ## 관련 페이지
