@@ -992,3 +992,13 @@
 - 커밋: `52e6554` by jy.choi
 - 변경 파일 수: 1
   - .gitignore
+
+## [2026-04-20] commit | feat: add 드라마틱 diary generation mode (dramatic)
+
+- 커밋: `b2bbe27` by jy.choi
+- 변경 파일 수: 5
+  - apps/mobile/app/upload.tsx
+  - apps/mobile/src/lib/api.ts
+  - apps/server/src/routes/photos.ts
+  - apps/server/src/services/claudeService.ts
+  - apps/server/src/workers/diaryWorker.ts
